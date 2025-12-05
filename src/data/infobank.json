@@ -1,0 +1,189 @@
+{
+  "entries": [
+    {
+      "id": "business-model-canvas",
+      "title": "Business Model Canvas",
+      "content": {
+        "description": "A strategic management template for developing new or documenting existing business models.",
+        "components": [
+          "Key Partners",
+          "Key Activities", 
+          "Key Resources",
+          "Value Propositions",
+          "Customer Relationships",
+          "Channels",
+          "Customer Segments",
+          "Cost Structure",
+          "Revenue Streams"
+        ],
+        "tips": [
+          "Start with your value proposition",
+          "Identify your customer segments first",
+          "Be specific about revenue streams"
+        ]
+      },
+      "tags": ["business_foundations", "planning", "strategy"]
+    },
+    {
+      "id": "lean-startup",
+      "title": "Lean Startup Methodology",
+      "content": {
+        "description": "A methodology for developing businesses and products that aims to shorten product development cycles.",
+        "principles": [
+          "Build-Measure-Learn feedback loop",
+          "Minimum Viable Product (MVP)",
+          "Validated Learning",
+          "Innovation Accounting",
+          "Pivot or Persevere"
+        ],
+        "steps": [
+          "Identify a problem worth solving",
+          "Build a minimum viable solution",
+          "Measure results and gather feedback",
+          "Learn and iterate"
+        ]
+      },
+      "tags": ["business_foundations", "methodology", "startup"]
+    },
+    {
+      "id": "customer-discovery",
+      "title": "Customer Discovery",
+      "content": {
+        "description": "The process of understanding your potential customers' needs, behaviors, and pain points.",
+        "methods": [
+          "Customer interviews",
+          "Surveys and questionnaires",
+          "Observation and shadowing",
+          "Prototype testing",
+          "Landing page tests"
+        ],
+        "questions_to_ask": [
+          "What's the biggest challenge you face?",
+          "How do you currently solve this problem?",
+          "What would an ideal solution look like?",
+          "How much would you pay for this solution?"
+        ]
+      },
+      "tags": ["customer_success", "research", "validation"]
+    },
+    {
+      "id": "pricing-strategies",
+      "title": "Pricing Strategies",
+      "content": {
+        "description": "Different approaches to setting prices for your products or services.",
+        "strategies": [
+          {
+            "name": "Cost-Plus Pricing",
+            "description": "Add a markup to your costs"
+          },
+          {
+            "name": "Value-Based Pricing",
+            "description": "Price based on perceived value to customer"
+          },
+          {
+            "name": "Competitive Pricing",
+            "description": "Price based on competitor analysis"
+          },
+          {
+            "name": "Freemium",
+            "description": "Free basic version with paid premium features"
+          }
+        ]
+      },
+      "tags": ["running_a_business", "pricing", "revenue"]
+    },
+    {
+      "id": "time-management",
+      "title": "Time Management for Entrepreneurs",
+      "content": {
+        "description": "Strategies for managing your time effectively as a busy entrepreneur.",
+        "techniques": [
+          "Pomodoro Technique",
+          "Time blocking",
+          "Eisenhower Matrix",
+          "80/20 Rule (Pareto Principle)",
+          "Batch processing"
+        ],
+        "tips": [
+          "Start with your most important task",
+          "Eliminate distractions",
+          "Learn to say no",
+          "Schedule breaks"
+        ]
+      },
+      "tags": ["daily_life_optimization", "productivity", "habits"]
+    },
+    {
+      "id": "growth-mindset",
+      "title": "Growth Mindset",
+      "content": {
+        "description": "The belief that abilities can be developed through dedication and hard work.",
+        "principles": [
+          "Embrace challenges",
+          "Persist through obstacles",
+          "See effort as path to mastery",
+          "Learn from criticism",
+          "Find inspiration in others' success"
+        ],
+        "affirmations": [
+          "I can learn anything I put my mind to",
+          "Mistakes help me grow",
+          "Challenges make me stronger"
+        ]
+      },
+      "tags": ["personal_development", "mindset", "psychology"]
+    },
+    {
+      "id": "stoic-entrepreneurship",
+      "title": "Stoic Philosophy for Entrepreneurs",
+      "content": {
+        "description": "Ancient wisdom applied to modern business challenges.",
+        "principles": [
+          "Focus on what you can control",
+          "Embrace obstacles as opportunities",
+          "Practice negative visualization",
+          "Take action despite fear",
+          "Reflect daily on progress"
+        ],
+        "quotes": [
+          "The obstacle is the way",
+          "We suffer more in imagination than in reality",
+          "Begin at once to live"
+        ]
+      },
+      "tags": ["philosophy_worldview", "mindset", "resilience"]
+    },
+    {
+      "id": "social-media-marketing",
+      "title": "Social Media Marketing Basics",
+      "content": {
+        "description": "How to use social media platforms to grow your business.",
+        "platforms": [
+          {
+            "name": "Instagram",
+            "best_for": "Visual products, lifestyle brands"
+          },
+          {
+            "name": "TikTok",
+            "best_for": "Reaching younger audiences, viral content"
+          },
+          {
+            "name": "LinkedIn",
+            "best_for": "B2B, professional services"
+          },
+          {
+            "name": "Twitter/X",
+            "best_for": "Thought leadership, tech community"
+          }
+        ],
+        "tips": [
+          "Post consistently",
+          "Engage with your audience",
+          "Provide value before asking for sales",
+          "Use analytics to optimize"
+        ]
+      },
+      "tags": ["running_a_business", "marketing", "social_media"]
+    }
+  ]
+}
