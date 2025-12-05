@@ -6,17 +6,26 @@ export interface User {
   created_at: string;
 }
 
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  experience_level: string;
+  learning_style: string;
+  time_commitment: string;
+  created_at: string;
+}
+
 export interface IntakeForm {
   id: string;
   user_id: string;
   idea: string;
   goals: string;
-  background: string;
-  experience_level: 'beginner' | 'intermediate' | 'advanced';
-  interests: string;
-  constraints: string;
-  learning_style: 'visual' | 'reading' | 'hands-on' | 'mixed';
-  commitment_level: 'casual' | 'moderate' | 'intensive';
+  background: string | null;
+  experience_level: string;
+  interests: string | null;
+  constraints: string | null;
+  learning_style: string;
+  commitment_level: string;
   created_at: string;
 }
 
@@ -45,11 +54,11 @@ export interface Module {
   title: string;
   domain: ModuleDomain;
   description: string;
+  summary: string;
   content: {
     sections: ModuleSection[];
     action_steps: string[];
   };
-  summary: string;
   progress: ModuleProgress;
   created_at: string;
 }
@@ -83,13 +92,6 @@ export const DOMAIN_ICONS: Record<ModuleDomain, string> = {
   other_topics: '✨'
 };
 
-export interface InfobankEntry {
-  id: string;
-  title: string;
-  content: Record<string, unknown>;
-  tags: string[];
-}
-
 export interface PDFExport {
   id: string;
   user_id: string;
@@ -113,22 +115,9 @@ export interface TutorMessage {
   };
 }
 
-export interface CourseGenerationRequest {
-  intake: IntakeForm;
-  existingModules?: Module[];
-}
-
-export interface TutorRequest {
-  message: string;
-  context?: {
-    module_id?: string;
-    section_title?: string;
-    user_progress?: ModuleProgress;
-  };
-  history: TutorMessage[];
-}
-
-export interface AIResponse {
-  type: 'course_generation' | 'tutor_response' | 'plug_and_play';
-  content: Module[] | string | PlugAndPlay;
+export interface InfobankEntry {
+  id: string;
+  title: string;
+  content: Record<string, unknown>;
+  tags: string[];
 }
