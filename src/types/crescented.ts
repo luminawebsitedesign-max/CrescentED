@@ -63,6 +63,48 @@ export interface Module {
   created_at: string;
 }
 
+export interface Lesson {
+  id: string;
+  title: string;
+  content: string;
+  worksheet?: PlugAndPlay;
+  plug_and_play?: PlugAndPlay;
+  tasks: string[];
+  completed?: boolean;
+}
+
+export interface CourseModule {
+  id: string;
+  title: string;
+  summary: string;
+  domain: ModuleDomain;
+  lessons: Lesson[];
+  completed?: boolean;
+}
+
+export interface CourseProgress {
+  completedLessons: string[];
+  completedModules: string[];
+  lastAccessedModule?: string;
+  lastAccessedLesson?: string;
+}
+
+export interface CourseData {
+  title: string;
+  description: string;
+  modules: CourseModule[];
+  recommended_tools: string[];
+  roadmap: string[];
+  progress?: CourseProgress;
+}
+
+export interface Course {
+  id: string;
+  user_id: string;
+  course_data: CourseData;
+  created_at: string;
+}
+
 export type ModuleDomain = 
   | 'business_foundations'
   | 'running_a_business'
