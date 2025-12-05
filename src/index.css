@@ -2,116 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    /* Cyber Sigillism - Deep space theme with holographic accents */
-    --background: 220 84% 5%;
-    --foreground: 190 100% 95%;
-
-    --card: 220 70% 8%;
-    --card-foreground: 190 100% 95%;
-
-    --popover: 220 70% 8%;
-    --popover-foreground: 190 100% 95%;
-
-    --primary: 190 95% 60%;
-    --primary-foreground: 220 84% 5%;
-
-    --secondary: 270 80% 60%;
-    --secondary-foreground: 220 84% 5%;
-
-    --muted: 220 50% 15%;
-    --muted-foreground: 190 30% 60%;
-
-    --accent: 270 80% 60%;
-    --accent-foreground: 220 84% 5%;
-
-    --destructive: 0 85% 60%;
-    --destructive-foreground: 220 84% 5%;
-
-    --border: 190 60% 20%;
-    --input: 220 50% 15%;
-    --ring: 190 95% 60%;
-
+    /* CrescentEd Cosmic Theme - Light Mode */
+    --background: 270 30% 98%;
+    --foreground: 270 50% 15%;
+    
+    --card: 270 25% 96%;
+    --card-foreground: 270 50% 15%;
+    
+    --popover: 270 25% 96%;
+    --popover-foreground: 270 50% 15%;
+    
+    --primary: 280 70% 50%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 260 40% 90%;
+    --secondary-foreground: 270 50% 20%;
+    
+    --muted: 270 20% 92%;
+    --muted-foreground: 270 30% 40%;
+    
+    --accent: 220 90% 55%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 270 20% 85%;
+    --input: 270 20% 85%;
+    --ring: 280 70% 50%;
+    
     --radius: 0.75rem;
-
-    /* Cyber Sigillism specific */
-    --glow-cyan: 190 95% 60%;
-    --glow-purple: 270 80% 60%;
-    --glow-pink: 320 90% 65%;
     
-    /* Gradients */
-    --gradient-cyber: linear-gradient(135deg, hsl(190 95% 60% / 0.2), hsl(270 80% 60% / 0.2));
-    --gradient-holographic: linear-gradient(90deg, hsl(190 95% 60%), hsl(270 80% 60%), hsl(320 90% 65%));
+    /* CrescentEd Custom Colors */
+    --cosmic-plum: 280 40% 25%;
+    --cosmic-magenta: 320 70% 55%;
+    --cosmic-violet: 270 60% 60%;
+    --cosmic-navy: 230 50% 15%;
+    --cosmic-sapphire: 220 90% 55%;
+    --cosmic-glow: 280 70% 70%;
     
-    /* Shadows & Glows */
-    --shadow-glow-cyan: 0 0 20px hsl(190 95% 60% / 0.3), 0 0 40px hsl(190 95% 60% / 0.1);
-    --shadow-glow-purple: 0 0 20px hsl(270 80% 60% / 0.3), 0 0 40px hsl(270 80% 60% / 0.1);
-    --shadow-card: 0 10px 40px hsl(220 84% 5% / 0.5);
-
-    --sidebar-background: 220 80% 6%;
-    --sidebar-foreground: 190 100% 95%;
-    --sidebar-primary: 190 95% 60%;
-    --sidebar-primary-foreground: 220 84% 5%;
-    --sidebar-accent: 220 60% 12%;
-    --sidebar-accent-foreground: 190 100% 95%;
-    --sidebar-border: 190 60% 15%;
-    --sidebar-ring: 190 95% 60%;
+    /* Shadows */
+    --shadow-glow: 0 0 30px hsl(280 70% 50% / 0.2);
+    --shadow-card: 0 4px 20px hsl(270 50% 15% / 0.1);
+    --shadow-hover: 0 8px 30px hsl(280 70% 50% / 0.15);
+    
+    /* Sidebar */
+    --sidebar-background: 270 30% 98%;
+    --sidebar-foreground: 270 50% 15%;
+    --sidebar-primary: 280 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 90% 55%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 270 20% 85%;
+    --sidebar-ring: 280 70% 50%;
   }
 
-  .light {
-    /* Light theme - inverted for accessibility */
-    --background: 0 0% 100%;
-    --foreground: 220 84% 10%;
-
-    --card: 0 0% 98%;
-    --card-foreground: 220 84% 10%;
-
-    --popover: 0 0% 98%;
-    --popover-foreground: 220 84% 10%;
-
-    --primary: 190 85% 45%;
+  .dark {
+    /* CrescentEd Cosmic Theme - Dark Mode (Default) */
+    --background: 270 40% 8%;
+    --foreground: 270 20% 95%;
+    
+    --card: 270 35% 12%;
+    --card-foreground: 270 20% 95%;
+    
+    --popover: 270 35% 12%;
+    --popover-foreground: 270 20% 95%;
+    
+    --primary: 280 70% 60%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 270 70% 50%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 220 20% 95%;
-    --muted-foreground: 220 30% 40%;
-
-    --accent: 270 70% 50%;
+    
+    --secondary: 270 30% 18%;
+    --secondary-foreground: 270 20% 90%;
+    
+    --muted: 270 25% 15%;
+    --muted-foreground: 270 20% 60%;
+    
+    --accent: 220 90% 60%;
     --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 85% 50%;
+    
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 220 30% 85%;
-    --input: 220 20% 90%;
-    --ring: 190 85% 45%;
-
-    --glow-cyan: 190 85% 45%;
-    --glow-purple: 270 70% 50%;
-    --glow-pink: 320 80% 55%;
     
-    --gradient-cyber: linear-gradient(135deg, hsl(190 85% 45% / 0.1), hsl(270 70% 50% / 0.1));
-    --gradient-holographic: linear-gradient(90deg, hsl(190 85% 45%), hsl(270 70% 50%), hsl(320 80% 55%));
+    --border: 270 30% 20%;
+    --input: 270 30% 20%;
+    --ring: 280 70% 60%;
     
-    --shadow-glow-cyan: 0 0 15px hsl(190 85% 45% / 0.2);
-    --shadow-glow-purple: 0 0 15px hsl(270 70% 50% / 0.2);
-    --shadow-card: 0 5px 20px hsl(220 84% 10% / 0.1);
-
-    --sidebar-background: 220 20% 97%;
-    --sidebar-foreground: 220 84% 10%;
-    --sidebar-primary: 190 85% 45%;
+    /* CrescentEd Custom Colors - Dark */
+    --cosmic-plum: 280 50% 35%;
+    --cosmic-magenta: 320 80% 60%;
+    --cosmic-violet: 270 70% 65%;
+    --cosmic-navy: 230 60% 12%;
+    --cosmic-sapphire: 220 90% 60%;
+    --cosmic-glow: 280 80% 75%;
+    
+    /* Shadows - Dark */
+    --shadow-glow: 0 0 40px hsl(280 70% 60% / 0.25);
+    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
+    --shadow-hover: 0 8px 40px hsl(280 70% 60% / 0.2);
+    
+    /* Sidebar - Dark */
+    --sidebar-background: 270 40% 10%;
+    --sidebar-foreground: 270 20% 95%;
+    --sidebar-primary: 280 70% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 92%;
-    --sidebar-accent-foreground: 220 84% 10%;
-    --sidebar-border: 220 30% 85%;
-    --sidebar-ring: 190 85% 45%;
+    --sidebar-accent: 220 90% 60%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 270 30% 20%;
+    --sidebar-ring: 280 70% 60%;
   }
 }
 
@@ -119,65 +118,119 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
+  
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
-
+  
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-weight: 600;
   }
 }
 
 @layer utilities {
-  .glow-cyan {
-    box-shadow: var(--shadow-glow-cyan);
+  .glass-cosmic {
+    @apply backdrop-blur-xl border border-border/50;
+    background: linear-gradient(145deg, hsl(var(--card) / 0.95), hsl(var(--card) / 0.8));
+    box-shadow: var(--shadow-card);
   }
   
-  .glow-purple {
-    box-shadow: var(--shadow-glow-purple);
+  .glow-primary {
+    box-shadow: var(--shadow-glow);
   }
-
-  .cyber-border {
-    border: 1px solid hsl(var(--border));
-    box-shadow: 0 0 10px hsl(var(--glow-cyan) / 0.2);
+  
+  .glow-accent {
+    box-shadow: 0 0 30px hsl(var(--accent) / 0.3);
   }
-
-  .holographic-text {
-    background: var(--gradient-holographic);
+  
+  .bg-cosmic {
+    background: linear-gradient(135deg, hsl(var(--cosmic-plum)), hsl(var(--cosmic-violet) / 0.8), hsl(var(--cosmic-navy)));
+  }
+  
+  .aurora-overlay {
+    background: linear-gradient(180deg, hsl(var(--primary) / 0.15), hsl(var(--accent) / 0.1), transparent);
+  }
+  
+  .text-gradient-cosmic {
+    background: linear-gradient(135deg, hsl(var(--cosmic-magenta)), hsl(var(--cosmic-violet)), hsl(var(--cosmic-sapphire)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-
-  .animate-glow {
-    animation: glow 2s ease-in-out infinite alternate;
+  
+  .noise-texture {
+    position: relative;
   }
-
-  @keyframes glow {
-    from {
-      box-shadow: 0 0 10px hsl(var(--glow-cyan) / 0.2);
-    }
-    to {
-      box-shadow: 0 0 20px hsl(var(--glow-cyan) / 0.6), 0 0 30px hsl(var(--glow-purple) / 0.4);
-    }
+  
+  .noise-texture::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    mix-blend-mode: overlay;
   }
-
-  .animate-shimmer {
-    animation: shimmer 3s ease-in-out infinite;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      hsl(var(--glow-cyan) / 0.1) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
+  
+  .hover-lift {
+    @apply transition-all duration-300;
   }
-
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
   }
+  
+  .progress-cosmic {
+    background: linear-gradient(90deg, hsl(var(--cosmic-violet)), hsl(var(--cosmic-magenta)), hsl(var(--cosmic-sapphire)));
+  }
+  
+  .scrollbar-cosmic::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .scrollbar-cosmic::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+  }
+  
+  .scrollbar-cosmic::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.5);
+    border-radius: 4px;
+  }
+  
+  .scrollbar-cosmic::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.7);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.3); }
+  50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.5); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.2), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }
