@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_logs: {
+        Row: {
+          action: string
+          id: string
+          input_data: Json | null
+          output_data: Json | null
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          id?: string
+          input_data?: Json | null
+          output_data?: Json | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          id?: string
+          input_data?: Json | null
+          output_data?: Json | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          course_data: Json
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          course_data?: Json
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          course_data?: Json
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       infobank: {
         Row: {
           content: Json
@@ -140,6 +188,33 @@ export type Database = {
           id?: string
           metadata?: Json
           user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          experience_level: string | null
+          full_name: string | null
+          id: string
+          learning_style: string | null
+          time_commitment: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          experience_level?: string | null
+          full_name?: string | null
+          id: string
+          learning_style?: string | null
+          time_commitment?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          experience_level?: string | null
+          full_name?: string | null
+          id?: string
+          learning_style?: string | null
+          time_commitment?: string | null
         }
         Relationships: []
       }
