@@ -1,4 +1,7 @@
 project_id = "lnxurlgljplfrimuqquz"
 
-[functions.ai-assistant]
+[functions.crescented-ai]
+verify_jwt = false
+
+[functions.generate-pdf]
 verify_jwt = false

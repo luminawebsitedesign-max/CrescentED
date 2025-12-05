@@ -14,7 +14,135 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      infobank: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          title: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
+      intake_forms: {
+        Row: {
+          background: string | null
+          commitment_level: string
+          constraints: string | null
+          created_at: string
+          experience_level: string
+          goals: string
+          id: string
+          idea: string
+          interests: string | null
+          learning_style: string
+          user_id: string
+        }
+        Insert: {
+          background?: string | null
+          commitment_level?: string
+          constraints?: string | null
+          created_at?: string
+          experience_level?: string
+          goals: string
+          id?: string
+          idea: string
+          interests?: string | null
+          learning_style?: string
+          user_id: string
+        }
+        Update: {
+          background?: string | null
+          commitment_level?: string
+          constraints?: string | null
+          created_at?: string
+          experience_level?: string
+          goals?: string
+          id?: string
+          idea?: string
+          interests?: string | null
+          learning_style?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      modules: {
+        Row: {
+          content: Json
+          created_at: string
+          description: string | null
+          domain: string
+          id: string
+          progress: Json
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          domain: string
+          id?: string
+          progress?: Json
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          domain?: string
+          id?: string
+          progress?: Json
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pdf_exports: {
+        Row: {
+          created_at: string
+          file_path: string
+          id: string
+          metadata: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          id?: string
+          metadata?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          id?: string
+          metadata?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
