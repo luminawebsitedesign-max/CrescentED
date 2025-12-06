@@ -5,7 +5,7 @@ import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import CrescentLogo from '@/components/ui/crescent-logo';
 import {
   Settings,
@@ -20,7 +20,6 @@ import {
   CheckCircle,
   StickyNote,
   LayoutDashboard,
-  Moon,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { type Module, type ModuleProgress } from '@/types/crescented';
@@ -98,13 +97,12 @@ const ModulesSidebar = () => {
   const isModuleComplete = (module: Module) => calculateModuleProgress(module) === 100;
 
   return (
-    <TooltipProvider>
-      <aside
-        className={cn(
-          'fixed left-0 top-0 h-full z-40 glass-cosmic border-r border-border transition-all duration-300 flex flex-col',
-          sidebarCollapsed ? 'w-16' : 'w-[260px]'
-        )}
-      >
+    <aside
+      className={cn(
+        'fixed left-0 top-0 h-full z-40 glass-cosmic border-r border-border transition-all duration-300 flex flex-col',
+        sidebarCollapsed ? 'w-16' : 'w-[260px]'
+      )}
+    >
         {/* Header - Logo & Settings */}
         <div className="p-3 border-b border-border flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-2">
@@ -426,7 +424,6 @@ const ModulesSidebar = () => {
           </Button>
         </div>
       </aside>
-    </TooltipProvider>
   );
 };
 
