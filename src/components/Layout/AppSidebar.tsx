@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
+import CrescentLogo from '@/components/ui/crescent-logo';
 import {
   LayoutDashboard,
   BookOpen,
@@ -40,42 +41,42 @@ const AppSidebar = () => {
     >
       {/* Logo */}
       <div className="p-4 border-b border-border flex items-center justify-between">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center flex-shrink-0">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-6 h-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          </div>
+        <Link to="/dashboard" className="flex items-center gap-3">
+          <CrescentLogo size={sidebarCollapsed ? 'sm' : 'md'} />
           {!sidebarCollapsed && (
             <span className="font-sora text-lg font-bold text-gradient-cosmic">
               CrescentEd
             </span>
           )}
         </Link>
+        {!sidebarCollapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarCollapsed(true)}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+
+      {sidebarCollapsed && (
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="text-muted-foreground hover:text-foreground"
+          onClick={() => setSidebarCollapsed(false)}
+          className="mx-auto mt-2 text-muted-foreground hover:text-foreground"
         >
-          {sidebarCollapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
+          <ChevronRight className="w-4 h-4" />
         </Button>
-      </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || 
+            (item.path === '/modules' && location.pathname.startsWith('/module/'));
           return (
             <Link key={item.path} to={item.path}>
               <Button
