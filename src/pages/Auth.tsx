@@ -94,8 +94,13 @@ const Auth = ({ mode }: AuthProps) => {
         </Link>
         
         <div className="glass-cosmic rounded-2xl p-8">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-2xl">🌙</span>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 relative">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cosmic-magenta via-cosmic-violet to-cosmic-sapphire opacity-60 blur-sm" />
+              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full border-2 border-white/80" style={{ clipPath: 'inset(0 0 0 40%)' }} />
+              </div>
+            </div>
             <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
           

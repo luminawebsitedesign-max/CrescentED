@@ -39,7 +39,7 @@ const Intake = () => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate('/login');
+        navigate('/auth');
         return;
       }
       setUserId(session.user.id);
@@ -76,31 +76,73 @@ const Intake = () => {
 
   const handleSubmit = async () => {
     if (!userId) return;
+    
+    if (!formData.idea.trim()) {
+      toast({
+        title: 'Missing information',
+        description: 'Please describe your business idea',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    if (!formData.goals.trim()) {
+      toast({
+        title: 'Missing information',
+        description: 'Please describe your goals',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      const { error } = await supabase
+      // Save intake form
+      const { error: intakeError } = await supabase
         .from('intake_forms')
         .insert({
           user_id: userId,
           ...formData,
         });
 
-      if (error) throw error;
+      if (intakeError) throw intakeError;
 
       toast({
-        title: 'Profile created!',
+        title: 'Profile saved!',
         description: 'Generating your personalized learning path...',
       });
 
+      // Generate course immediately
+      const response = await supabase.functions.invoke('crescented-ai', {
+        body: {
+          type: 'generate_course',
+          intake: formData,
+          userId: userId,
+        },
+      });
+
+      if (response.error) {
+        console.error('Course generation error:', response.error);
+        toast({
+          title: 'Course generation started',
+          description: 'Please wait while we create your course...',
+        });
+      } else {
+        toast({
+          title: 'Course generated!',
+          description: `Created ${response.data?.modulesCount || 7} modules for you.`,
+        });
+      }
+
       navigate('/dashboard');
     } catch (error: any) {
+      console.error('Submission error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to save your profile',
         variant: 'destructive',
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -113,8 +155,13 @@ const Intake = () => {
       
       <div className="relative z-10 w-full max-w-2xl">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <span className="text-2xl">🌙</span>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-8 h-8 relative">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cosmic-magenta via-cosmic-violet to-cosmic-sapphire opacity-60 blur-sm" />
+              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full border-2 border-white/80" style={{ clipPath: 'inset(0 0 0 40%)' }} />
+              </div>
+            </div>
             <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
           <Progress value={progress} className="h-2 bg-secondary" />
