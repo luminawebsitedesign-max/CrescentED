@@ -19,21 +19,22 @@ const Auth = ({ mode }: AuthProps) => {
   const [checkingSession, setCheckingSession] = useState(true);
   const [rememberedEmail, setRememberedEmail] = useState<string | null>(null);
   const [useDifferentEmail, setUseDifferentEmail] = useState(false);
+  const [hasActiveSession, setHasActiveSession] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for remembered email in localStorage
     const savedEmail = localStorage.getItem('crescented-last-email');
     if (savedEmail) {
       setRememberedEmail(savedEmail);
     }
     
-    // Check if user has an active session
+    // Check if user has an active session for the remembered email
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      // Don't auto-redirect - always show login screen
-      // The user must explicitly choose to continue or use different email
+      if (session && savedEmail && session.user.email === savedEmail) {
+        setHasActiveSession(true);
+      }
       setCheckingSession(false);
     };
     
@@ -43,21 +44,34 @@ const Auth = ({ mode }: AuthProps) => {
   const handleContinueAsRemembered = async () => {
     if (!rememberedEmail) return;
     
+    setLoading(true);
+    
     // Check if there's an active session for this email
     const { data: { session } } = await supabase.auth.getSession();
+    
     if (session && session.user.email === rememberedEmail) {
+      // Active session exists - navigate to dashboard
+      toast({
+        title: 'Welcome back!',
+        description: 'Continuing your entrepreneurial journey.',
+      });
       navigate('/dashboard');
     } else {
-      // Need to re-login
+      // No active session - need password to login
       setEmail(rememberedEmail);
-      setUseDifferentEmail(false);
+      setUseDifferentEmail(true); // Show login form with email pre-filled
+      toast({
+        title: 'Session expired',
+        description: 'Please enter your password to continue.',
+      });
     }
+    
+    setLoading(false);
   };
 
   const handleUseDifferentEmail = () => {
     setUseDifferentEmail(true);
     setEmail('');
-    setRememberedEmail(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,7 +90,6 @@ const Auth = ({ mode }: AuthProps) => {
         
         if (error) throw error;
         
-        // Save email for future logins
         localStorage.setItem('crescented-last-email', email);
         
         toast({
@@ -92,7 +105,6 @@ const Auth = ({ mode }: AuthProps) => {
         
         if (error) throw error;
         
-        // Save email for future logins
         localStorage.setItem('crescented-last-email', email);
         
         toast({
@@ -149,15 +161,23 @@ const Auth = ({ mode }: AuthProps) => {
               {/* Continue as remembered email */}
               <button
                 onClick={handleContinueAsRemembered}
-                className="w-full p-4 mb-3 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-all text-left group"
+                disabled={loading}
+                className="w-full p-4 mb-3 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-all text-left group disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                      <User className="w-5 h-5 text-primary" />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-muted-foreground">Continue as</p>
                     <p className="font-medium truncate">{rememberedEmail}</p>
+                    {hasActiveSession && (
+                      <p className="text-xs text-green-500">Active session</p>
+                    )}
                   </div>
                 </div>
               </button>
@@ -165,7 +185,8 @@ const Auth = ({ mode }: AuthProps) => {
               {/* Use different email */}
               <button
                 onClick={handleUseDifferentEmail}
-                className="w-full p-4 rounded-xl border border-border bg-secondary/10 hover:bg-secondary/30 transition-all text-left"
+                disabled={loading}
+                className="w-full p-4 rounded-xl border border-border bg-secondary/10 hover:bg-secondary/30 transition-all text-left disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">

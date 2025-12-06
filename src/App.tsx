@@ -12,6 +12,7 @@ import Modules from "./pages/Modules";
 import Tools from "./pages/Tools";
 import PDFs from "./pages/PDFs";
 import Settings from "./pages/Settings";
+import BusinessHub from "./pages/BusinessHub";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/tools" element={<Tools />} />
             <Route path="/pdfs" element={<PDFs />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/business-hub" element={<BusinessHub />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
