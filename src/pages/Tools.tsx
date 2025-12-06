@@ -1,388 +1,362 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import DashboardLayout from '@/components/Layout/DashboardLayout';
+import { CosmicCard } from '@/components/ui/cosmic-card';
+import { GradientButton } from '@/components/ui/gradient-button';
+import { SectionDivider } from '@/components/ui/section-divider';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { 
-  ArrowLeft, Sparkles, FileText, Lightbulb, 
-  ListTodo, Target, BookOpen, Loader2, Download
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { generatePDF, generateChecklistPDF } from '@/lib/pdf';
+import {
+  Loader2, Lightbulb, Palette, FileText, CheckSquare,
+  Download, Sparkles, ClipboardList, TrendingUp, Rocket,
+  FolderDown, Eye
 } from 'lucide-react';
-import { User } from '@supabase/supabase-js';
 
 interface Tool {
   id: string;
   title: string;
   description: string;
   icon: React.ElementType;
-  action: string;
-  placeholder: string;
+  category: 'ai' | 'pdf' | 'template';
+  placeholder?: string;
 }
 
 const TOOLS: Tool[] = [
-  {
-    id: 'idea-refine',
-    title: 'Idea Refinement',
-    description: 'Refine and validate your business idea',
-    icon: Lightbulb,
-    action: 'generate_template',
-    placeholder: 'Describe your business idea...',
-  },
-  {
-    id: 'worksheet',
-    title: 'Worksheet Generator',
-    description: 'Create custom learning worksheets',
-    icon: FileText,
-    action: 'generate_worksheet',
-    placeholder: 'What topic do you want a worksheet for?',
-  },
-  {
-    id: 'template',
-    title: 'Template Generator',
-    description: 'Generate plug-and-play business templates',
-    icon: Sparkles,
-    action: 'generate_template',
-    placeholder: 'What kind of template do you need?',
-  },
-  {
-    id: 'tasks',
-    title: 'Daily Task Generator',
-    description: 'Get actionable tasks for today',
-    icon: ListTodo,
-    action: 'generate_worksheet',
-    placeholder: 'What are you working on today?',
-  },
-  {
-    id: 'goals',
-    title: 'Goal Planner',
-    description: 'Break down your goals into steps',
-    icon: Target,
-    action: 'generate_template',
-    placeholder: 'What goal do you want to achieve?',
-  },
-  {
-    id: 'resources',
-    title: 'Resource Finder',
-    description: 'Get curated resources for your topic',
-    icon: BookOpen,
-    action: 'generate_worksheet',
-    placeholder: 'What topic do you need resources for?',
-  },
+  { id: 'refine', title: 'Business Idea Refiner', icon: Lightbulb, description: 'Sharpen and validate your business concept with AI feedback', category: 'ai', placeholder: 'Describe your business idea in detail...' },
+  { id: 'branding', title: 'Branding Starter Kit', icon: Palette, description: 'Generate brand name, tagline, colors, and voice guidelines', category: 'ai', placeholder: 'What is your business about? Who is your target audience?' },
+  { id: 'plan', title: 'One-Page Business Plan', icon: FileText, description: 'Create a focused, actionable business plan', category: 'ai', placeholder: 'Describe your business, target market, and goals...' },
+  { id: 'marketing', title: 'Marketing Checklist', icon: CheckSquare, description: 'Get a comprehensive launch marketing checklist', category: 'ai', placeholder: 'What product/service are you launching?' },
+  { id: 'worksheet', title: 'Custom Worksheet', icon: ClipboardList, description: 'Generate any worksheet or exercise', category: 'ai', placeholder: 'What topic do you need a worksheet for?' },
+  { id: 'tasks', title: 'Daily Task Generator', icon: TrendingUp, description: 'Get actionable tasks you can complete today', category: 'ai', placeholder: 'What are you working on? What are your goals for today?' },
 ];
 
-export default function Tools() {
-  const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
+const Tools = () => {
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [input, setInput] = useState('');
-  const [businessIdea, setBusinessIdea] = useState('');
+  const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [businessIdea, setBusinessIdea] = useState('');
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate('/auth');
-      } else {
-        setUser(session.user);
-        setTimeout(() => loadBusinessIdea(session.user.id), 0);
+    const loadIdea = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data } = await supabase
+          .from('intake_forms')
+          .select('idea')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        if (data?.idea) setBusinessIdea(data.idea);
       }
-    });
+    };
+    loadIdea();
+  }, []);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate('/auth');
-      } else {
-        setUser(session.user);
-        loadBusinessIdea(session.user.id);
-      }
-    });
+  const getPromptForTool = (toolId: string, userInput: string): string => {
+    const context = userInput || businessIdea;
+    const prompts: Record<string, string> = {
+      refine: `You are a startup advisor. Analyze and refine this business idea. Provide:
+1. IMPROVED VALUE PROPOSITION - Make it clearer and more compelling
+2. TARGET AUDIENCE - Define the ideal customer profile
+3. KEY DIFFERENTIATORS - What makes this unique
+4. POTENTIAL CHALLENGES - Top 3 obstacles and how to overcome them
+5. IMMEDIATE NEXT STEPS - 5 actionable tasks to validate this idea
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+Business idea: ${context}`,
+      branding: `You are a brand strategist. Create a comprehensive branding starter kit for this business:
+1. BRAND NAME OPTIONS - 5 unique, memorable name suggestions with explanations
+2. TAGLINE OPTIONS - 5 punchy taglines that capture the essence
+3. BRAND VOICE - Tone, personality, do's and don'ts
+4. COLOR PALETTE - Primary, secondary, accent colors with hex codes
+5. BRAND VALUES - 5 core values that define the brand
+6. VISUAL STYLE DIRECTION - Modern/classic, playful/serious, etc.
 
-  const loadBusinessIdea = async (userId: string) => {
-    const { data } = await supabase
-      .from('intake_forms')
-      .select('idea')
-      .eq('user_id', userId)
-      .maybeSingle();
-    
-    if (data?.idea) {
-      setBusinessIdea(data.idea);
-    }
+Business: ${context}`,
+      plan: `You are a business strategist. Create a concise one-page business plan:
+EXECUTIVE SUMMARY (2-3 sentences)
+THE PROBLEM - What pain point are you solving?
+THE SOLUTION - How does your product/service solve it?
+TARGET MARKET - Who are your customers? Market size?
+REVENUE MODEL - How will you make money?
+COMPETITIVE ADVANTAGE - Why will you win?
+KEY MILESTONES - Next 6 months roadmap
+TEAM NEEDS - Key roles to hire
+FUNDING NEEDS - If applicable
+
+Business: ${context}`,
+      marketing: `You are a marketing strategist. Create a comprehensive marketing launch checklist:
+PRE-LAUNCH (2 weeks before):
+- List 10 specific tasks with details
+LAUNCH DAY:
+- List 10 specific tasks with details
+POST-LAUNCH (first week):
+- List 10 specific tasks with details
+ONGOING MARKETING:
+- List 5 recurring activities
+
+For: ${context}`,
+      worksheet: `Create a detailed, actionable worksheet about: ${context}
+
+Include:
+1. LEARNING OBJECTIVES - What will they learn/achieve
+2. WARM-UP QUESTIONS - 3 reflection questions
+3. MAIN EXERCISES - 5 practical exercises with clear instructions
+4. ACTION ITEMS - 5 concrete next steps
+5. REFLECTION PROMPTS - 3 questions to consolidate learning`,
+      tasks: `You are a productivity coach. Generate 7 specific, actionable tasks I can complete TODAY to make progress on: ${context}
+
+For each task provide:
+- Clear, specific task description
+- Time estimate (15min, 30min, 1hr, etc.)
+- Why it matters
+- How to do it (brief instructions)
+
+Make tasks realistic, achievable, and high-impact.`,
+    };
+    return prompts[toolId] || `Generate helpful content about: ${context}`;
   };
 
   const generateContent = async () => {
-    if (!selectedTool || !input.trim() || loading) return;
-
+    if (!selectedTool) return;
     setLoading(true);
-    setResult(null);
+    setResult('');
 
     try {
-      const { data, error } = await supabase.functions.invoke('crescented-ai', {
-        body: {
-          action: selectedTool.action,
-          data: {
-            topic: input,
-            businessIdea,
-            toolType: selectedTool.id,
-          },
-          userId: user?.id,
-        },
+      const prompt = getPromptForTool(selectedTool.id, input);
+      
+      const response = await supabase.functions.invoke('crescented-ai', {
+        body: { type: 'tutor', message: prompt, history: [] },
       });
 
-      if (error) throw error;
-
-      if (data?.result) {
-        setResult(data.result);
-        toast.success('Generated successfully!');
-      }
+      if (response.error) throw response.error;
+      setResult(response.data.response);
+      
+      toast({ 
+        title: 'Generated successfully!', 
+        description: 'Your content is ready to download.' 
+      });
     } catch (error: any) {
-      console.error('Generation error:', error);
-      toast.error(error.message || 'Failed to generate content');
+      toast({ 
+        title: 'Generation failed', 
+        description: error.message || 'Please try again', 
+        variant: 'destructive' 
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const downloadAsPDF = async () => {
-    if (!result) return;
-
-    toast.info('Generating PDF...');
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-pdf', {
-        body: {
-          type: selectedTool?.action === 'generate_worksheet' ? 'worksheet' : 'template',
-          title: result.title || `${selectedTool?.title} - ${input}`,
-          content: result,
-          userId: user?.id,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.pdf) {
-        const byteCharacters = atob(data.pdf);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'application/pdf' });
-        
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${result.title || selectedTool?.title}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        toast.success('PDF downloaded!');
-      }
-    } catch (error) {
-      console.error('PDF error:', error);
-      toast.error('Failed to generate PDF');
-    }
+  const downloadPDF = () => {
+    if (!selectedTool || !result) return;
+    
+    const typeMap: Record<string, 'worksheet' | 'template' | 'checklist' | 'summary'> = {
+      refine: 'summary',
+      branding: 'template',
+      plan: 'template',
+      marketing: 'checklist',
+      worksheet: 'worksheet',
+      tasks: 'checklist',
+    };
+    
+    generatePDF({ 
+      title: selectedTool.title, 
+      subtitle: input || businessIdea,
+      content: result, 
+      type: typeMap[selectedTool.id] || 'template' 
+    });
+    
+    toast({ title: 'Downloaded!', description: 'PDF saved to your device' });
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Dashboard
-          </button>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-4 py-8">
+    <DashboardLayout>
+      <div className="max-w-6xl mx-auto animate-fade-in">
         <div className="mb-8">
-          <h1 className="text-3xl font-display font-bold mb-2">Tools & Generators</h1>
+          <h1 className="text-h1 mb-2">Business Tools</h1>
           <p className="text-muted-foreground">
-            AI-powered tools to help you build your business
+            AI-powered tools and templates to accelerate your startup journey
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Tools List */}
-          <div className="space-y-4">
+          <div className="space-y-3">
+            <h2 className="font-outfit font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-4">
+              AI Generators
+            </h2>
             {TOOLS.map((tool) => (
-              <button
+              <CosmicCard
                 key={tool.id}
-                onClick={() => {
-                  setSelectedTool(tool);
-                  setInput('');
-                  setResult(null);
-                }}
-                className={`w-full p-4 rounded-xl border text-left transition-all ${
-                  selectedTool?.id === tool.id
-                    ? 'bg-primary/10 border-primary/50'
-                    : 'bg-card/50 border-border/50 hover:border-primary/30'
+                className={`p-4 flex items-center gap-3 transition-all ${
+                  selectedTool?.id === tool.id 
+                    ? 'border-primary glow-primary bg-primary/5' 
+                    : ''
                 }`}
+                onClick={() => { 
+                  setSelectedTool(tool); 
+                  setResult(''); 
+                  setInput('');
+                }}
               >
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${
-                    selectedTool?.id === tool.id ? 'bg-primary/20' : 'bg-muted/50'
-                  }`}>
-                    <tool.icon className={`w-5 h-5 ${
-                      selectedTool?.id === tool.id ? 'text-primary' : 'text-muted-foreground'
-                    }`} />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{tool.title}</h3>
-                    <p className="text-sm text-muted-foreground">{tool.description}</p>
-                  </div>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                  selectedTool?.id === tool.id 
+                    ? 'bg-primary/20' 
+                    : 'bg-secondary'
+                }`}>
+                  <tool.icon className={`w-5 h-5 ${
+                    selectedTool?.id === tool.id 
+                      ? 'text-primary' 
+                      : 'text-muted-foreground'
+                  }`} />
                 </div>
-              </button>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-outfit font-medium text-sm truncate">{tool.title}</h3>
+                  <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
+                </div>
+              </CosmicCard>
             ))}
+
+            <SectionDivider label="Quick Downloads" className="pt-4" />
+            
+            <CosmicCard className="p-4 flex items-center gap-3" hover={false}>
+              <div className="w-10 h-10 rounded-lg bg-cosmic-violet/10 flex items-center justify-center">
+                <FolderDown className="w-5 h-5 text-cosmic-violet" />
+              </div>
+              <div>
+                <h3 className="font-outfit font-medium text-sm">Download Center</h3>
+                <p className="text-xs text-muted-foreground">View all your generated PDFs</p>
+              </div>
+            </CosmicCard>
           </div>
 
           {/* Generator Panel */}
           <div className="lg:col-span-2">
             {selectedTool ? (
-              <div className="bg-card/50 backdrop-blur-xl rounded-2xl border border-border/50 p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 rounded-xl bg-primary/20">
-                    <selectedTool.icon className="w-6 h-6 text-primary" />
+              <CosmicCard className="p-6" hover={false}>
+                {/* Tool Header */}
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cosmic-magenta/20 to-cosmic-violet/20 flex items-center justify-center">
+                    <selectedTool.icon className="w-7 h-7 text-primary" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold">{selectedTool.title}</h2>
+                    <h2 className="font-outfit font-semibold text-xl">{selectedTool.title}</h2>
                     <p className="text-sm text-muted-foreground">{selectedTool.description}</p>
                   </div>
                 </div>
 
-                <div className="space-y-4 mb-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="input">Your Request</Label>
-                    <Textarea
-                      id="input"
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      placeholder={selectedTool.placeholder}
-                      className="min-h-[100px] bg-background/50"
-                    />
-                  </div>
-
-                  <Button
-                    onClick={generateContent}
-                    disabled={loading || !input.trim()}
-                    className="w-full gap-2 bg-gradient-to-r from-primary to-accent"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        Generate
-                      </>
-                    )}
-                  </Button>
+                {/* Input Area */}
+                <div className="mb-6">
+                  <Textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder={selectedTool.placeholder || 'Describe what you need...'}
+                    className="min-h-[120px] bg-background/50 border-border resize-none"
+                  />
+                  {businessIdea && !input && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Using your business idea: "{businessIdea.slice(0, 50)}..."
+                    </p>
+                  )}
                 </div>
 
-                {/* Result */}
+                {/* Generate Button */}
+                <GradientButton 
+                  onClick={generateContent} 
+                  disabled={loading} 
+                  className="w-full mb-6"
+                  glow={!loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating with AI...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate
+                    </>
+                  )}
+                </GradientButton>
+
+                {/* Results */}
                 {result && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 animate-fade-in">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">Result</h3>
-                      <Button variant="outline" size="sm" onClick={downloadAsPDF} className="gap-2">
-                        <Download className="w-4 h-4" />
-                        Download PDF
-                      </Button>
+                      <h3 className="font-outfit font-semibold">Generated Content</h3>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setPreviewOpen(true)}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          Preview
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={downloadPDF}
+                          className="border-primary text-primary hover:bg-primary/10"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download PDF
+                        </Button>
+                      </div>
                     </div>
                     
-                    <div className="bg-muted/30 rounded-xl p-5 space-y-4">
-                      {result.title && (
-                        <h4 className="text-lg font-semibold">{result.title}</h4>
-                      )}
-                      {result.description && (
-                        <p className="text-muted-foreground">{result.description}</p>
-                      )}
-                      
-                      {/* Sections */}
-                      {result.sections?.map((section: any, i: number) => (
-                        <div key={i} className="border-t border-border/50 pt-4">
-                          <h5 className="font-medium mb-2">{section.heading}</h5>
-                          {section.instructions && (
-                            <p className="text-sm text-muted-foreground mb-3">{section.instructions}</p>
-                          )}
-                          {section.questions?.map((q: any, j: number) => (
-                            <div key={j} className="mb-2">
-                              <p className="text-sm">{typeof q === 'string' ? q : q.prompt}</p>
-                            </div>
-                          ))}
-                          {section.fields?.map((f: any, j: number) => (
-                            <div key={j} className="mb-2">
-                              <Label className="text-sm">{f.label}</Label>
-                              <p className="text-xs text-muted-foreground">{f.placeholder}</p>
-                            </div>
-                          ))}
+                    <div className="p-5 bg-secondary/30 rounded-xl border border-border max-h-[400px] overflow-y-auto scrollbar-cosmic">
+                      <div className="prose prose-sm prose-invert max-w-none">
+                        <div className="whitespace-pre-wrap text-sm text-foreground/90 leading-relaxed">
+                          {result}
                         </div>
-                      ))}
-
-                      {/* Action Items */}
-                      {result.action_items && (
-                        <div className="border-t border-border/50 pt-4">
-                          <h5 className="font-medium mb-2">Next Steps</h5>
-                          <ul className="space-y-1">
-                            {result.action_items.map((item: string, i: number) => (
-                              <li key={i} className="text-sm flex items-start gap-2">
-                                <span className="text-primary">•</span>
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Tips */}
-                      {result.tips && (
-                        <div className="border-t border-border/50 pt-4">
-                          <h5 className="font-medium mb-2">Tips</h5>
-                          <ul className="space-y-1">
-                            {result.tips.map((tip: string, i: number) => (
-                              <li key={i} className="text-sm flex items-start gap-2">
-                                <Lightbulb className="w-4 h-4 text-accent mt-0.5" />
-                                {tip}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Raw content fallback */}
-                      {result.raw && (
-                        <pre className="text-sm whitespace-pre-wrap">{result.raw}</pre>
-                      )}
+                      </div>
                     </div>
                   </div>
                 )}
-              </div>
+              </CosmicCard>
             ) : (
-              <div className="bg-card/30 backdrop-blur-xl rounded-2xl border border-border/30 p-12 text-center">
-                <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Select a Tool</h2>
-                <p className="text-muted-foreground">
-                  Choose a tool from the left to get started
+              <CosmicCard className="p-12 text-center" hover={false}>
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cosmic-magenta/10 to-cosmic-violet/10 flex items-center justify-center mx-auto mb-6">
+                  <Rocket className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h2 className="font-outfit font-semibold text-xl mb-2">Select a Tool</h2>
+                <p className="text-muted-foreground max-w-sm mx-auto">
+                  Choose a tool from the left panel to generate AI-powered content for your business
                 </p>
-              </div>
+              </CosmicCard>
             )}
           </div>
         </div>
-      </main>
-    </div>
+
+        {/* Preview Modal */}
+        <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{selectedTool?.title}</DialogTitle>
+            </DialogHeader>
+            <div className="prose prose-sm prose-invert max-w-none py-4">
+              <div className="whitespace-pre-wrap">{result}</div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t border-border">
+              <Button variant="outline" onClick={() => setPreviewOpen(false)}>
+                Close
+              </Button>
+              <GradientButton onClick={downloadPDF}>
+                <Download className="w-4 h-4 mr-2" />
+                Download PDF
+              </GradientButton>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </DashboardLayout>
   );
-}
+};
+
+export default Tools;
