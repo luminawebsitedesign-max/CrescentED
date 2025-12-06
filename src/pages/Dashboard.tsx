@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import DashboardLayout from '@/components/Layout/DashboardLayout';
+import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { CosmicCard } from '@/components/ui/cosmic-card';
+import { GradientButton } from '@/components/ui/gradient-button';
+import { SectionDivider } from '@/components/ui/section-divider';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Loader2, BookOpen, MessageCircle, FileText, LogOut, 
-  Play, CheckCircle, Sparkles, RefreshCw 
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Loader2, Sparkles, Play, CheckCircle, RefreshCw,
+  BookOpen, Wrench, FileText, TrendingUp, Target, Lightbulb
 } from 'lucide-react';
 import { DOMAIN_LABELS, DOMAIN_ICONS, type Module, type IntakeForm, type ModuleProgress } from '@/types/crescented';
-import TutorSidebar from '@/components/Tutor/TutorSidebar';
 
 const Dashboard = () => {
-  const [user, setUser] = useState<any>(null);
-  const [intake, setIntake] = useState<IntakeForm | null>(null);
-  const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [tutorOpen, setTutorOpen] = useState(false);
+  const { user, modules, setModules, intake, setIntake, setTutorOpen } = useStore();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -28,7 +29,6 @@ const Dashboard = () => {
         navigate('/login');
         return;
       }
-      setUser(session.user);
 
       // Fetch intake form
       const { data: intakeData } = await supabase
@@ -58,21 +58,16 @@ const Dashboard = () => {
     };
 
     fetchData();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') {
-        navigate('/login');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, setIntake, setModules]);
 
   const generateCourse = async () => {
     if (!user || !intake) return;
     setGenerating(true);
 
     try {
+      // Delete existing modules first
+      await supabase.from('modules').delete().eq('user_id', user.id);
+
       const response = await supabase.functions.invoke('crescented-ai', {
         body: {
           type: 'generate_course',
@@ -109,10 +104,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
   const calculateModuleProgress = (module: Module): number => {
     const progress = module.progress as ModuleProgress;
     const sections = module.content?.sections || [];
@@ -126,59 +117,17 @@ const Dashboard = () => {
     return total / modules.length;
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const getNextModule = (): Module | undefined => {
+    return modules.find(m => calculateModuleProgress(m) < 100);
+  };
 
   return (
-    <div className="min-h-screen bg-background noise-texture">
-      <div className="fixed inset-0 aurora-overlay pointer-events-none" />
-
-      {/* Header */}
-      <header className="relative z-10 border-b border-border glass-cosmic">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🌙</span>
-            <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setTutorOpen(true)}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Ask Tutor
-            </Button>
-            <Link to="/pdfs">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                <FileText className="w-4 h-4 mr-2" />
-                My PDFs
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+    <DashboardLayout loading={loading}>
+      <div className="max-w-6xl mx-auto animate-fade-in">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="font-sora text-3xl font-bold mb-2">
-            Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}! 👋
+          <h1 className="text-h1 mb-2">
+            Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}!
           </h1>
           <p className="text-muted-foreground">
             {modules.length > 0
@@ -187,35 +136,115 @@ const Dashboard = () => {
           </p>
         </div>
 
+        {/* Quick Stats */}
+        {modules.length > 0 && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <CosmicCard className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{modules.length}</p>
+                  <p className="text-caption">Modules</p>
+                </div>
+              </div>
+            </CosmicCard>
+            <CosmicCard className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{Math.round(calculateOverallProgress())}%</p>
+                  <p className="text-caption">Progress</p>
+                </div>
+              </div>
+            </CosmicCard>
+            <CosmicCard className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-cosmic-violet/10 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-cosmic-violet" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {modules.filter(m => calculateModuleProgress(m) === 100).length}
+                  </p>
+                  <p className="text-caption">Completed</p>
+                </div>
+              </div>
+            </CosmicCard>
+            <CosmicCard className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-cosmic-sapphire/10 flex items-center justify-center">
+                  <Lightbulb className="w-5 h-5 text-cosmic-sapphire" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold truncate text-sm">{intake?.idea?.slice(0, 15)}...</p>
+                  <p className="text-caption">Your Idea</p>
+                </div>
+              </div>
+            </CosmicCard>
+          </div>
+        )}
+
         {/* Progress Overview */}
         {modules.length > 0 && (
-          <div className="glass-cosmic rounded-xl p-6 mb-8">
+          <CosmicCard className="p-6 mb-8" hover={false}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-outfit font-semibold">Overall Progress</h2>
               <span className="text-sm text-muted-foreground">
                 {Math.round(calculateOverallProgress())}% Complete
               </span>
             </div>
-            <Progress value={calculateOverallProgress()} className="h-3 bg-secondary">
-              <div className="h-full progress-cosmic rounded-full transition-all" style={{ width: `${calculateOverallProgress()}%` }} />
-            </Progress>
-          </div>
+            <div className="relative h-3 bg-secondary rounded-full overflow-hidden">
+              <div
+                className="absolute inset-y-0 left-0 progress-cosmic rounded-full transition-all duration-500"
+                style={{ width: `${calculateOverallProgress()}%` }}
+              />
+            </div>
+          </CosmicCard>
+        )}
+
+        {/* Continue Learning Card */}
+        {modules.length > 0 && getNextModule() && (
+          <CosmicCard className="p-6 mb-8" variant="glow" hover={false}>
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="flex-1">
+                <p className="text-sm text-primary mb-1">Continue Learning</p>
+                <h3 className="font-outfit font-semibold text-xl mb-2">
+                  {getNextModule()?.title}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {getNextModule()?.description || getNextModule()?.summary}
+                </p>
+              </div>
+              <Link to={`/module/${getNextModule()?.id}`}>
+                <GradientButton size="lg">
+                  <Play className="w-4 h-4 mr-2" />
+                  Continue
+                </GradientButton>
+              </Link>
+            </div>
+          </CosmicCard>
         )}
 
         {/* Generate Course Button */}
         {modules.length === 0 && (
-          <div className="glass-cosmic rounded-2xl p-10 text-center mb-8">
-            <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
-            <h2 className="font-sora text-2xl font-bold mb-2">Generate Your Course</h2>
+          <CosmicCard className="p-10 text-center mb-8" variant="gradient" hover={false}>
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center mx-auto mb-6">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-h2 mb-2">Generate Your Course</h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               Based on your profile, our AI will create a personalized learning path
               covering all 7 domains of entrepreneurship.
             </p>
-            <Button
+            <GradientButton
               size="lg"
               onClick={generateCourse}
               disabled={generating}
-              className="bg-primary hover:bg-primary/90 glow-primary"
+              glow
             >
               {generating ? (
                 <>
@@ -228,15 +257,58 @@ const Dashboard = () => {
                   Generate My Course
                 </>
               )}
-            </Button>
-          </div>
+            </GradientButton>
+          </CosmicCard>
+        )}
+
+        {/* Quick Actions */}
+        {modules.length > 0 && (
+          <>
+            <SectionDivider label="Quick Actions" />
+            <div className="grid md:grid-cols-3 gap-4 mb-8">
+              <Link to="/tools">
+                <CosmicCard className="p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Wrench className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-outfit font-medium">Business Tools</h3>
+                    <p className="text-caption">Templates & generators</p>
+                  </div>
+                </CosmicCard>
+              </Link>
+              <CosmicCard
+                className="p-5 flex items-center gap-4"
+                onClick={() => setTutorOpen(true)}
+              >
+                <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-outfit font-medium">Ask AI Tutor</h3>
+                  <p className="text-caption">Get personalized help</p>
+                </div>
+              </CosmicCard>
+              <Link to="/pdfs">
+                <CosmicCard className="p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-cosmic-violet/10 flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-cosmic-violet" />
+                  </div>
+                  <div>
+                    <h3 className="font-outfit font-medium">My Downloads</h3>
+                    <p className="text-caption">Worksheets & PDFs</p>
+                  </div>
+                </CosmicCard>
+              </Link>
+            </div>
+          </>
         )}
 
         {/* Modules Grid */}
         {modules.length > 0 && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-sora text-xl font-bold">Your Modules</h2>
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-h2">Your Modules</h2>
               <Button
                 variant="outline"
                 size="sm"
@@ -250,14 +322,14 @@ const Dashboard = () => {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {modules.map((module) => {
+              {modules.map((module, index) => {
                 const progress = calculateModuleProgress(module);
                 const isComplete = progress === 100;
                 const domainKey = module.domain as keyof typeof DOMAIN_LABELS;
-                
+
                 return (
                   <Link key={module.id} to={`/module/${module.id}`}>
-                    <div className="glass-cosmic rounded-xl p-6 hover-lift group cursor-pointer h-full">
+                    <CosmicCard className="p-6 h-full animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
                       <div className="flex items-start justify-between mb-4">
                         <span className="text-3xl">
                           {DOMAIN_ICONS[domainKey] || '📚'}
@@ -280,20 +352,22 @@ const Dashboard = () => {
                           <span>Progress</span>
                           <span>{Math.round(progress)}%</span>
                         </div>
-                        <Progress value={progress} className="h-2 bg-secondary" />
+                        <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className="absolute inset-y-0 left-0 progress-cosmic rounded-full transition-all"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    </CosmicCard>
                   </Link>
                 );
               })}
             </div>
-          </div>
+          </>
         )}
-      </main>
-
-      {/* Tutor Sidebar */}
-      <TutorSidebar open={tutorOpen} onClose={() => setTutorOpen(false)} />
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

@@ -5,112 +5,127 @@
 @layer base {
   :root {
     /* CrescentEd Cosmic Theme - Light Mode */
-    --background: 270 30% 98%;
-    --foreground: 270 50% 15%;
+    --background: 220 30% 98%;
+    --foreground: 220 50% 10%;
     
-    --card: 270 25% 96%;
-    --card-foreground: 270 50% 15%;
+    --card: 220 25% 96%;
+    --card-foreground: 220 50% 10%;
     
-    --popover: 270 25% 96%;
-    --popover-foreground: 270 50% 15%;
+    --popover: 220 25% 96%;
+    --popover-foreground: 220 50% 10%;
     
-    --primary: 280 70% 50%;
+    --primary: 342 64% 42%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 260 40% 90%;
-    --secondary-foreground: 270 50% 20%;
+    --secondary: 220 30% 92%;
+    --secondary-foreground: 220 50% 15%;
     
-    --muted: 270 20% 92%;
-    --muted-foreground: 270 30% 40%;
+    --muted: 220 20% 90%;
+    --muted-foreground: 220 20% 45%;
     
-    --accent: 220 90% 55%;
+    --accent: 210 70% 50%;
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 270 20% 85%;
-    --input: 270 20% 85%;
-    --ring: 280 70% 50%;
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+    --ring: 342 64% 42%;
     
     --radius: 0.75rem;
     
-    /* CrescentEd Custom Colors */
-    --cosmic-plum: 280 40% 25%;
-    --cosmic-magenta: 320 70% 55%;
-    --cosmic-violet: 270 60% 60%;
-    --cosmic-navy: 230 50% 15%;
-    --cosmic-sapphire: 220 90% 55%;
-    --cosmic-glow: 280 70% 70%;
+    /* CrescentEd Brand Colors - EXACT HEX VALUES */
+    /* Deep Space Navy: #0b1020 */
+    --cosmic-navy: 225 55% 8%;
+    /* Crescent Magenta: #c6335e */
+    --cosmic-magenta: 342 64% 49%;
+    /* Arc Rose: #a63d7a */
+    --cosmic-rose: 322 46% 45%;
+    /* Nebula Violet: #7c4987 */
+    --cosmic-violet: 287 32% 41%;
+    /* Midnight Indigo: #534f82 */
+    --cosmic-indigo: 244 26% 41%;
+    /* Star Blue: #354e70 */
+    --cosmic-sapphire: 210 37% 32%;
+    /* Deep Slate: #2f4858 */
+    --cosmic-slate: 199 30% 27%;
+    /* Glow accent (soft teal) */
+    --cosmic-glow: 190 80% 60%;
     
     /* Shadows */
-    --shadow-glow: 0 0 30px hsl(280 70% 50% / 0.2);
-    --shadow-card: 0 4px 20px hsl(270 50% 15% / 0.1);
-    --shadow-hover: 0 8px 30px hsl(280 70% 50% / 0.15);
+    --shadow-glow: 0 0 30px hsl(342 64% 49% / 0.2);
+    --shadow-card: 0 4px 20px hsl(220 50% 10% / 0.08);
+    --shadow-hover: 0 8px 30px hsl(342 64% 49% / 0.15);
     
     /* Sidebar */
-    --sidebar-background: 270 30% 98%;
-    --sidebar-foreground: 270 50% 15%;
-    --sidebar-primary: 280 70% 50%;
+    --sidebar-background: 220 30% 97%;
+    --sidebar-foreground: 220 50% 10%;
+    --sidebar-primary: 342 64% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 90% 55%;
+    --sidebar-accent: 210 70% 50%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 270 20% 85%;
-    --sidebar-ring: 280 70% 50%;
+    --sidebar-border: 220 20% 88%;
+    --sidebar-ring: 342 64% 42%;
   }
 
   .dark {
-    /* CrescentEd Cosmic Theme - Dark Mode (Default) */
-    --background: 270 40% 8%;
-    --foreground: 270 20% 95%;
+    /* CrescentEd Cosmic Theme - Dark Mode (Primary) */
+    /* Deep Space Navy as base: #0b1020 */
+    --background: 225 55% 7%;
+    --foreground: 220 15% 92%;
     
-    --card: 270 35% 12%;
-    --card-foreground: 270 20% 95%;
+    --card: 225 45% 10%;
+    --card-foreground: 220 15% 92%;
     
-    --popover: 270 35% 12%;
-    --popover-foreground: 270 20% 95%;
+    --popover: 225 45% 10%;
+    --popover-foreground: 220 15% 92%;
     
-    --primary: 280 70% 60%;
+    /* Crescent Magenta: #c6335e */
+    --primary: 342 64% 49%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 270 30% 18%;
-    --secondary-foreground: 270 20% 90%;
+    --secondary: 225 35% 14%;
+    --secondary-foreground: 220 15% 90%;
     
-    --muted: 270 25% 15%;
-    --muted-foreground: 270 20% 60%;
+    --muted: 225 30% 12%;
+    --muted-foreground: 220 15% 55%;
     
-    --accent: 220 90% 60%;
+    /* Star Blue: #354e70 */
+    --accent: 210 37% 50%;
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 270 30% 20%;
-    --input: 270 30% 20%;
-    --ring: 280 70% 60%;
+    --border: 225 30% 18%;
+    --input: 225 30% 18%;
+    --ring: 342 64% 49%;
     
-    /* CrescentEd Custom Colors - Dark */
-    --cosmic-plum: 280 50% 35%;
-    --cosmic-magenta: 320 80% 60%;
-    --cosmic-violet: 270 70% 65%;
-    --cosmic-navy: 230 60% 12%;
-    --cosmic-sapphire: 220 90% 60%;
-    --cosmic-glow: 280 80% 75%;
+    /* CrescentEd Brand Colors - Dark Mode */
+    --cosmic-navy: 225 55% 8%;
+    --cosmic-magenta: 342 64% 55%;
+    --cosmic-rose: 322 50% 52%;
+    --cosmic-violet: 287 38% 50%;
+    --cosmic-indigo: 244 30% 50%;
+    --cosmic-sapphire: 210 45% 45%;
+    --cosmic-slate: 199 35% 35%;
+    --cosmic-glow: 190 80% 65%;
     
     /* Shadows - Dark */
-    --shadow-glow: 0 0 40px hsl(280 70% 60% / 0.25);
-    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
-    --shadow-hover: 0 8px 40px hsl(280 70% 60% / 0.2);
+    --shadow-glow: 0 0 40px hsl(342 64% 55% / 0.25);
+    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.4);
+    --shadow-hover: 0 8px 40px hsl(342 64% 55% / 0.2);
     
     /* Sidebar - Dark */
-    --sidebar-background: 270 40% 10%;
-    --sidebar-foreground: 270 20% 95%;
-    --sidebar-primary: 280 70% 60%;
+    --sidebar-background: 225 50% 9%;
+    --sidebar-foreground: 220 15% 92%;
+    --sidebar-primary: 342 64% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 90% 60%;
+    --sidebar-accent: 210 45% 55%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 270 30% 20%;
-    --sidebar-ring: 280 70% 60%;
+    --sidebar-border: 225 30% 18%;
+    --sidebar-ring: 342 64% 55%;
   }
 }
 
@@ -146,18 +161,33 @@
   }
   
   .bg-cosmic {
-    background: linear-gradient(135deg, hsl(var(--cosmic-plum)), hsl(var(--cosmic-violet) / 0.8), hsl(var(--cosmic-navy)));
+    background: linear-gradient(135deg, hsl(var(--cosmic-magenta)), hsl(var(--cosmic-violet)), hsl(var(--cosmic-navy)));
+  }
+  
+  .bg-cosmic-subtle {
+    background: linear-gradient(145deg, hsl(var(--cosmic-navy)), hsl(var(--cosmic-slate)));
   }
   
   .aurora-overlay {
-    background: linear-gradient(180deg, hsl(var(--primary) / 0.15), hsl(var(--accent) / 0.1), transparent);
+    background: linear-gradient(180deg, 
+      hsl(var(--cosmic-magenta) / 0.08) 0%, 
+      hsl(var(--cosmic-violet) / 0.05) 30%, 
+      hsl(var(--cosmic-sapphire) / 0.03) 60%, 
+      transparent 100%
+    );
   }
   
   .text-gradient-cosmic {
-    background: linear-gradient(135deg, hsl(var(--cosmic-magenta)), hsl(var(--cosmic-violet)), hsl(var(--cosmic-sapphire)));
+    background: linear-gradient(135deg, hsl(var(--cosmic-magenta)), hsl(var(--cosmic-rose)), hsl(var(--cosmic-sapphire)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  
+  .border-gradient-cosmic {
+    border: 1px solid transparent;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                linear-gradient(135deg, hsl(var(--cosmic-magenta) / 0.5), hsl(var(--cosmic-violet) / 0.5)) border-box;
   }
   
   .noise-texture {
@@ -169,13 +199,13 @@
     position: absolute;
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.03;
+    opacity: 0.02;
     pointer-events: none;
     mix-blend-mode: overlay;
   }
   
   .hover-lift {
-    @apply transition-all duration-300;
+    @apply transition-all duration-300 ease-out;
   }
   
   .hover-lift:hover {
@@ -184,7 +214,7 @@
   }
   
   .progress-cosmic {
-    background: linear-gradient(90deg, hsl(var(--cosmic-violet)), hsl(var(--cosmic-magenta)), hsl(var(--cosmic-sapphire)));
+    background: linear-gradient(90deg, hsl(var(--cosmic-magenta)), hsl(var(--cosmic-rose)), hsl(var(--cosmic-sapphire)));
   }
   
   .scrollbar-cosmic::-webkit-scrollbar {
@@ -197,28 +227,60 @@
   }
   
   .scrollbar-cosmic::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.5);
+    background: hsl(var(--cosmic-magenta) / 0.5);
     border-radius: 4px;
   }
   
   .scrollbar-cosmic::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 0.7);
+    background: hsl(var(--cosmic-magenta) / 0.7);
+  }
+  
+  /* Typography Scale */
+  .text-display {
+    @apply text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight;
+  }
+  
+  .text-h1 {
+    @apply text-3xl md:text-4xl font-bold;
+  }
+  
+  .text-h2 {
+    @apply text-2xl md:text-3xl font-semibold;
+  }
+  
+  .text-body {
+    @apply text-base leading-relaxed;
+  }
+  
+  .text-caption {
+    @apply text-sm text-muted-foreground;
   }
 }
 
+/* Animations */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.3); }
-  50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.5); }
+  0%, 100% { box-shadow: 0 0 20px hsl(var(--cosmic-magenta) / 0.3); }
+  50% { box-shadow: 0 0 40px hsl(var(--cosmic-magenta) / 0.5); }
 }
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .animate-float {
@@ -230,7 +292,30 @@
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.2), transparent);
+  background: linear-gradient(90deg, transparent, hsl(var(--cosmic-magenta) / 0.2), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+.animate-slide-in {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* Loading dots */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.loading-dots span {
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+.loading-dots span:nth-child(3) { animation-delay: 0; }

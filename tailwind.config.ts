@@ -63,11 +63,13 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
         cosmic: {
-          plum: "hsl(var(--cosmic-plum))",
-          magenta: "hsl(var(--cosmic-magenta))",
-          violet: "hsl(var(--cosmic-violet))",
           navy: "hsl(var(--cosmic-navy))",
+          magenta: "hsl(var(--cosmic-magenta))",
+          rose: "hsl(var(--cosmic-rose))",
+          violet: "hsl(var(--cosmic-violet))",
+          indigo: "hsl(var(--cosmic-indigo))",
           sapphire: "hsl(var(--cosmic-sapphire))",
+          slate: "hsl(var(--cosmic-slate))",
           glow: "hsl(var(--cosmic-glow))",
         },
       },
@@ -75,6 +77,7 @@ export default {
         sora: ['Sora', 'system-ui', 'sans-serif'],
         outfit: ['Outfit', 'system-ui', 'sans-serif'],
         inter: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -95,12 +98,20 @@ export default {
           "50%": { transform: "translateY(-10px)" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 20px hsl(var(--primary) / 0.3)" },
-          "50%": { boxShadow: "0 0 40px hsl(var(--primary) / 0.5)" },
+          "0%, 100%": { boxShadow: "0 0 20px hsl(var(--cosmic-magenta) / 0.3)" },
+          "50%": { boxShadow: "0 0 40px hsl(var(--cosmic-magenta) / 0.5)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
+        },
+        "fade-in": {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-in-right": {
+          from: { opacity: "0", transform: "translateX(20px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
         },
       },
       animation: {
@@ -109,6 +120,8 @@ export default {
         float: "float 6s ease-in-out infinite",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         shimmer: "shimmer 2s infinite",
+        "fade-in": "fade-in 0.5s ease-out",
+        "slide-in": "slide-in-right 0.3s ease-out",
       },
     },
   },
