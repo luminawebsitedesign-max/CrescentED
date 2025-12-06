@@ -26,6 +26,7 @@ What you can help with:
 - Helping with their specific business idea
 - Providing encouragement and motivation
 - Suggesting practical next steps
+- Generating templates, worksheets, and checklists
 
 What you should NOT do:
 - Give legal or medical advice
@@ -33,48 +34,50 @@ What you should NOT do:
 - Be discouraging or harsh
 - Use overly technical jargon`;
 
-const COURSE_GENERATION_PROMPT = `You are NEXUS, an AI Course Architect for CrescentEd, creating personalized entrepreneurship curricula.
+const COURSE_GENERATION_PROMPT = `You are an AI Course Architect for CrescentEd, creating personalized entrepreneurship curricula.
 
-Based on the user's intake form, generate a complete learning path across the 7 domains:
-1. Business Foundations - Ideas, planning, validation
-2. Running a Business - Operations, finance, legal basics
-3. Customer Success - Marketing, sales, customer relationships
-4. Personal Development - Mindset, skills, resilience
-5. Daily Life Optimization - Productivity, time management, balance
-6. Philosophy & Worldview - Purpose, values, ethics
-7. Other Topics - Specialized knowledge relevant to their idea
+Based on the user's intake form, generate a complete learning path across these 7 domains:
+1. business_foundations - Ideas, planning, validation
+2. running_a_business - Operations, finance, legal basics
+3. customer_success - Marketing, sales, customer relationships
+4. personal_development - Mindset, skills, resilience
+5. daily_life_optimization - Productivity, time management, balance
+6. philosophy_worldview - Purpose, values, ethics
+7. other_topics - Specialized knowledge relevant to their idea
 
 For EACH module, output a JSON object with this exact structure:
 {
-  "title": "Module title",
-  "domain": "domain_key (e.g., business_foundations)",
-  "description": "2-3 sentence description",
+  "title": "Module title (clear and specific)",
+  "domain": "one of: business_foundations, running_a_business, customer_success, personal_development, daily_life_optimization, philosophy_worldview, other_topics",
+  "description": "2-3 sentence description of what they'll learn",
+  "summary": "One sentence summary",
   "content": {
     "sections": [
       {
         "title": "Section title",
-        "content": "Detailed educational content (300-500 words). Make it practical, actionable, and relevant to their specific business idea.",
+        "content": "Detailed educational content (300-500 words). Make it practical, actionable, and relevant to their specific business idea. Use clear paragraphs and examples.",
         "plug_and_plays": [
           {
             "title": "Resource name",
-            "type": "worksheet|template|checklist|decision_tree|script|exercise",
-            "content": "The actual content of the resource they can use"
+            "type": "worksheet",
+            "content": "The actual content of the resource they can use - be specific and actionable"
           }
         ]
       }
     ],
-    "action_steps": ["Step 1", "Step 2", "Step 3"]
-  },
-  "summary": "One sentence summary"
+    "action_steps": ["Specific action step 1", "Specific action step 2", "Specific action step 3"]
+  }
 }
 
-IMPORTANT:
+IMPORTANT RULES:
+- Output ONLY a valid JSON array of 7 module objects (one per domain)
 - Personalize everything to their specific idea, goals, and constraints
 - Make content practical and actionable, not theoretical
-- Include 2-4 sections per module
-- Include 1-3 plug_and_plays per section
-- Keep language simple and encouraging
-- End each module with clear action steps`;
+- Include 2-3 sections per module
+- Include 1-2 plug_and_plays per section with types: worksheet, template, checklist, script, exercise
+- Keep language simple, encouraging, and youth-friendly
+- End each module with 3-5 clear action steps
+- Do NOT include any text before or after the JSON array`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -107,8 +110,10 @@ User Profile:
 - Learning Style: ${intake.learning_style}
 - Commitment Level: ${intake.commitment_level}
 
-Generate a complete personalized curriculum with modules for each of the 7 entrepreneurship domains.
-Output as a JSON array of module objects. Make sure it's valid JSON!`;
+Generate a complete personalized curriculum with exactly 7 modules (one for each domain).
+Output ONLY the JSON array, no other text.`;
+
+      console.log('Calling AI gateway for course generation...');
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -117,69 +122,129 @@ Output as a JSON array of module objects. Make sure it's valid JSON!`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "openai/gpt-5",
+          model: "google/gemini-2.5-flash",
           messages: [
             { role: "system", content: COURSE_GENERATION_PROMPT },
             { role: "user", content: userPrompt },
           ],
-          temperature: 0.7,
-          max_tokens: 8000,
         }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error('AI Gateway Error:', response.status, errorText);
+        
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        if (response.status === 402) {
+          return new Response(
+            JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
+            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
         throw new Error(`AI gateway error: ${response.status}`);
       }
 
       const data = await response.json();
       const content = data.choices[0].message.content;
+      console.log('AI response received, parsing modules...');
       
       // Parse the JSON response
       let modules;
       try {
-        // Try to extract JSON from the response
-        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        // Try to extract JSON from the response - handle code blocks
+        let jsonString = content;
+        
+        // Remove markdown code blocks if present
+        if (jsonString.includes('```json')) {
+          jsonString = jsonString.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+        } else if (jsonString.includes('```')) {
+          jsonString = jsonString.replace(/```\n?/g, '');
+        }
+        
+        // Try to find JSON array
+        const jsonMatch = jsonString.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           modules = JSON.parse(jsonMatch[0]);
         } else {
+          console.error("No JSON array found in response:", content);
           throw new Error("No JSON array found in response");
+        }
+        
+        if (!Array.isArray(modules) || modules.length === 0) {
+          throw new Error("Invalid modules array");
         }
       } catch (parseError) {
         console.error("Failed to parse modules JSON:", parseError);
-        throw new Error("Failed to generate course structure");
+        console.error("Raw content:", content);
+        throw new Error("Failed to generate course structure. Please try again.");
       }
+
+      console.log(`Parsed ${modules.length} modules, saving to database...`);
 
       // Save modules to database
+      const insertedModules = [];
       for (const module of modules) {
-        await supabase.from('modules').insert({
+        const { data: insertedModule, error } = await supabase.from('modules').insert({
           user_id: userId,
-          title: module.title,
-          domain: module.domain,
-          description: module.description,
-          content: module.content,
-          summary: module.summary,
+          title: module.title || 'Untitled Module',
+          domain: module.domain || 'other_topics',
+          description: module.description || module.summary || '',
+          content: module.content || { sections: [], action_steps: [] },
+          summary: module.summary || module.description || '',
           progress: { sectionsCompleted: [], plugAndPlayCompleted: [] },
-        });
+        }).select().single();
+
+        if (error) {
+          console.error('Error inserting module:', error);
+        } else {
+          insertedModules.push(insertedModule);
+        }
       }
 
-      return new Response(JSON.stringify({ success: true, modulesCount: modules.length }), {
+      console.log(`Successfully saved ${insertedModules.length} modules`);
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        modulesCount: insertedModules.length 
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
 
     } else if (type === "tutor") {
       // AI Tutor response
       let contextInfo = "";
+      
+      // Get user's intake data for context
+      if (userId) {
+        const { data: intakeData } = await supabase
+          .from('intake_forms')
+          .select('idea, goals, experience_level')
+          .eq('user_id', userId)
+          .maybeSingle();
+        
+        if (intakeData) {
+          contextInfo += `\n\nUser's Business Idea: ${intakeData.idea}`;
+          contextInfo += `\nUser's Goals: ${intakeData.goals}`;
+          contextInfo += `\nExperience Level: ${intakeData.experience_level}`;
+        }
+      }
+      
       if (context?.module_id) {
         const { data: moduleData } = await supabase
           .from('modules')
-          .select('title, domain, content')
+          .select('title, domain, content, summary')
           .eq('id', context.module_id)
-          .single();
+          .maybeSingle();
         
         if (moduleData) {
-          contextInfo = `\n\nCurrent module: ${moduleData.title} (${moduleData.domain})`;
+          contextInfo += `\n\nCurrent Module: ${moduleData.title} (${moduleData.domain})`;
+          contextInfo += `\nModule Summary: ${moduleData.summary || 'No summary'}`;
           if (context.section_title) {
             contextInfo += `\nDiscussing section: ${context.section_title}`;
           }
@@ -188,9 +253,11 @@ Output as a JSON array of module objects. Make sure it's valid JSON!`;
 
       const messages = [
         { role: "system", content: TUTOR_SYSTEM_PROMPT + contextInfo },
-        ...(history || []).map((m: any) => ({ role: m.role, content: m.content })),
+        ...(history || []).slice(-10).map((m: any) => ({ role: m.role, content: m.content })),
         { role: "user", content: message },
       ];
+
+      console.log('Calling AI gateway for tutor response...');
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -199,10 +266,8 @@ Output as a JSON array of module objects. Make sure it's valid JSON!`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "openai/gpt-5",
+          model: "google/gemini-2.5-flash",
           messages,
-          temperature: 0.7,
-          max_tokens: 1000,
         }),
       });
 
@@ -229,7 +294,51 @@ Output as a JSON array of module objects. Make sure it's valid JSON!`;
       const data = await response.json();
       const tutorResponse = data.choices[0].message.content;
 
+      // Log the interaction
+      if (userId) {
+        const { error: logError } = await supabase.from('ai_logs').insert({
+          user_id: userId,
+          action: 'tutor_chat',
+          input_data: { message, context },
+          output_data: { response: tutorResponse.slice(0, 500) },
+        });
+        if (logError) console.error('Error logging AI interaction:', logError);
+      }
+
       return new Response(JSON.stringify({ response: tutorResponse }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    } else if (type === "generate_tool") {
+      // Generate content for tools (business plan, marketing checklist, etc.)
+      const { prompt, toolType } = message;
+      
+      console.log('Generating tool content:', toolType);
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: "You are a helpful business advisor. Provide detailed, actionable, and well-formatted content. Use clear headers, bullet points, and numbered lists for readability." },
+            { role: "user", content: prompt },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('AI Gateway Error:', response.status, errorText);
+        throw new Error(`AI gateway error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const generatedContent = data.choices[0].message.content;
+
+      return new Response(JSON.stringify({ response: generatedContent }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -239,7 +348,7 @@ Output as a JSON array of module objects. Make sure it's valid JSON!`;
   } catch (error) {
     console.error("CrescentEd AI Error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

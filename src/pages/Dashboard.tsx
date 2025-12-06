@@ -26,9 +26,12 @@ const Dashboard = () => {
     const fetchData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate('/login');
+        navigate('/auth');
         return;
       }
+
+      // Set user in store
+      useStore.getState().setUser(session.user);
 
       // Fetch intake form
       const { data: intakeData } = await supabase
@@ -61,28 +64,48 @@ const Dashboard = () => {
   }, [navigate, setIntake, setModules]);
 
   const generateCourse = async () => {
-    if (!user || !intake) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !intake) {
+      toast({
+        title: 'Error',
+        description: 'Please complete your profile first',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setGenerating(true);
 
     try {
       // Delete existing modules first
-      await supabase.from('modules').delete().eq('user_id', user.id);
+      await supabase.from('modules').delete().eq('user_id', session.user.id);
+
+      toast({
+        title: 'Generating your course...',
+        description: 'This may take a minute. Please wait.',
+      });
 
       const response = await supabase.functions.invoke('crescented-ai', {
         body: {
           type: 'generate_course',
           intake,
-          userId: user.id,
+          userId: session.user.id,
         },
       });
 
-      if (response.error) throw response.error;
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to generate course');
+      }
+
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
 
       // Refresh modules
       const { data: modulesData } = await supabase
         .from('modules')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: true });
 
       if (modulesData) {
@@ -91,12 +114,13 @@ const Dashboard = () => {
 
       toast({
         title: 'Course generated!',
-        description: 'Your personalized learning path is ready.',
+        description: `Created ${response.data?.modulesCount || modulesData?.length || 0} personalized modules.`,
       });
     } catch (error: any) {
+      console.error('Course generation error:', error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to generate course',
+        title: 'Generation failed',
+        description: error.message || 'Failed to generate course. Please try again.',
         variant: 'destructive',
       });
     } finally {

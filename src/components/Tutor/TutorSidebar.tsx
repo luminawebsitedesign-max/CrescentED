@@ -59,11 +59,16 @@ const TutorSidebar = ({ open, onClose, context }: TutorSidebarProps) => {
     setLoading(true);
 
     try {
+      // Get current user ID for context
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+
       const response = await supabase.functions.invoke('crescented-ai', {
         body: {
           type: 'tutor',
           message: input,
           context,
+          userId,
           history: messages.slice(-10), // Last 10 messages for context
         },
       });
