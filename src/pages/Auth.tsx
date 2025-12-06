@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Loader2, Mail, Lock, ArrowLeft, User } from 'lucide-react';
+import CrescentLogo from '@/components/ui/crescent-logo';
 
 interface AuthProps {
   mode: 'login' | 'register';
@@ -15,28 +16,49 @@ const Auth = ({ mode }: AuthProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [rememberedEmail, setRememberedEmail] = useState<string | null>(null);
+  const [useDifferentEmail, setUseDifferentEmail] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkUser = async () => {
+    // Check for remembered email in localStorage
+    const savedEmail = localStorage.getItem('crescented-last-email');
+    if (savedEmail) {
+      setRememberedEmail(savedEmail);
+    }
+    
+    // Check if user has an active session
+    const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/dashboard');
-      }
+      // Don't auto-redirect - always show login screen
+      // The user must explicitly choose to continue or use different email
+      setCheckingSession(false);
     };
-    checkUser();
+    
+    checkSession();
+  }, []);
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate('/dashboard');
-      }
-    });
+  const handleContinueAsRemembered = async () => {
+    if (!rememberedEmail) return;
+    
+    // Check if there's an active session for this email
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session && session.user.email === rememberedEmail) {
+      navigate('/dashboard');
+    } else {
+      // Need to re-login
+      setEmail(rememberedEmail);
+      setUseDifferentEmail(false);
+    }
+  };
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  const handleUseDifferentEmail = () => {
+    setUseDifferentEmail(true);
+    setEmail('');
+    setRememberedEmail(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,23 +76,30 @@ const Auth = ({ mode }: AuthProps) => {
         
         if (error) throw error;
         
+        // Save email for future logins
+        localStorage.setItem('crescented-last-email', email);
+        
         toast({
           title: 'Account created!',
           description: 'Welcome to CrescentEd. Let\'s get started!',
         });
         navigate('/intake');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
         if (error) throw error;
         
+        // Save email for future logins
+        localStorage.setItem('crescented-last-email', email);
+        
         toast({
           title: 'Welcome back!',
           description: 'Ready to continue your entrepreneurial journey?',
         });
+        navigate('/dashboard');
       }
     } catch (error: any) {
       toast({
@@ -82,6 +111,17 @@ const Auth = ({ mode }: AuthProps) => {
       setLoading(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show "Continue as" screen if remembered email exists and not choosing different
+  const showRememberedChoice = rememberedEmail && !useDifferentEmail && mode === 'login';
 
   return (
     <div className="min-h-screen bg-background noise-texture flex items-center justify-center p-6">
@@ -95,91 +135,136 @@ const Auth = ({ mode }: AuthProps) => {
         
         <div className="glass-cosmic rounded-2xl p-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-9 h-9 relative">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cosmic-magenta via-cosmic-violet to-cosmic-sapphire opacity-60 blur-sm" />
-              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center">
-                <div className="w-5 h-5 rounded-full border-2 border-white/80" style={{ clipPath: 'inset(0 0 0 40%)' }} />
-              </div>
-            </div>
+            <CrescentLogo size="md" />
             <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
           
-          <h1 className="font-sora text-2xl font-bold mb-2">
-            {mode === 'login' ? 'Welcome Back' : 'Start Your Journey'}
-          </h1>
-          <p className="text-muted-foreground mb-6">
-            {mode === 'login' 
-              ? 'Log in to continue your entrepreneurial path' 
-              : 'Create your account and begin learning'}
-          </p>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-secondary/50 border-border"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-secondary/50 border-border"
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full bg-primary hover:bg-primary/90 glow-primary"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {mode === 'login' ? 'Signing in...' : 'Creating account...'}
-                </>
-              ) : (
-                mode === 'login' ? 'Sign In' : 'Create Account'
-              )}
-            </Button>
-          </form>
-          
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === 'login' ? (
-              <>
+          {showRememberedChoice ? (
+            <>
+              <h1 className="font-sora text-2xl font-bold mb-2">Welcome Back</h1>
+              <p className="text-muted-foreground mb-6">
+                Choose how you'd like to continue
+              </p>
+              
+              {/* Continue as remembered email */}
+              <button
+                onClick={handleContinueAsRemembered}
+                className="w-full p-4 mb-3 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-all text-left group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-muted-foreground">Continue as</p>
+                    <p className="font-medium truncate">{rememberedEmail}</p>
+                  </div>
+                </div>
+              </button>
+              
+              {/* Use different email */}
+              <button
+                onClick={handleUseDifferentEmail}
+                className="w-full p-4 rounded-xl border border-border bg-secondary/10 hover:bg-secondary/30 transition-all text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Use a different email</p>
+                    <p className="text-sm text-muted-foreground">Sign in with another account</p>
+                  </div>
+                </div>
+              </button>
+              
+              <p className="mt-6 text-center text-sm text-muted-foreground">
                 Don't have an account?{' '}
                 <Link to="/register" className="text-primary hover:underline">
                   Sign up
                 </Link>
-              </>
-            ) : (
-              <>
-                Already have an account?{' '}
-                <Link to="/login" className="text-primary hover:underline">
-                  Log in
-                </Link>
-              </>
-            )}
-          </p>
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="font-sora text-2xl font-bold mb-2">
+                {mode === 'login' ? 'Welcome Back' : 'Start Your Journey'}
+              </h1>
+              <p className="text-muted-foreground mb-6">
+                {mode === 'login' 
+                  ? 'Log in to continue your entrepreneurial path' 
+                  : 'Create your account and begin learning'}
+              </p>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 bg-secondary/50 border-border"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 bg-secondary/50 border-border"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-primary hover:bg-primary/90 glow-primary"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {mode === 'login' ? 'Signing in...' : 'Creating account...'}
+                    </>
+                  ) : (
+                    mode === 'login' ? 'Sign In' : 'Create Account'
+                  )}
+                </Button>
+              </form>
+              
+              <p className="mt-6 text-center text-sm text-muted-foreground">
+                {mode === 'login' ? (
+                  <>
+                    Don't have an account?{' '}
+                    <Link to="/register" className="text-primary hover:underline">
+                      Sign up
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-primary hover:underline">
+                      Log in
+                    </Link>
+                  </>
+                )}
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

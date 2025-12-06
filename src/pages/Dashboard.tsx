@@ -4,24 +4,23 @@ import DashboardLayout from '@/components/Layout/DashboardLayout';
 import AITutorMain from '@/components/Dashboard/AITutorMain';
 import ModuleContent from '@/components/Dashboard/ModuleContent';
 import { useStore } from '@/store/useStore';
-import { Button } from '@/components/ui/button';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { GradientButton } from '@/components/ui/gradient-button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import {
-  Loader2, Sparkles, RefreshCw, BookOpen, MessageCircle
+  Loader2, Sparkles, ChevronRight, Home
 } from 'lucide-react';
-import { type Module, type IntakeForm } from '@/types/crescented';
+import { type Module, type IntakeForm, DOMAIN_LABELS } from '@/types/crescented';
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'tutor' | 'content'>('tutor');
-  const { user, modules, setModules, intake, setIntake, setCurrentModuleId } = useStore();
+  const { user, modules, setModules, intake, setIntake, currentModuleId, setCurrentModuleId } = useStore();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const currentModule = modules.find(m => m.id === currentModuleId);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,6 +132,14 @@ const Dashboard = () => {
     }
   };
 
+  // Calculate overall progress
+  const completedModules = modules.filter(m => {
+    const sections = m.content?.sections || [];
+    const completed = m.progress?.sectionsCompleted?.length || 0;
+    return sections.length > 0 && completed >= sections.length;
+  }).length;
+  const progressPercent = modules.length > 0 ? Math.round((completedModules / modules.length) * 100) : 0;
+
   // No modules - show generation screen
   if (!loading && modules.length === 0) {
     return (
@@ -174,40 +181,47 @@ const Dashboard = () => {
   return (
     <DashboardLayout loading={loading}>
       <div className="h-full flex flex-col animate-fade-in">
-        {/* Header with tabs and regenerate */}
+        {/* Breadcrumb Header */}
         <div className="flex items-center justify-between mb-4">
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'tutor' | 'content')}>
-            <TabsList className="bg-secondary/50">
-              <TabsTrigger value="tutor" className="gap-2">
-                <MessageCircle className="w-4 h-4" />
-                AI Tutor
-              </TabsTrigger>
-              <TabsTrigger value="content" className="gap-2">
-                <BookOpen className="w-4 h-4" />
-                Module Content
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={generateCourse}
-            disabled={generating}
-            className="border-border"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${generating ? 'animate-spin' : ''}`} />
-            Regenerate Course
-          </Button>
+          <div className="flex items-center gap-2 text-sm">
+            <Home className="w-4 h-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Dashboard</span>
+            {currentModule && (
+              <>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium text-foreground truncate max-w-[200px]">
+                  {currentModule.title}
+                </span>
+              </>
+            )}
+          </div>
+          
+          {/* Progress indicator */}
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Course Progress</p>
+              <p className="text-sm font-medium">{progressPercent}% Complete</p>
+            </div>
+            <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden">
+              <div 
+                className="h-full progress-cosmic rounded-full transition-all"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-hidden">
-          {activeTab === 'tutor' ? (
-            <AITutorMain />
-          ) : (
+        {/* Main Content - AI Tutor with Module Content side by side on large screens */}
+        <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Module Content Panel */}
+          <div className="order-2 lg:order-1 overflow-hidden">
             <ModuleContent />
-          )}
+          </div>
+          
+          {/* AI Tutor Panel */}
+          <div className="order-1 lg:order-2 overflow-hidden">
+            <AITutorMain />
+          </div>
         </div>
       </div>
     </DashboardLayout>

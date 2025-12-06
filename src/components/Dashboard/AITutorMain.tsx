@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { GradientButton } from '@/components/ui/gradient-button';
@@ -10,9 +9,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/store/useStore';
 import { 
   Send, Loader2, Sparkles, User, RefreshCw, 
-  BookOpen, ChevronDown, ChevronUp, FileText, Lightbulb
+  FileText, Lightbulb, ClipboardList, BookOpen
 } from 'lucide-react';
-import { type TutorMessage, type Module, type ModuleProgress, DOMAIN_LABELS, DOMAIN_ICONS } from '@/types/crescented';
+import { type TutorMessage, type Module, type ModuleProgress } from '@/types/crescented';
 import { cn } from '@/lib/utils';
 
 const AITutorMain = () => {
@@ -67,13 +66,6 @@ const AITutorMain = () => {
       }
     }
   }, [currentModuleId, modules, setCurrentModuleId]);
-
-  const calculateModuleProgress = (module: Module): number => {
-    const progress = module.progress as ModuleProgress;
-    const sections = module.content?.sections || [];
-    if (sections.length === 0) return 0;
-    return (progress.sectionsCompleted.length / sections.length) * 100;
-  };
 
   const sendMessage = async (customMessage?: string) => {
     const messageText = customMessage || input.trim();
@@ -161,7 +153,7 @@ const AITutorMain = () => {
 
       setMessages(prev => prev.map(m => 
         m.id === messageId 
-          ? { ...m, content: response.data.response || m.content, expanded: true }
+          ? { ...m, content: response.data.response || m.content }
           : m
       ));
     } catch (error: any) {
@@ -181,148 +173,132 @@ const AITutorMain = () => {
     localStorage.removeItem('crescented-tutor-history');
   };
 
-  const quickPrompts = [
-    { label: 'Explain this module', prompt: `Explain the key concepts of "${currentModule?.title || 'this module'}" in simple terms.` },
-    { label: 'Give me action steps', prompt: `What are the most important action steps I should take for "${currentModule?.title || 'this module'}"?` },
-    { label: 'Generate a worksheet', prompt: `Create a practical worksheet I can use to apply the concepts from "${currentModule?.title || 'this module'}" to my business: ${intake?.idea || 'my business idea'}.` },
-    { label: 'What should I focus on?', prompt: `Based on my goals (${intake?.goals || 'building a successful business'}), what should I prioritize in this module?` },
+  // Quick action buttons for tutor
+  const quickActions = [
+    { 
+      icon: BookOpen, 
+      label: 'Open Template', 
+      prompt: `Show me a practical template I can use for "${currentModule?.title || 'my current module'}".`
+    },
+    { 
+      icon: FileText, 
+      label: 'Show Resources', 
+      prompt: `What resources and tools should I use for "${currentModule?.title || 'this topic'}"?`
+    },
+    { 
+      icon: ClipboardList, 
+      label: 'Generate Worksheet', 
+      prompt: `Create a worksheet I can fill out for "${currentModule?.title || 'my current module'}" applied to my business: ${intake?.idea || 'my business'}.`
+    },
+    { 
+      icon: Lightbulb, 
+      label: 'Action Steps', 
+      prompt: `What are the most important action steps for "${currentModule?.title || 'this module'}"?`
+    },
   ];
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Current Module Header */}
-      {currentModule && (
-        <CosmicCard className="p-4 mb-4" hover={false}>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">
-                  {DOMAIN_ICONS[currentModule.domain as keyof typeof DOMAIN_ICONS] || '📚'}
-                </span>
-                <span className="text-xs font-medium text-primary uppercase tracking-wide">
-                  {DOMAIN_LABELS[currentModule.domain as keyof typeof DOMAIN_LABELS] || currentModule.domain}
-                </span>
-              </div>
-              <h2 className="text-xl font-sora font-bold">{currentModule.title}</h2>
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                {currentModule.description || currentModule.summary}
-              </p>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <div className="text-right">
-                <p className="text-sm font-medium">{Math.round(calculateModuleProgress(currentModule))}%</p>
-                <p className="text-xs text-muted-foreground">Complete</p>
-              </div>
-              <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full progress-cosmic rounded-full transition-all"
-                  style={{ width: `${calculateModuleProgress(currentModule)}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </CosmicCard>
-      )}
+    <CosmicCard className="h-full flex flex-col overflow-hidden" hover={false}>
+      {/* Header */}
+      <div className="p-3 border-b border-border flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center">
+          <Sparkles className="w-4 h-4 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold">AI Tutor</h3>
+          <p className="text-xs text-muted-foreground truncate">
+            {currentModule ? `Helping with: ${currentModule.title}` : 'Ready to help'}
+          </p>
+        </div>
+      </div>
 
-      {/* Quick Action Prompts */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {quickPrompts.map((item, idx) => (
+      {/* Quick Actions */}
+      <div className="p-2 border-b border-border flex flex-wrap gap-1">
+        {quickActions.map((action, idx) => (
           <Button
             key={idx}
-            variant="outline"
+            variant="ghost"
             size="sm"
-            onClick={() => sendMessage(item.prompt)}
+            onClick={() => sendMessage(action.prompt)}
             disabled={loading}
-            className="text-xs border-border hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+            className="text-xs h-7 gap-1 hover:bg-primary/10 hover:text-primary"
           >
-            {item.label}
+            <action.icon className="w-3 h-3" />
+            {action.label}
           </Button>
         ))}
       </div>
 
       {/* Chat Messages */}
-      <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
+      <ScrollArea className="flex-1 px-3" ref={scrollRef}>
         {messages.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center max-w-md">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-sora font-bold mb-2">Hi there! I'm your AI Tutor 👋</h3>
-              <p className="text-muted-foreground mb-6">
-                I'm here to help you learn and build your business. Ask me anything about 
-                {currentModule ? ` "${currentModule.title}"` : ' your modules'}, or get personalized guidance based on your goals.
+          <div className="h-full flex items-center justify-center py-8">
+            <div className="text-center max-w-xs">
+              <Sparkles className="w-10 h-10 text-primary mx-auto mb-3" />
+              <h3 className="text-sm font-semibold mb-1">Hi! I'm your AI Tutor 👋</h3>
+              <p className="text-xs text-muted-foreground">
+                Ask me anything about your modules, get templates, or request personalized guidance.
               </p>
-              <div className="grid grid-cols-2 gap-3">
-                <CosmicCard className="p-4 cursor-pointer" onClick={() => sendMessage("What's the most important thing I should learn first?")}>
-                  <Lightbulb className="w-5 h-5 text-primary mb-2" />
-                  <p className="text-sm font-medium">Where should I start?</p>
-                </CosmicCard>
-                <CosmicCard className="p-4 cursor-pointer" onClick={() => sendMessage("Help me understand this module step by step.")}>
-                  <BookOpen className="w-5 h-5 text-primary mb-2" />
-                  <p className="text-sm font-medium">Explain step by step</p>
-                </CosmicCard>
-              </div>
             </div>
           </div>
         ) : (
-          <div className="space-y-4 pb-4">
+          <div className="space-y-3 py-3">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={cn(
-                  'flex gap-3',
+                  'flex gap-2',
                   message.role === 'user' ? 'flex-row-reverse' : ''
                 )}
               >
                 <div className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
+                  'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0',
                   message.role === 'user' ? 'bg-primary/20' : 'bg-accent/20'
                 )}>
                   {message.role === 'user' ? (
-                    <User className="w-4 h-4 text-primary" />
+                    <User className="w-3 h-3 text-primary" />
                   ) : (
-                    <Sparkles className="w-4 h-4 text-accent" />
+                    <Sparkles className="w-3 h-3 text-accent" />
                   )}
                 </div>
                 <div className={cn(
-                  'max-w-[80%] rounded-2xl px-4 py-3',
+                  'max-w-[85%] rounded-xl px-3 py-2',
                   message.role === 'user' 
                     ? 'bg-primary text-primary-foreground' 
                     : 'bg-secondary'
                 )}>
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-xs whitespace-pre-wrap">{message.content}</p>
                   
-                  {/* Regenerate Expanded button for assistant messages */}
+                  {/* Expand button for assistant */}
                   {message.role === 'assistant' && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => regenerateExpanded(message.id, message.content)}
                       disabled={loading && expandedAnswer === message.id}
-                      className="mt-2 text-xs text-muted-foreground hover:text-primary"
+                      className="mt-1 text-[10px] h-5 px-1 text-muted-foreground hover:text-primary"
                     >
                       {loading && expandedAnswer === message.id ? (
-                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        <Loader2 className="w-2.5 h-2.5 mr-1 animate-spin" />
                       ) : (
-                        <RefreshCw className="w-3 h-3 mr-1" />
+                        <RefreshCw className="w-2.5 h-2.5 mr-1" />
                       )}
-                      Regenerate Expanded Answer
+                      Expand
                     </Button>
                   )}
                 </div>
               </div>
             ))}
             {loading && !expandedAnswer && (
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-accent" />
+              <div className="flex gap-2">
+                <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
+                  <Sparkles className="w-3 h-3 text-accent" />
                 </div>
-                <div className="bg-secondary rounded-2xl px-4 py-3">
+                <div className="bg-secondary rounded-xl px-3 py-2">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               </div>
@@ -332,16 +308,16 @@ const AITutorMain = () => {
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="pt-4 border-t border-border mt-4">
+      <div className="p-3 border-t border-border">
         {messages.length > 0 && (
           <div className="flex justify-end mb-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={clearHistory}
-              className="text-xs text-muted-foreground"
+              className="text-[10px] h-5 text-muted-foreground"
             >
-              Clear conversation
+              Clear
             </Button>
           </div>
         )}
@@ -350,19 +326,20 @@ const AITutorMain = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-            placeholder="Ask me anything about your learning journey..."
-            className="bg-secondary/50 border-border"
+            placeholder="Ask anything..."
+            className="bg-secondary/50 border-border text-sm h-9"
             disabled={loading}
           />
           <GradientButton
             onClick={() => sendMessage()}
             disabled={loading || !input.trim()}
+            className="h-9 w-9 p-0"
           >
             <Send className="w-4 h-4" />
           </GradientButton>
         </div>
       </div>
-    </div>
+    </CosmicCard>
   );
 };
 

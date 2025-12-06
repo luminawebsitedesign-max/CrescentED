@@ -59,10 +59,10 @@ const DashboardLayout = ({ children, loading = false }: DashboardLayoutProps) =>
       <main
         className={cn(
           'relative z-10 transition-all duration-300 min-h-screen',
-          sidebarCollapsed ? 'ml-16' : 'ml-72'
+          sidebarCollapsed ? 'ml-16' : 'ml-[260px]'
         )}
       >
-        <div className="p-6 lg:p-8 h-screen overflow-hidden">
+        <div className="p-4 lg:p-6 h-screen overflow-hidden">
           {children}
         </div>
       </main>
