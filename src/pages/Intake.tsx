@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, Sparkles, Save } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const STEPS = [
@@ -18,9 +18,14 @@ const STEPS = [
 ];
 
 const Intake = () => {
+  const [searchParams] = useSearchParams();
+  const isEditMode = searchParams.get('edit') === 'true';
+  
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [existingIntakeId, setExistingIntakeId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -47,16 +52,39 @@ const Intake = () => {
       // Check if user already has an intake form
       const { data: existing } = await supabase
         .from('intake_forms')
-        .select('id')
+        .select('*')
         .eq('user_id', session.user.id)
         .maybeSingle();
       
       if (existing) {
-        navigate('/dashboard');
+        if (isEditMode) {
+          // Load existing data for editing
+          setExistingIntakeId(existing.id);
+          setFormData({
+            idea: existing.idea || '',
+            goals: existing.goals || '',
+            background: existing.background || '',
+            experience_level: existing.experience_level || 'beginner',
+            interests: existing.interests || '',
+            constraints: existing.constraints || '',
+            learning_style: existing.learning_style || 'mixed',
+            commitment_level: existing.commitment_level || 'moderate',
+          });
+        } else {
+          // Not in edit mode and intake exists - go to dashboard
+          navigate('/dashboard');
+          return;
+        }
+      } else if (isEditMode) {
+        // Edit mode but no intake exists - redirect to regular intake
+        navigate('/intake');
+        return;
       }
+      
+      setInitialLoading(false);
     };
     checkAuth();
-  }, [navigate]);
+  }, [navigate, isEditMode]);
 
   const updateField = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -98,44 +126,63 @@ const Intake = () => {
     setLoading(true);
 
     try {
-      // Save intake form
-      const { error: intakeError } = await supabase
-        .from('intake_forms')
-        .insert({
-          user_id: userId,
-          ...formData,
-        });
+      if (isEditMode && existingIntakeId) {
+        // Update existing intake form - DO NOT regenerate course
+        const { error: intakeError } = await supabase
+          .from('intake_forms')
+          .update({
+            ...formData,
+          })
+          .eq('id', existingIntakeId);
 
-      if (intakeError) throw intakeError;
+        if (intakeError) throw intakeError;
 
-      toast({
-        title: 'Profile saved!',
-        description: 'Generating your personalized learning path...',
-      });
-
-      // Generate course immediately
-      const response = await supabase.functions.invoke('crescented-ai', {
-        body: {
-          type: 'generate_course',
-          intake: formData,
-          userId: userId,
-        },
-      });
-
-      if (response.error) {
-        console.error('Course generation error:', response.error);
         toast({
-          title: 'Course generation started',
-          description: 'Please wait while we create your course...',
+          title: 'Profile updated!',
+          description: 'Your learning preferences have been saved.',
         });
+
+        navigate('/dashboard');
       } else {
-        toast({
-          title: 'Course generated!',
-          description: `Created ${response.data?.modulesCount || 7} modules for you.`,
-        });
-      }
+        // New intake - save and generate course
+        const { error: intakeError } = await supabase
+          .from('intake_forms')
+          .insert({
+            user_id: userId,
+            ...formData,
+          });
 
-      navigate('/dashboard');
+        if (intakeError) throw intakeError;
+
+        toast({
+          title: 'Profile saved!',
+          description: 'Generating your personalized learning path...',
+        });
+
+        // Generate course immediately
+        const response = await supabase.functions.invoke('crescented-ai', {
+          body: {
+            type: 'generate_course',
+            intake: formData,
+            userId: userId,
+          },
+        });
+
+        if (response.error) {
+          console.error('Course generation error:', response.error);
+          toast({
+            title: 'Course generation started',
+            description: 'Please wait while we create your course...',
+          });
+        } else {
+          toast({
+            title: 'Course generated!',
+            description: `Created ${response.data?.modulesCount || 7} modules for you.`,
+          });
+        }
+
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       console.error('Submission error:', error);
       toast({
@@ -146,6 +193,14 @@ const Intake = () => {
       setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const progress = ((step + 1) / STEPS.length) * 100;
 
@@ -164,6 +219,9 @@ const Intake = () => {
             </div>
             <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
+          {isEditMode && (
+            <p className="text-sm text-primary mb-2">Editing your profile</p>
+          )}
           <Progress value={progress} className="h-2 bg-secondary" />
           <p className="text-sm text-muted-foreground mt-2">
             Step {step + 1} of {STEPS.length}
@@ -276,10 +334,10 @@ const Intake = () => {
                   className="grid grid-cols-2 gap-4"
                 >
                   {[
-                    { value: 'visual', label: '👁️ Visual', desc: 'Diagrams & videos' },
-                    { value: 'reading', label: '📖 Reading', desc: 'Text & articles' },
-                    { value: 'hands-on', label: '🛠️ Hands-on', desc: 'Learning by doing' },
-                    { value: 'mixed', label: '🎯 Mixed', desc: 'A bit of everything' },
+                    { value: 'visual', label: 'Visual', desc: 'Diagrams & videos' },
+                    { value: 'reading', label: 'Reading', desc: 'Text & articles' },
+                    { value: 'hands-on', label: 'Hands-on', desc: 'Learning by doing' },
+                    { value: 'mixed', label: 'Mixed', desc: 'A bit of everything' },
                   ].map((option) => (
                     <label
                       key={option.value}
@@ -329,12 +387,11 @@ const Intake = () => {
           <div className="flex justify-between mt-8">
             <Button
               variant="outline"
-              onClick={handleBack}
-              disabled={step === 0}
+              onClick={isEditMode && step === 0 ? () => navigate('/dashboard') : handleBack}
               className="border-border"
             >
               <ArrowLeft className="mr-2 w-4 h-4" />
-              Back
+              {isEditMode && step === 0 ? 'Cancel' : 'Back'}
             </Button>
             
             {step < STEPS.length - 1 ? (
@@ -351,7 +408,12 @@ const Intake = () => {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating your path...
+                    {isEditMode ? 'Saving...' : 'Creating your path...'}
+                  </>
+                ) : isEditMode ? (
+                  <>
+                    <Save className="mr-2 w-4 h-4" />
+                    Save Changes
                   </>
                 ) : (
                   <>

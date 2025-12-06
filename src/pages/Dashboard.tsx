@@ -9,13 +9,16 @@ import { GradientButton } from '@/components/ui/gradient-button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import {
-  Loader2, Sparkles, ChevronRight, Home
+  Loader2, Sparkles, ChevronRight, Home, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { type Module, type IntakeForm, DOMAIN_LABELS } from '@/types/crescented';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [tutorCollapsed, setTutorCollapsed] = useState(false);
   const { user, modules, setModules, intake, setIntake, currentModuleId, setCurrentModuleId } = useStore();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -211,16 +214,39 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Main Content - AI Tutor with Module Content side by side on large screens */}
-        <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Module Content Panel */}
-          <div className="order-2 lg:order-1 overflow-hidden">
+        {/* Main Content - Module takes priority, AI Tutor is secondary */}
+        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-4">
+          {/* Module Content Panel - Primary (65-70% width) */}
+          <div className="flex-1 lg:w-[65%] overflow-hidden order-1">
             <ModuleContent />
           </div>
           
-          {/* AI Tutor Panel */}
-          <div className="order-1 lg:order-2 overflow-hidden">
-            <AITutorMain />
+          {/* AI Tutor Panel - Secondary (collapsible on mobile, side panel on desktop) */}
+          <div className="lg:w-[35%] overflow-hidden order-2">
+            <div className="lg:hidden">
+              <Collapsible open={!tutorCollapsed} onOpenChange={(open) => setTutorCollapsed(!open)}>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full flex items-center justify-between p-3 bg-secondary/30 rounded-t-lg border border-border"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span className="font-medium text-sm">AI Tutor</span>
+                    </div>
+                    {tutorCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="h-[400px]">
+                    <AITutorMain />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+            <div className="hidden lg:block h-full">
+              <AITutorMain />
+            </div>
           </div>
         </div>
       </div>
