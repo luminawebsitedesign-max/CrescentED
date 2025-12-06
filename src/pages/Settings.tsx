@@ -121,7 +121,14 @@ const Settings = () => {
     }
 
     try {
+      // Delete all existing modules from Supabase
       await supabase.from('modules').delete().eq('user_id', session.user.id);
+      
+      // Clear local state and storage
+      setModules([]);
+      setCurrentModuleId(null);
+      localStorage.removeItem('crescented-modules-cache');
+      sessionStorage.removeItem('crescented-modules-cache');
 
       const response = await supabase.functions.invoke('crescented-ai', {
         body: {
@@ -134,7 +141,7 @@ const Settings = () => {
       if (response.error) throw new Error(response.error.message);
       if (response.data?.error) throw new Error(response.data.error);
 
-      // Refresh modules
+      // Refresh modules from database
       const { data: modulesData } = await supabase
         .from('modules')
         .select('*')

@@ -14,6 +14,16 @@ import {
 import { type TutorMessage, type Module, type ModuleProgress } from '@/types/crescented';
 import { cn } from '@/lib/utils';
 
+// Clean AI response from asterisks, markdown, and formatting
+const cleanAIResponse = (text: string): string => {
+  return text
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/#{1,6}\s/g, '')
+    .replace(/`{1,3}/g, '')
+    .trim();
+};
+
 const AITutorMain = () => {
   const [messages, setMessages] = useState<TutorMessage[]>([]);
   const [input, setInput] = useState('');
@@ -107,10 +117,12 @@ const AITutorMain = () => {
 
       if (response.error) throw response.error;
 
+      const cleanedResponse = cleanAIResponse(response.data.response || "I'm here to help! Could you tell me more about what you're working on?");
+      
       const assistantMessage: TutorMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.data.response || "I'm here to help! Could you tell me more about what you're working on?",
+        content: cleanedResponse,
         timestamp: new Date().toISOString(),
       };
 
@@ -151,9 +163,11 @@ const AITutorMain = () => {
 
       if (response.error) throw response.error;
 
+      const cleanedResponse = cleanAIResponse(response.data.response || '');
+      
       setMessages(prev => prev.map(m => 
         m.id === messageId 
-          ? { ...m, content: response.data.response || m.content }
+          ? { ...m, content: cleanedResponse || m.content }
           : m
       ));
     } catch (error: any) {
