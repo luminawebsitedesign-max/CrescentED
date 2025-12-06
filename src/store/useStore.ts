@@ -24,9 +24,13 @@ interface AppState {
   currentModuleId: string | null;
   setCurrentModuleId: (id: string | null) => void;
   
-  // Tutor sidebar state
+  // Tutor sidebar state (kept for backwards compatibility)
   tutorOpen: boolean;
   setTutorOpen: (open: boolean) => void;
+  
+  // Master notes
+  masterNotes: string;
+  setMasterNotes: (notes: string) => void;
   
   // Sidebar collapsed state
   sidebarCollapsed: boolean;
@@ -44,6 +48,7 @@ const initialState = {
   currentModuleId: null,
   tutorOpen: false,
   sidebarCollapsed: false,
+  masterNotes: '',
 };
 
 export const useStore = create<AppState>()(
@@ -57,6 +62,7 @@ export const useStore = create<AppState>()(
       setCurrentModuleId: (currentModuleId) => set({ currentModuleId }),
       setTutorOpen: (tutorOpen) => set({ tutorOpen }),
       setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
+      setMasterNotes: (masterNotes) => set({ masterNotes }),
       reset: () => set(initialState),
     }),
     {

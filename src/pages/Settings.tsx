@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, User, Palette, Bell, Shield } from 'lucide-react';
+import { Loader2, Save, User, Palette, Bell, Shield, StickyNote } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [masterNotes, setMasterNotes] = useState('');
   const [profile, setProfile] = useState({
     full_name: '',
     experience_level: 'beginner',
@@ -21,6 +23,12 @@ const Settings = () => {
   });
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Load master notes from localStorage
+    const notes = localStorage.getItem('crescented-master-notes') || '';
+    setMasterNotes(notes);
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -84,6 +92,36 @@ const Settings = () => {
         </p>
 
         <div className="space-y-6">
+          {/* Master Notes Section */}
+          <CosmicCard className="p-6" hover={false}>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-cosmic-violet/10 flex items-center justify-center">
+                <StickyNote className="w-5 h-5 text-cosmic-violet" />
+              </div>
+              <div>
+                <h2 className="font-outfit font-semibold">Master Notes</h2>
+                <p className="text-sm text-muted-foreground">Things the AI should always know about you</p>
+              </div>
+            </div>
+            <Textarea
+              value={masterNotes}
+              onChange={(e) => setMasterNotes(e.target.value)}
+              placeholder="e.g., I'm building a SaaS for local gyms. I prefer step-by-step guidance. I have 10 hours per week to dedicate..."
+              className="min-h-[120px] bg-background/50"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={() => {
+                localStorage.setItem('crescented-master-notes', masterNotes);
+                toast({ title: 'Master notes saved!' });
+              }}
+            >
+              Save Notes
+            </Button>
+          </CosmicCard>
+
           {/* Profile Section */}
           <CosmicCard className="p-6" hover={false}>
             <div className="flex items-center gap-3 mb-6">
