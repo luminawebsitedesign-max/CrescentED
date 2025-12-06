@@ -185,7 +185,7 @@ const Dashboard = () => {
     <DashboardLayout loading={loading}>
       <div className="h-full flex flex-col animate-fade-in">
         {/* Breadcrumb Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 flex-shrink-0">
           <div className="flex items-center gap-2 text-sm">
             <Home className="w-4 h-4 text-muted-foreground" />
             <span className="text-muted-foreground">Dashboard</span>
@@ -214,39 +214,37 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Main Content - Module takes priority, AI Tutor is secondary */}
-        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-4">
-          {/* Module Content Panel - Primary (65-70% width) */}
-          <div className="flex-1 lg:w-[65%] overflow-hidden order-1">
+        {/* Main Content - Module takes full width, AI Tutor docked at bottom */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Module Content - Full Width Primary View */}
+          <div className="flex-1 overflow-hidden">
             <ModuleContent />
           </div>
           
-          {/* AI Tutor Panel - Secondary (collapsible on mobile, side panel on desktop) */}
-          <div className="lg:w-[35%] overflow-hidden order-2">
-            <div className="lg:hidden">
-              <Collapsible open={!tutorCollapsed} onOpenChange={(open) => setTutorCollapsed(!open)}>
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full flex items-center justify-between p-3 bg-secondary/30 rounded-t-lg border border-border"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span className="font-medium text-sm">AI Tutor</span>
-                    </div>
-                    {tutorCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="h-[400px]">
-                    <AITutorMain />
+          {/* AI Tutor - Docked Bottom Panel */}
+          <div className="flex-shrink-0 mt-4">
+            <Collapsible open={!tutorCollapsed} onOpenChange={(open) => setTutorCollapsed(!open)}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full flex items-center justify-between p-3 bg-secondary/30 rounded-t-lg border border-border hover:bg-secondary/50"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="font-medium text-sm">AI Tutor</span>
+                    <span className="text-xs text-muted-foreground">
+                      — Ask questions about your current module
+                    </span>
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-            <div className="hidden lg:block h-full">
-              <AITutorMain />
-            </div>
+                  {tutorCollapsed ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="h-[280px] border border-t-0 border-border rounded-b-lg overflow-hidden bg-background/50">
+                  <AITutorMain />
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </div>
       </div>

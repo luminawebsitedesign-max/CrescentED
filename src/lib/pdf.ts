@@ -1,20 +1,47 @@
 import { jsPDF } from 'jspdf';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PDFOptions {
   title: string;
   subtitle?: string;
   content: string | string[];
   type?: 'worksheet' | 'template' | 'checklist' | 'summary';
+  saveToStorage?: boolean;
 }
 
-export const generatePDF = ({ title, subtitle, content, type = 'worksheet' }: PDFOptions): void => {
+// Clean content from asterisks, weird unicode, emojis that break encoding
+const cleanContent = (text: string): string => {
+  return text
+    // Remove asterisks used for markdown bold
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    // Remove common markdown
+    .replace(/#{1,6}\s/g, '')
+    .replace(/`{1,3}/g, '')
+    // Remove problematic unicode
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/\u2026/g, '...')
+    .replace(/\u2014/g, '-')
+    .replace(/\u2013/g, '-')
+    // Remove emojis that cause encoding issues (keep basic ones)
+    .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+    .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+    .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+    .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')
+    // Clean up extra whitespace
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+};
+
+export const generatePDF = async ({ title, subtitle, content, type = 'worksheet', saveToStorage = true }: PDFOptions): Promise<void> => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 20;
   const maxWidth = pageWidth - margin * 2;
   
-  // Header gradient background (simulated with rectangle)
+  // Header gradient background
   doc.setFillColor(198, 51, 94); // #c6335e - Crescent Magenta
   doc.rect(0, 0, pageWidth, 45, 'F');
   
@@ -42,24 +69,26 @@ export const generatePDF = ({ title, subtitle, content, type = 'worksheet' }: PD
   const typeLabel = type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
   doc.text(typeLabel.toUpperCase(), margin, 35);
   
-  // Title
+  // Title - cleaned
+  const cleanTitle = cleanContent(title);
   doc.setTextColor(11, 16, 32); // Deep Space Navy
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
   
-  const titleLines = doc.splitTextToSize(title, maxWidth);
+  const titleLines = doc.splitTextToSize(cleanTitle, maxWidth);
   let yPosition = 60;
   titleLines.forEach((line: string) => {
     doc.text(line, margin, yPosition);
     yPosition += 10;
   });
   
-  // Subtitle
+  // Subtitle - cleaned
   if (subtitle) {
+    const cleanSubtitle = cleanContent(subtitle);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(83, 79, 130); // Midnight Indigo
-    const subtitleLines = doc.splitTextToSize(subtitle, maxWidth);
+    const subtitleLines = doc.splitTextToSize(cleanSubtitle, maxWidth);
     subtitleLines.forEach((line: string) => {
       doc.text(line, margin, yPosition);
       yPosition += 6;
@@ -74,7 +103,7 @@ export const generatePDF = ({ title, subtitle, content, type = 'worksheet' }: PD
   doc.line(margin, yPosition, pageWidth - margin, yPosition);
   yPosition += 15;
   
-  // Content
+  // Content - cleaned
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(47, 72, 88); // Deep Slate
@@ -82,22 +111,19 @@ export const generatePDF = ({ title, subtitle, content, type = 'worksheet' }: PD
   const contentArray = Array.isArray(content) ? content : [content];
   
   contentArray.forEach((section, index) => {
+    const cleanSection = cleanContent(section);
+    
     // Check if we need a new page
     if (yPosition > pageHeight - 40) {
       doc.addPage();
       yPosition = 30;
     }
     
-    const lines = doc.splitTextToSize(section, maxWidth);
+    const lines = doc.splitTextToSize(cleanSection, maxWidth);
     lines.forEach((line: string) => {
       if (yPosition > pageHeight - 30) {
         doc.addPage();
         yPosition = 30;
-      }
-      
-      // Check for bullet points or numbered items
-      if (line.trim().startsWith('•') || line.trim().match(/^\d+\./)) {
-        doc.setFont('helvetica', 'normal');
       }
       
       doc.text(line, margin, yPosition);
@@ -132,20 +158,55 @@ export const generatePDF = ({ title, subtitle, content, type = 'worksheet' }: PD
     doc.text('CrescentEd', pageWidth - margin, pageHeight - 10, { align: 'right' });
   }
   
-  // Save the PDF
-  const filename = `${title.toLowerCase().replace(/\s+/g, '-')}-${type}.pdf`;
+  // Generate filename
+  const filename = `${cleanTitle.toLowerCase().replace(/\s+/g, '-').substring(0, 50)}-${type}.pdf`;
+  
+  // Save to Supabase storage if requested
+  if (saveToStorage) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const pdfBlob = doc.output('blob');
+        const filePath = `${session.user.id}/${Date.now()}-${filename}`;
+        
+        // Upload to storage
+        const { error: uploadError } = await supabase.storage
+          .from('pdfs')
+          .upload(filePath, pdfBlob, {
+            contentType: 'application/pdf',
+          });
+        
+        if (!uploadError) {
+          // Save metadata to pdf_exports table
+          await supabase.from('pdf_exports').insert({
+            user_id: session.user.id,
+            file_path: filePath,
+            metadata: {
+              title: cleanTitle,
+              type: type,
+              created_at: new Date().toISOString(),
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error saving PDF to storage:', error);
+    }
+  }
+  
+  // Download the PDF locally
   doc.save(filename);
 };
 
-export const generateWorksheetPDF = (title: string, content: string): void => {
-  generatePDF({ title, content, type: 'worksheet' });
+export const generateWorksheetPDF = async (title: string, content: string): Promise<void> => {
+  await generatePDF({ title, content, type: 'worksheet' });
 };
 
-export const generateTemplatePDF = (title: string, content: string): void => {
-  generatePDF({ title, content, type: 'template' });
+export const generateTemplatePDF = async (title: string, content: string): Promise<void> => {
+  await generatePDF({ title, content, type: 'template' });
 };
 
-export const generateChecklistPDF = (title: string, items: string[]): void => {
-  const formattedItems = items.map((item, index) => `☐ ${index + 1}. ${item}`);
-  generatePDF({ title, content: formattedItems, type: 'checklist' });
+export const generateChecklistPDF = async (title: string, items: string[]): Promise<void> => {
+  const formattedItems = items.map((item, index) => `[ ] ${index + 1}. ${cleanContent(item)}`);
+  await generatePDF({ title, content: formattedItems, type: 'checklist' });
 };
