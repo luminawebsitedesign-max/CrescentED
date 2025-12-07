@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Download, FolderOpen } from 'lucide-react';
+import { FileText, Download, FolderOpen, ExternalLink } from 'lucide-react';
 import { type PDFExport } from '@/types/crescented';
 import { format } from 'date-fns';
 
@@ -18,7 +18,7 @@ const PDFs = () => {
   useEffect(() => {
     const fetchPDFs = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate('/login'); return; }
+      if (!session) { navigate('/auth'); return; }
 
       const { data } = await supabase
         .from('pdf_exports')
@@ -31,6 +31,22 @@ const PDFs = () => {
     };
     fetchPDFs();
   }, [navigate]);
+
+  const openPDF = async (pdf: PDFExport) => {
+    try {
+      const { data, error } = await supabase.storage.from('pdfs').download(pdf.file_path);
+      if (error) throw error;
+      
+      // Create blob URL and open in new tab
+      const url = window.URL.createObjectURL(data);
+      window.open(url, '_blank');
+      
+      // Clean up the URL after a delay
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+    } catch (error: any) {
+      toast({ title: 'Failed to open PDF', description: error.message, variant: 'destructive' });
+    }
+  };
 
   const downloadPDF = async (pdf: PDFExport) => {
     try {
@@ -50,8 +66,8 @@ const PDFs = () => {
   return (
     <DashboardLayout loading={loading}>
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-h1 mb-2">My PDFs</h1>
-        <p className="text-muted-foreground mb-8">All your downloaded worksheets and templates</p>
+        <h1 className="text-2xl font-sora font-bold mb-2">My PDFs</h1>
+        <p className="text-muted-foreground mb-8">All your generated worksheets, templates, and exports</p>
 
         {pdfs.length === 0 ? (
           <CosmicCard className="p-10 text-center" hover={false}>
@@ -64,20 +80,28 @@ const PDFs = () => {
           <div className="space-y-3">
             {pdfs.map((pdf) => (
               <CosmicCard key={pdf.id} className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div 
+                  className="flex items-center gap-4 flex-1 cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => openPDF(pdf)}
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <FileText className="w-5 h-5 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="font-outfit font-medium">{pdf.metadata.title}</h3>
+                  <div className="min-w-0">
+                    <h3 className="font-outfit font-medium truncate">{pdf.metadata.title}</h3>
                     <p className="text-sm text-muted-foreground">
                       {pdf.metadata.type} • {format(new Date(pdf.created_at), 'MMM d, yyyy')}
                     </p>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => downloadPDF(pdf)}>
-                  <Download className="w-4 h-4" />
-                </Button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button variant="ghost" size="sm" onClick={() => openPDF(pdf)} title="Open in new tab">
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => downloadPDF(pdf)} title="Download">
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
               </CosmicCard>
             ))}
           </div>
