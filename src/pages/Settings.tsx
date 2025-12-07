@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/store/useStore';
 import { 
   Loader2, Save, User, Palette, StickyNote, 
-  BookOpen, AlertTriangle, RefreshCw 
+  BookOpen, AlertTriangle, RefreshCw, Trash2 
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -31,8 +31,10 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [masterNotes, setMasterNotes] = useState('');
   const [confirmText, setConfirmText] = useState('');
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [profile, setProfile] = useState({
     full_name: '',
     experience_level: 'beginner',
@@ -41,10 +43,9 @@ const Settings = () => {
   });
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { intake, setModules, setCurrentModuleId } = useStore();
+  const { intake, setModules, setCurrentModuleId, setIntake, setCourse, reset } = useStore();
 
   useEffect(() => {
-    // Load master notes from localStorage
     const notes = localStorage.getItem('crescented-master-notes') || '';
     setMasterNotes(notes);
   }, []);
@@ -87,7 +88,6 @@ const Settings = () => {
       .update(profile)
       .eq('id', session.user.id);
 
-    // Also save master notes
     localStorage.setItem('crescented-master-notes', masterNotes);
 
     if (error) {
@@ -105,6 +105,7 @@ const Settings = () => {
     setSaving(false);
   };
 
+  // Regenerate Course - keeps profile, resets course content
   const handleRegenerateCourse = async () => {
     if (confirmText !== 'REGENERATE') return;
     
@@ -121,15 +122,26 @@ const Settings = () => {
     }
 
     try {
-      // Delete all existing modules from Supabase
+      // Delete modules, PDFs, and clear all caches
       await supabase.from('modules').delete().eq('user_id', session.user.id);
+      await supabase.from('pdf_exports').delete().eq('user_id', session.user.id);
       
-      // Clear local state and storage
+      // Clear local state
       setModules([]);
       setCurrentModuleId(null);
-      localStorage.removeItem('crescented-modules-cache');
-      sessionStorage.removeItem('crescented-modules-cache');
+      setCourse(null);
+      
+      // Clear all localStorage caches
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('crescented-chat-') || 
+            key.startsWith('crescented-modules') ||
+            key.startsWith('crescented-tutor')) {
+          localStorage.removeItem(key);
+        }
+      });
+      sessionStorage.clear();
 
+      // Generate new course
       const response = await supabase.functions.invoke('crescented-ai', {
         body: {
           type: 'generate_course',
@@ -141,7 +153,7 @@ const Settings = () => {
       if (response.error) throw new Error(response.error.message);
       if (response.data?.error) throw new Error(response.data.error);
 
-      // Refresh modules from database
+      // Refresh modules
       const { data: modulesData } = await supabase
         .from('modules')
         .select('*')
@@ -168,6 +180,54 @@ const Settings = () => {
       });
     } finally {
       setRegenerating(false);
+    }
+  };
+
+  // Delete Course & Start New - resets EVERYTHING except auth
+  const handleDeleteAndStartNew = async () => {
+    if (deleteConfirmText !== 'DELETE') return;
+    
+    setDeleting(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setDeleting(false);
+      return;
+    }
+
+    try {
+      // Delete all user data from Supabase
+      await supabase.from('modules').delete().eq('user_id', session.user.id);
+      await supabase.from('pdf_exports').delete().eq('user_id', session.user.id);
+      await supabase.from('intake_forms').delete().eq('user_id', session.user.id);
+      await supabase.from('ai_logs').delete().eq('user_id', session.user.id);
+      await supabase.from('courses').delete().eq('user_id', session.user.id);
+      
+      // Reset all local state
+      reset();
+      
+      // Clear ALL localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('crescented-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      sessionStorage.clear();
+
+      toast({
+        title: 'Account reset',
+        description: 'All course data has been deleted. Starting fresh!',
+      });
+
+      setDeleteConfirmText('');
+      navigate('/intake');
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to reset account',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -317,14 +377,15 @@ const Settings = () => {
                 </div>
                 <div>
                   <h2 className="font-outfit font-semibold text-sm">Course Management</h2>
-                  <p className="text-xs text-muted-foreground">Manage your learning path</p>
+                  <p className="text-xs text-muted-foreground">Reset or regenerate your learning path</p>
                 </div>
               </div>
 
               <div className="space-y-3">
+                {/* Regenerate Course Button */}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="w-full border-destructive/30 text-destructive hover:bg-destructive/10">
+                    <Button variant="outline" className="w-full border-primary/30 text-primary hover:bg-primary/10">
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Regenerate Course
                     </Button>
@@ -332,11 +393,13 @@ const Settings = () => {
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle className="flex items-center gap-2">
-                        <AlertTriangle className="w-5 h-5 text-destructive" />
+                        <RefreshCw className="w-5 h-5 text-primary" />
                         Regenerate Course?
                       </AlertDialogTitle>
                       <AlertDialogDescription className="space-y-3">
-                        <p>This will delete all your current modules and progress and create a new course based on your intake form.</p>
+                        <p>This will delete all modules, PDFs, and chat history, then generate a fresh course based on your current intake form.</p>
+                        <p><strong>Keeps:</strong> Your profile and intake data</p>
+                        <p><strong>Resets:</strong> Modules, PDFs, tools outputs, chat history</p>
                         <p className="font-medium">Type REGENERATE to confirm:</p>
                         <Input
                           value={confirmText}
@@ -351,7 +414,7 @@ const Settings = () => {
                       <AlertDialogAction
                         onClick={handleRegenerateCourse}
                         disabled={confirmText !== 'REGENERATE' || regenerating}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
                       >
                         {regenerating ? (
                           <>
@@ -360,6 +423,54 @@ const Settings = () => {
                           </>
                         ) : (
                           'Confirm Regenerate'
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+                {/* Delete & Start New Button */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" className="w-full border-destructive/30 text-destructive hover:bg-destructive/10">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Course & Start New
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5 text-destructive" />
+                        Delete Everything & Start Over?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-3">
+                        <p>This will permanently delete ALL your data and start completely fresh.</p>
+                        <p><strong>Deletes:</strong> Modules, intake form, PDFs, chat history, all generated content</p>
+                        <p><strong>Keeps:</strong> Only your login credentials</p>
+                        <p className="font-medium text-destructive">This action cannot be undone!</p>
+                        <p className="font-medium">Type DELETE to confirm:</p>
+                        <Input
+                          value={deleteConfirmText}
+                          onChange={(e) => setDeleteConfirmText(e.target.value)}
+                          placeholder="DELETE"
+                          className="mt-2"
+                        />
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeleteConfirmText('')}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAndStartNew}
+                        disabled={deleteConfirmText !== 'DELETE' || deleting}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          'Delete Everything'
                         )}
                       </AlertDialogAction>
                     </AlertDialogFooter>
