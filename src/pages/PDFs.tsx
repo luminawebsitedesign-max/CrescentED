@@ -5,13 +5,14 @@ import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Download, FolderOpen, ExternalLink } from 'lucide-react';
+import { FileText, Download, FolderOpen, ExternalLink, Loader2 } from 'lucide-react';
 import { type PDFExport } from '@/types/crescented';
 import { format } from 'date-fns';
 
 const PDFs = () => {
   const [pdfs, setPdfs] = useState<PDFExport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openingPdf, setOpeningPdf] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -33,6 +34,7 @@ const PDFs = () => {
   }, [navigate]);
 
   const openPDF = async (pdf: PDFExport) => {
+    setOpeningPdf(pdf.id);
     try {
       const { data, error } = await supabase.storage.from('pdfs').download(pdf.file_path);
       if (error) throw error;
@@ -45,6 +47,8 @@ const PDFs = () => {
       setTimeout(() => window.URL.revokeObjectURL(url), 10000);
     } catch (error: any) {
       toast({ title: 'Failed to open PDF', description: error.message, variant: 'destructive' });
+    } finally {
+      setOpeningPdf(null);
     }
   };
 
@@ -58,6 +62,7 @@ const PDFs = () => {
       a.download = pdf.metadata.title || 'download.pdf';
       a.click();
       window.URL.revokeObjectURL(url);
+      toast({ title: 'Download started', description: `Downloading ${pdf.metadata.title}` });
     } catch (error: any) {
       toast({ title: 'Download failed', description: error.message, variant: 'destructive' });
     }
@@ -79,15 +84,15 @@ const PDFs = () => {
         ) : (
           <div className="space-y-3">
             {pdfs.map((pdf) => (
-              <CosmicCard key={pdf.id} className="p-4 flex items-center justify-between">
+              <CosmicCard key={pdf.id} className="p-4 flex items-center justify-between gap-4">
                 <div 
-                  className="flex items-center gap-4 flex-1 cursor-pointer hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => openPDF(pdf)}
                 >
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <FileText className="w-5 h-5 text-primary" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h3 className="font-outfit font-medium truncate">{pdf.metadata.title}</h3>
                     <p className="text-sm text-muted-foreground">
                       {pdf.metadata.type} • {format(new Date(pdf.created_at), 'MMM d, yyyy')}
@@ -95,8 +100,18 @@ const PDFs = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <Button variant="ghost" size="sm" onClick={() => openPDF(pdf)} title="Open in new tab">
-                    <ExternalLink className="w-4 h-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => openPDF(pdf)} 
+                    title="Open in new tab"
+                    disabled={openingPdf === pdf.id}
+                  >
+                    {openingPdf === pdf.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <ExternalLink className="w-4 h-4" />
+                    )}
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => downloadPDF(pdf)} title="Download">
                     <Download className="w-4 h-4" />

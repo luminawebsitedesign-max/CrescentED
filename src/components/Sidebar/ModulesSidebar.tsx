@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ import { type Module, type ModuleProgress } from '@/types/crescented';
 const MOON_PHASES = ['🌑', '🌒', '🌓', '🌔', '🌕'];
 
 // Short creative display names for modules
-const getShortName = (title: string, index: number): string => {
+const getShortName = (title: string): string => {
   const shortNames: Record<string, string> = {
     'budgeting': 'Budget Basics',
     'pricing': 'Price It Right',
@@ -70,6 +70,7 @@ const getMoonPhase = (index: number, total: number, isComplete: boolean): string
 
 const ModulesSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { 
     sidebarCollapsed, 
     setSidebarCollapsed, 
@@ -97,6 +98,11 @@ const ModulesSidebar = () => {
 
   const isModuleComplete = (module: Module) => calculateModuleProgress(module) === 100;
 
+  const handleModuleClick = (moduleId: string) => {
+    setCurrentModuleId(moduleId);
+    navigate('/dashboard');
+  };
+
   return (
     <aside
       className={cn(
@@ -105,9 +111,9 @@ const ModulesSidebar = () => {
       )}
     >
       {/* Header - Logo & Settings */}
-      <div className="p-3 border-b border-border flex items-center justify-between">
+      <div className="p-3 border-b border-border flex items-center justify-between flex-shrink-0">
         <Link to="/dashboard" className="flex items-center gap-2">
-          <CrescentLogo size={sidebarCollapsed ? 'sm' : 'sm'} />
+          <CrescentLogo size="sm" />
           {!sidebarCollapsed && (
             <span className="font-sora text-base font-bold text-gradient-cosmic">
               CrescentEd
@@ -130,7 +136,7 @@ const ModulesSidebar = () => {
             variant="ghost"
             size="icon"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="text-muted-foreground hover:text-foreground h-8 w-8"
+            className="text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
           >
             {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </Button>
@@ -139,8 +145,8 @@ const ModulesSidebar = () => {
 
       {sidebarCollapsed ? (
         /* Collapsed View */
-        <div className="flex-1 flex flex-col items-center py-3 gap-1">
-          <Tooltip>
+        <div className="flex-1 flex flex-col items-center py-3 gap-1 overflow-hidden">
+          <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <Link to="/dashboard">
                 <Button
@@ -158,7 +164,7 @@ const ModulesSidebar = () => {
             <TooltipContent side="right">Dashboard</TooltipContent>
           </Tooltip>
           
-          <Tooltip>
+          <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <Link to="/tools">
                 <Button
@@ -176,7 +182,7 @@ const ModulesSidebar = () => {
             <TooltipContent side="right">Tools</TooltipContent>
           </Tooltip>
           
-          <Tooltip>
+          <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <Link to="/pdfs">
                 <Button
@@ -194,7 +200,7 @@ const ModulesSidebar = () => {
             <TooltipContent side="right">My PDFs</TooltipContent>
           </Tooltip>
           
-          <Tooltip>
+          <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <Link to="/profile">
                 <Button
@@ -209,25 +215,7 @@ const ModulesSidebar = () => {
                 </Button>
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Profile & Notes</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link to="/business-hub">
-                <Button
-                  variant={location.pathname === '/business-hub' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className={cn(
-                    'h-9 w-9',
-                    location.pathname === '/business-hub' && 'bg-primary/10 text-primary border border-primary/20'
-                  )}
-                >
-                  <Briefcase className="w-4 h-4" />
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Business Hub</TooltipContent>
+            <TooltipContent side="right">Profile</TooltipContent>
           </Tooltip>
           
           <div className="my-2 w-8 h-px bg-border" />
@@ -236,12 +224,12 @@ const ModulesSidebar = () => {
           <ScrollArea className="flex-1 w-full">
             <div className="flex flex-col items-center gap-1 px-2">
               {modules.map((module, index) => (
-                <Tooltip key={module.id}>
+                <Tooltip key={module.id} delayDuration={0}>
                   <TooltipTrigger asChild>
                     <Button
                       variant={isModuleActive(module.id) ? 'secondary' : 'ghost'}
                       size="icon"
-                      onClick={() => setCurrentModuleId(module.id)}
+                      onClick={() => handleModuleClick(module.id)}
                       className={cn(
                         'h-9 w-9 relative',
                         isModuleActive(module.id) && 'bg-primary/10 text-primary border border-primary/20'
@@ -252,7 +240,7 @@ const ModulesSidebar = () => {
                       </span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="right">{module.title}</TooltipContent>
+                  <TooltipContent side="right" className="max-w-[200px]">{module.title}</TooltipContent>
                 </Tooltip>
               ))}
             </div>
@@ -304,7 +292,7 @@ const ModulesSidebar = () => {
               </Button>
             </Link>
 
-            {/* Profile & Notes */}
+            {/* Profile */}
             <Link to="/profile">
               <Button
                 variant={location.pathname === '/profile' ? 'secondary' : 'ghost'}
@@ -314,14 +302,14 @@ const ModulesSidebar = () => {
                 )}
               >
                 <User className="w-4 h-4 flex-shrink-0" />
-                <span>Profile & Notes</span>
+                <span>Profile</span>
               </Button>
             </Link>
 
             {/* Divider */}
             <div className="my-3 h-px bg-border" />
 
-            {/* User Data Collapsible - simplified, no Master Notes link */}
+            {/* User Data Collapsible */}
             <Collapsible open={userDataOpen} onOpenChange={setUserDataOpen}>
               <CollapsibleTrigger asChild>
                 <Button
@@ -332,24 +320,26 @@ const ModulesSidebar = () => {
                     <Briefcase className="w-4 h-4 flex-shrink-0" />
                     <span>My Data</span>
                   </div>
-                  {userDataOpen ? (
-                    <ChevronUp className="w-3 h-3" />
-                  ) : (
-                    <ChevronDown className="w-3 h-3" />
-                  )}
+                  <span className="flex-shrink-0">
+                    {userDataOpen ? (
+                      <ChevronUp className="w-3 h-3" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3" />
+                    )}
+                  </span>
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="px-2 py-1 space-y-1">
                 <Link to="/intake?edit=true">
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs h-8">
-                    <FileText className="w-3 h-3" />
-                    Edit Onboarding
+                    <FileText className="w-3 h-3 flex-shrink-0" />
+                    <span>Edit Onboarding</span>
                   </Button>
                 </Link>
-                <Link to="/business-hub">
+                <Link to="/settings">
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs h-8">
-                    <Briefcase className="w-3 h-3" />
-                    Business Hub
+                    <Settings className="w-3 h-3 flex-shrink-0" />
+                    <span>Settings</span>
                   </Button>
                 </Link>
                 {intake && (
@@ -384,13 +374,13 @@ const ModulesSidebar = () => {
                 {modules.map((module, index) => {
                   const isActive = isModuleActive(module.id);
                   const isComplete = isModuleComplete(module);
-                  const shortName = getShortName(module.title, index);
+                  const shortName = getShortName(module.title);
 
                   return (
-                    <Tooltip key={module.id}>
+                    <Tooltip key={module.id} delayDuration={0}>
                       <TooltipTrigger asChild>
                         <button
-                          onClick={() => setCurrentModuleId(module.id)}
+                          onClick={() => handleModuleClick(module.id)}
                           className={cn(
                             'w-full text-left px-2 py-2 rounded-lg transition-all group flex items-center gap-2',
                             isActive 
@@ -429,7 +419,7 @@ const ModulesSidebar = () => {
       )}
 
       {/* Logout */}
-      <div className="p-2 border-t border-border">
+      <div className="p-2 border-t border-border flex-shrink-0">
         <Button
           variant="ghost"
           onClick={handleLogout}
