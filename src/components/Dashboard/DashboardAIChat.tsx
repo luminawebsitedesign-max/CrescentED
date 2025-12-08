@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/store/useStore';
 import { 
   Send, Loader2, Sparkles, User, 
-  FileText, Lightbulb, ClipboardList, BookOpen, Trash2
+  FileText, Lightbulb, ClipboardList, BookOpen, Trash2, MessageCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -19,7 +19,7 @@ interface ChatMessage {
   moduleId?: string;
 }
 
-// Clean AI response from asterisks and markdown
+// Clean AI response from asterisks and markdown artifacts
 const cleanAIResponse = (text: string): string => {
   return text
     .replace(/\*\*/g, '')
@@ -34,7 +34,7 @@ const DashboardAIChat = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
   const { modules, currentModuleId, intake } = useStore();
 
@@ -65,12 +65,15 @@ const DashboardAIChat = () => {
     localStorage.setItem(storageKey, JSON.stringify(messages));
   }, [messages, currentModuleId]);
 
-  // Scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
     }
-  }, [messages]);
+  }, [messages, loading]);
 
   const sendMessage = useCallback(async (customMessage?: string) => {
     const messageText = customMessage || input.trim();
@@ -131,9 +134,16 @@ const DashboardAIChat = () => {
       });
     } finally {
       setLoading(false);
-      inputRef.current?.focus();
+      textareaRef.current?.focus();
     }
   }, [input, loading, currentModule, currentModuleId, intake, messages, toast]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
   const clearHistory = () => {
     if (!currentModuleId) return;
@@ -146,34 +156,34 @@ const DashboardAIChat = () => {
     { 
       icon: BookOpen, 
       label: 'Explain this module', 
-      prompt: `Give me a clear, step-by-step overview of "${currentModule?.title || 'this module'}". What are the key concepts I need to understand?`
-    },
-    { 
-      icon: FileText, 
-      label: 'Show resources', 
-      prompt: `What tools and resources should I use for "${currentModule?.title || 'this topic'}"? Give me specific recommendations.`
-    },
-    { 
-      icon: ClipboardList, 
-      label: 'Create worksheet', 
-      prompt: `Create a hands-on worksheet I can fill out for "${currentModule?.title || 'this module'}" applied to my business: ${intake?.idea || 'my business'}.`
+      prompt: `Give me a clear overview of "${currentModule?.title || 'this module'}". What are the key concepts I need to understand?`
     },
     { 
       icon: Lightbulb, 
-      label: 'Action steps', 
-      prompt: `What are the 5 most important action steps I should take right now for "${currentModule?.title || 'this module'}"?`
+      label: 'Give me examples', 
+      prompt: `Give me real-world examples for "${currentModule?.title || 'this topic'}" that I can apply to my business: ${intake?.idea || 'my business'}.`
+    },
+    { 
+      icon: ClipboardList, 
+      label: 'What should I do next?', 
+      prompt: `What are the most important action steps I should take right now for "${currentModule?.title || 'this module'}"?`
+    },
+    { 
+      icon: FileText, 
+      label: 'Create a worksheet', 
+      prompt: `Create a hands-on worksheet I can fill out for "${currentModule?.title || 'this module'}" applied to my business: ${intake?.idea || 'my business'}.`
     },
   ];
 
   return (
     <div className="h-full flex flex-col bg-background">
       {/* Chat Messages Area */}
-      <ScrollArea className="flex-1 px-4 lg:px-8" ref={scrollRef}>
-        <div className="max-w-3xl mx-auto py-6">
+      <ScrollArea className="flex-1" ref={scrollRef}>
+        <div className="max-w-3xl mx-auto px-4 lg:px-8 py-6">
           {messages.length === 0 ? (
-            <div className="text-center py-16">
+            <div className="text-center py-12">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="w-8 h-8 text-white" />
+                <MessageCircle className="w-8 h-8 text-primary-foreground" />
               </div>
               <h2 className="text-xl font-sora font-semibold mb-2">
                 Hi! I'm your AI Tutor
@@ -184,17 +194,17 @@ const DashboardAIChat = () => {
               </p>
               
               {/* Quick Actions Grid */}
-              <div className="grid grid-cols-2 gap-3 max-w-lg mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto">
                 {quickActions.map((action, idx) => (
                   <Button
                     key={idx}
                     variant="outline"
                     onClick={() => sendMessage(action.prompt)}
                     disabled={loading}
-                    className="h-auto py-4 px-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30"
+                    className="h-auto py-4 px-4 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
                   >
                     <action.icon className="w-5 h-5 text-primary" />
-                    <span className="text-sm">{action.label}</span>
+                    <span className="text-sm text-center">{action.label}</span>
                   </Button>
                 ))}
               </div>
@@ -205,13 +215,13 @@ const DashboardAIChat = () => {
                 <div
                   key={message.id}
                   className={cn(
-                    'flex gap-3',
+                    'flex gap-3 animate-fade-in',
                     message.role === 'user' ? 'justify-end' : 'justify-start'
                   )}
                 >
                   {message.role === 'assistant' && (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center flex-shrink-0 mt-1">
+                      <Sparkles className="w-4 h-4 text-primary-foreground" />
                     </div>
                   )}
                   <div className={cn(
@@ -223,7 +233,7 @@ const DashboardAIChat = () => {
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                   </div>
                   {message.role === 'user' && (
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
                       <User className="w-4 h-4 text-primary" />
                     </div>
                   )}
@@ -231,9 +241,9 @@ const DashboardAIChat = () => {
               ))}
               
               {loading && (
-                <div className="flex gap-3 justify-start">
+                <div className="flex gap-3 justify-start animate-fade-in">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-4 h-4 text-white" />
+                    <Sparkles className="w-4 h-4 text-primary-foreground" />
                   </div>
                   <div className="bg-secondary rounded-2xl rounded-bl-md px-4 py-3">
                     <div className="flex gap-1.5">
@@ -249,8 +259,8 @@ const DashboardAIChat = () => {
         </div>
       </ScrollArea>
 
-      {/* Input Area */}
-      <div className="border-t border-border bg-card/50 p-4">
+      {/* Input Area - Fixed at bottom */}
+      <div className="border-t border-border bg-card/80 backdrop-blur-sm p-4 flex-shrink-0">
         <div className="max-w-3xl mx-auto">
           {messages.length > 0 && (
             <div className="flex justify-end mb-2">
@@ -265,27 +275,28 @@ const DashboardAIChat = () => {
               </Button>
             </div>
           )}
-          <div className="flex gap-3">
-            <Input
-              ref={inputRef}
+          <div className="flex gap-3 items-end">
+            <Textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+              onKeyDown={handleKeyDown}
               placeholder="Ask AI Tutor anything..."
-              className="flex-1 h-12 bg-background border-border text-base"
+              className="flex-1 min-h-[48px] max-h-32 resize-none bg-background border-border text-base"
               disabled={loading}
+              rows={1}
             />
             <Button
               onClick={() => sendMessage()}
               disabled={loading || !input.trim()}
-              className="h-12 px-6 bg-primary hover:bg-primary/90"
+              className="h-12 px-6 bg-primary hover:bg-primary/90 flex-shrink-0"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
                   <Send className="w-5 h-5 mr-2" />
-                  Ask AI Tutor
+                  <span className="hidden sm:inline">Ask AI Tutor</span>
                 </>
               )}
             </Button>

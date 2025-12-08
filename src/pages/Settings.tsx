@@ -58,7 +58,7 @@ const Settings = () => {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', session.user.id)
@@ -105,6 +105,18 @@ const Settings = () => {
     setSaving(false);
   };
 
+  // Clear all chat histories from localStorage
+  const clearAllChatHistories = () => {
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('crescented-chat-') || 
+          key.startsWith('crescented-modules') ||
+          key.startsWith('crescented-tutor')) {
+        localStorage.removeItem(key);
+      }
+    });
+    sessionStorage.clear();
+  };
+
   // Regenerate Course - keeps profile, resets course content
   const handleRegenerateCourse = async () => {
     if (confirmText !== 'REGENERATE') return;
@@ -122,24 +134,22 @@ const Settings = () => {
     }
 
     try {
-      // Delete modules, PDFs, and clear all caches
+      // Delete modules and PDFs from Supabase
       await supabase.from('modules').delete().eq('user_id', session.user.id);
       await supabase.from('pdf_exports').delete().eq('user_id', session.user.id);
       
-      // Clear local state
+      // Clear local state immediately
       setModules([]);
       setCurrentModuleId(null);
       setCourse(null);
       
       // Clear all localStorage caches
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('crescented-chat-') || 
-            key.startsWith('crescented-modules') ||
-            key.startsWith('crescented-tutor')) {
-          localStorage.removeItem(key);
-        }
+      clearAllChatHistories();
+
+      toast({
+        title: 'Generating new course...',
+        description: 'This may take a minute. Please wait.',
       });
-      sessionStorage.clear();
 
       // Generate new course
       const response = await supabase.functions.invoke('crescented-ai', {
@@ -205,7 +215,7 @@ const Settings = () => {
       // Reset all local state
       reset();
       
-      // Clear ALL localStorage
+      // Clear ALL crescented localStorage
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('crescented-')) {
           localStorage.removeItem(key);
@@ -244,7 +254,7 @@ const Settings = () => {
             {/* Master Notes Section */}
             <CosmicCard className="p-5" hover={false}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-cosmic-violet/10 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-lg bg-cosmic-violet/10 flex items-center justify-center flex-shrink-0">
                   <StickyNote className="w-4 h-4 text-cosmic-violet" />
                 </div>
                 <div>
@@ -263,7 +273,7 @@ const Settings = () => {
             {/* Profile Section */}
             <CosmicCard className="p-5" hover={false}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <User className="w-4 h-4 text-primary" />
                 </div>
                 <div>
@@ -287,7 +297,7 @@ const Settings = () => {
             {/* Learning Preferences */}
             <CosmicCard className="p-5" hover={false}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
                   <Palette className="w-4 h-4 text-accent" />
                 </div>
                 <div>
@@ -372,7 +382,7 @@ const Settings = () => {
             {/* Course Management */}
             <CosmicCard className="p-5" hover={false}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center flex-shrink-0">
                   <BookOpen className="w-4 h-4 text-destructive" />
                 </div>
                 <div>
@@ -441,13 +451,12 @@ const Settings = () => {
                     <AlertDialogHeader>
                       <AlertDialogTitle className="flex items-center gap-2">
                         <AlertTriangle className="w-5 h-5 text-destructive" />
-                        Delete Everything & Start Over?
+                        Delete Everything?
                       </AlertDialogTitle>
                       <AlertDialogDescription className="space-y-3">
-                        <p>This will permanently delete ALL your data and start completely fresh.</p>
-                        <p><strong>Deletes:</strong> Modules, intake form, PDFs, chat history, all generated content</p>
+                        <p>This will permanently delete ALL your data and cannot be undone.</p>
+                        <p><strong>Deletes:</strong> All modules, chat history, PDFs, tools outputs, and intake form</p>
                         <p><strong>Keeps:</strong> Only your login credentials</p>
-                        <p className="font-medium text-destructive">This action cannot be undone!</p>
                         <p className="font-medium">Type DELETE to confirm:</p>
                         <Input
                           value={deleteConfirmText}
@@ -479,17 +488,23 @@ const Settings = () => {
               </div>
             </CosmicCard>
 
-            <Button
-              onClick={handleSave}
+            {/* Save Button */}
+            <Button 
+              onClick={handleSave} 
               disabled={saving}
-              className="w-full bg-primary hover:bg-primary/90 glow-primary"
+              className="w-full"
             >
               {saving ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
               ) : (
-                <Save className="w-4 h-4 mr-2" />
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Settings
+                </>
               )}
-              Save Settings
             </Button>
           </div>
         </div>
