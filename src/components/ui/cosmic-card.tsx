@@ -18,7 +18,7 @@ const CosmicCard = ({
         'glass-cosmic rounded-xl',
         hover && 'hover-lift cursor-pointer',
         variant === 'glow' && 'glow-primary',
-        variant === 'gradient' && 'bg-gradient-to-br from-cosmic-plum/20 to-cosmic-violet/20',
+        variant === 'gradient' && 'bg-gradient-to-br from-cosmic-magenta/20 to-cosmic-violet/20',
         className
       )}
       {...props}
