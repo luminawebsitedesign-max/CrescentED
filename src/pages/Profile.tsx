@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import DashboardLayout from '@/components/Layout/DashboardLayout';
+import { CosmicCard } from '@/components/ui/cosmic-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { toast } from 'sonner';
-import { ArrowLeft, Loader2, Save } from 'lucide-react';
-import { User } from '@supabase/supabase-js';
-import { Profile } from '@/types/crescented';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Save } from 'lucide-react';
+import { useStore } from '@/store/useStore';
 
 export default function ProfilePage() {
-  const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [profile, setProfile] = useState<Partial<Profile>>({
+  const { user } = useStore();
+  const { toast } = useToast();
+  const [profile, setProfile] = useState({
     full_name: '',
     experience_level: 'beginner',
     learning_style: 'mixed',
@@ -23,36 +23,15 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate('/auth');
-      } else {
-        setUser(session.user);
-        setTimeout(() => loadProfile(session.user.id), 0);
-      }
-    });
+    const loadProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate('/auth');
-      } else {
-        setUser(session.user);
-        loadProfile(session.user.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const loadProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', session.user.id)
         .maybeSingle();
-
-      if (error) throw error;
 
       if (data) {
         setProfile({
@@ -62,191 +41,121 @@ export default function ProfilePage() {
           time_commitment: data.time_commitment || 'moderate',
         });
       }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-    } finally {
       setLoading(false);
-    }
-  };
+    };
+    loadProfile();
+  }, []);
 
   const handleSave = async () => {
-    if (!user) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
     setSaving(true);
 
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          ...profile,
-        });
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({ id: session.user.id, ...profile });
 
-      if (error) throw error;
-
-      toast.success('Profile updated!');
-    } catch (error: any) {
-      console.error('Error saving profile:', error);
-      toast.error('Failed to save profile');
-    } finally {
-      setSaving(false);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to save profile', variant: 'destructive' });
+    } else {
+      toast({ title: 'Profile updated!', description: 'Your changes have been saved.' });
     }
+    setSaving(false);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-primary">Loading profile...</div>
+  const radioOption = (value: string, label: string, desc: string, selected: boolean) => (
+    <label
+      key={value}
+      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+        selected ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+      }`}
+    >
+      <RadioGroupItem value={value} className="mt-0.5" />
+      <div>
+        <div className="font-medium text-sm">{label}</div>
+        <div className="text-xs text-muted-foreground">{desc}</div>
       </div>
-    );
-  }
+    </label>
+  );
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Dashboard
-          </button>
-        </div>
-      </header>
-
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-display font-bold mb-2">Your Profile</h1>
-          <p className="text-muted-foreground">
-            Update your learning preferences
-          </p>
+    <DashboardLayout loading={loading}>
+      <div className="max-w-2xl mx-auto animate-fade-in">
+        <div className="mb-6">
+          <h1 className="text-h1 mb-1">Your Profile</h1>
+          <p className="text-muted-foreground text-sm">Update your personal info and learning preferences</p>
         </div>
 
-        <div className="bg-card/50 backdrop-blur-xl rounded-2xl border border-border/50 p-6 space-y-6">
-          {/* Name */}
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              value={profile.full_name || ''}
-              onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-              placeholder="Your name"
-              className="bg-background/50"
-            />
-          </div>
-
-          {/* Email (read-only) */}
-          <div className="space-y-2">
-            <Label>Email</Label>
-            <Input
-              value={user?.email || ''}
-              disabled
-              className="bg-muted/50"
-            />
-          </div>
+        <div className="space-y-4">
+          {/* Name & Email */}
+          <CosmicCard className="p-5" hover={false}>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name" className="text-sm">Full Name</Label>
+                <Input
+                  id="name"
+                  value={profile.full_name}
+                  onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+                  placeholder="Your name"
+                  className="mt-1 bg-background/50"
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Email</Label>
+                <Input value={user?.email || ''} disabled className="mt-1 bg-muted/50" />
+              </div>
+            </div>
+          </CosmicCard>
 
           {/* Experience Level */}
-          <div className="space-y-3">
-            <Label>Experience Level</Label>
+          <CosmicCard className="p-5" hover={false}>
+            <Label className="text-sm mb-3 block">Experience Level</Label>
             <RadioGroup
               value={profile.experience_level}
-              onValueChange={(value) => setProfile({ ...profile, experience_level: value })}
+              onValueChange={(v) => setProfile({ ...profile, experience_level: v })}
               className="space-y-2"
             >
-              {[
-                { value: 'beginner', label: 'Beginner', desc: "I'm just starting out" },
-                { value: 'intermediate', label: 'Intermediate', desc: "I've tried some things" },
-                { value: 'advanced', label: 'Advanced', desc: 'I have real experience' },
-              ].map((option) => (
-                <label
-                  key={option.value}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-background/30 cursor-pointer hover:bg-background/50 transition-colors"
-                >
-                  <RadioGroupItem value={option.value} className="mt-0.5" />
-                  <div>
-                    <div className="font-medium text-sm">{option.label}</div>
-                    <div className="text-xs text-muted-foreground">{option.desc}</div>
-                  </div>
-                </label>
-              ))}
+              {radioOption('beginner', 'Beginner', "I'm just starting out", profile.experience_level === 'beginner')}
+              {radioOption('intermediate', 'Intermediate', "I've tried some things", profile.experience_level === 'intermediate')}
+              {radioOption('advanced', 'Advanced', 'I have real experience', profile.experience_level === 'advanced')}
             </RadioGroup>
-          </div>
+          </CosmicCard>
 
           {/* Learning Style */}
-          <div className="space-y-3">
-            <Label>Learning Style</Label>
+          <CosmicCard className="p-5" hover={false}>
+            <Label className="text-sm mb-3 block">Learning Style</Label>
             <RadioGroup
               value={profile.learning_style}
-              onValueChange={(value) => setProfile({ ...profile, learning_style: value })}
+              onValueChange={(v) => setProfile({ ...profile, learning_style: v })}
               className="space-y-2"
             >
-              {[
-                { value: 'visual', label: 'Visual', desc: 'Videos, diagrams, infographics' },
-                { value: 'reading', label: 'Reading', desc: 'Articles, guides, written content' },
-                { value: 'hands-on', label: 'Hands-on', desc: 'Projects, exercises, practice' },
-                { value: 'mixed', label: 'Mixed', desc: 'A bit of everything' },
-              ].map((option) => (
-                <label
-                  key={option.value}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-background/30 cursor-pointer hover:bg-background/50 transition-colors"
-                >
-                  <RadioGroupItem value={option.value} className="mt-0.5" />
-                  <div>
-                    <div className="font-medium text-sm">{option.label}</div>
-                    <div className="text-xs text-muted-foreground">{option.desc}</div>
-                  </div>
-                </label>
-              ))}
+              {radioOption('visual', 'Visual', 'Videos, diagrams, infographics', profile.learning_style === 'visual')}
+              {radioOption('reading', 'Reading', 'Articles, guides, written content', profile.learning_style === 'reading')}
+              {radioOption('hands-on', 'Hands-on', 'Projects, exercises, practice', profile.learning_style === 'hands-on')}
+              {radioOption('mixed', 'Mixed', 'A bit of everything', profile.learning_style === 'mixed')}
             </RadioGroup>
-          </div>
+          </CosmicCard>
 
           {/* Time Commitment */}
-          <div className="space-y-3">
-            <Label>Time Commitment</Label>
+          <CosmicCard className="p-5" hover={false}>
+            <Label className="text-sm mb-3 block">Time Commitment</Label>
             <RadioGroup
               value={profile.time_commitment}
-              onValueChange={(value) => setProfile({ ...profile, time_commitment: value })}
+              onValueChange={(v) => setProfile({ ...profile, time_commitment: v })}
               className="space-y-2"
             >
-              {[
-                { value: 'casual', label: 'Casual', desc: '1-2 hours/week' },
-                { value: 'moderate', label: 'Moderate', desc: '3-5 hours/week' },
-                { value: 'intensive', label: 'Intensive', desc: '6+ hours/week' },
-              ].map((option) => (
-                <label
-                  key={option.value}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-background/30 cursor-pointer hover:bg-background/50 transition-colors"
-                >
-                  <RadioGroupItem value={option.value} className="mt-0.5" />
-                  <div>
-                    <div className="font-medium text-sm">{option.label}</div>
-                    <div className="text-xs text-muted-foreground">{option.desc}</div>
-                  </div>
-                </label>
-              ))}
+              {radioOption('casual', 'Casual', '1-2 hours/week', profile.time_commitment === 'casual')}
+              {radioOption('moderate', 'Moderate', '3-5 hours/week', profile.time_commitment === 'moderate')}
+              {radioOption('intensive', 'Intensive', '6+ hours/week', profile.time_commitment === 'intensive')}
             </RadioGroup>
-          </div>
+          </CosmicCard>
 
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full gap-2 bg-gradient-to-r from-primary to-accent"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                Save Changes
-              </>
-            )}
+          <Button onClick={handleSave} disabled={saving} className="w-full bg-primary hover:bg-primary/90 gap-2">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

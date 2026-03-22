@@ -171,8 +171,9 @@ const Intake = () => {
         if (response.error) {
           console.error('Course generation error:', response.error);
           toast({
-            title: 'Course generation started',
-            description: 'Please wait while we create your course...',
+            title: 'Course generation failed',
+            description: 'We couldn\'t generate your course right now. You can retry from the Dashboard.',
+            variant: 'destructive',
           });
         } else {
           toast({
