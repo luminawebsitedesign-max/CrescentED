@@ -213,7 +213,7 @@ const Landing = () => {
             <span className="font-sora font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2024 CrescentEd. Empowering young entrepreneurs worldwide.
+            © 2025 CrescentEd. Empowering young entrepreneurs worldwide.
           </p>
         </div>
       </footer>
