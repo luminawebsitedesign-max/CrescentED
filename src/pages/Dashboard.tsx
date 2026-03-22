@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Loader2, Sparkles, Settings, FileText, Wrench, User,
-  ChevronLeft, ChevronRight, CheckCircle, LayoutDashboard, Briefcase
+  ChevronLeft, ChevronRight, CheckCircle, LayoutDashboard
 } from 'lucide-react';
 import { type Module, type ModuleDomain, DOMAIN_LABELS, DOMAIN_ICONS } from '@/types/crescented';
 import DashboardAIChat from '@/components/Dashboard/DashboardAIChat';
