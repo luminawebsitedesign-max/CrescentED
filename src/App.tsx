@@ -38,7 +38,7 @@ const App = () => (
             <Route path="/pdfs" element={<PDFs />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/business-hub" element={<BusinessHub />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
