@@ -11,17 +11,24 @@ import { Loader2, ArrowRight, ArrowLeft, Sparkles, Save } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import CrescentLogo from '@/components/ui/crescent-logo';
 
-const STEPS = [
+const STEPS_NEW = [
   { id: 'idea', title: 'Your Big Idea', subtitle: 'What do you want to build?' },
   { id: 'goals', title: 'Your Goals', subtitle: 'What do you want to achieve?' },
   { id: 'background', title: 'About You', subtitle: 'Help us understand your journey' },
   { id: 'style', title: 'Learning Style', subtitle: 'How do you learn best?' },
 ];
 
+const STEPS_EDIT = [
+  { id: 'idea', title: 'Edit Your Idea', subtitle: 'Update your business idea and interests' },
+  { id: 'goals', title: 'Edit Your Goals', subtitle: 'Refine what you want to achieve' },
+  { id: 'background', title: 'Edit Your Background', subtitle: 'Update your experience info' },
+  { id: 'style', title: 'Edit Learning Style', subtitle: 'Change how you prefer to learn' },
+];
+
 const Intake = () => {
   const [searchParams] = useSearchParams();
   const isEditMode = searchParams.get('edit') === 'true';
-  
+  const STEPS = isEditMode ? STEPS_EDIT : STEPS_NEW;
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -139,8 +146,8 @@ const Intake = () => {
         if (intakeError) throw intakeError;
 
         toast({
-          title: 'Profile updated!',
-          description: 'Your learning preferences have been saved.',
+          title: 'Onboarding updated!',
+          description: 'Your answers have been saved. Your existing course is unchanged.',
         });
 
         navigate('/dashboard');
@@ -219,9 +226,9 @@ const Intake = () => {
             <CrescentLogo size="sm" />
             <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
-          {isEditMode && (
-            <p className="text-sm text-primary mb-2">Editing your profile</p>
-          )}
+          {isEditMode ? (
+            <p className="text-sm text-primary font-medium mb-2">Editing your onboarding answers</p>
+          ) : null}
           <Progress value={progress} className="h-2 bg-secondary" />
           <p className="text-sm text-muted-foreground mt-2">
             Step {step + 1} of {STEPS.length}
