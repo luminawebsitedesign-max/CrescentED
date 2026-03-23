@@ -161,36 +161,9 @@ Output ONLY the JSON array.`;
       const content = data.choices[0].message.content;
       console.log('AI response received, parsing modules...');
       
-      let modules;
-      try {
-        let jsonString = content;
-        if (jsonString.includes('```json')) {
-          jsonString = jsonString.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-        } else if (jsonString.includes('```')) {
-          jsonString = jsonString.replace(/```\n?/g, '');
-        }
-        
-        const jsonMatch = jsonString.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          modules = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error("No JSON array found in response");
-        }
-        
-        if (!Array.isArray(modules) || modules.length === 0) {
-          throw new Error("Invalid modules array");
-        }
-        
-        // Enforce exactly 5 modules
-        if (modules.length > 5) {
-          console.log(`AI returned ${modules.length} modules, truncating to 5`);
-          modules = modules.slice(0, 5);
-        } else if (modules.length < 5) {
-          console.warn(`AI returned only ${modules.length} modules instead of 5`);
-        }
-      } catch (parseError) {
-        console.error("Failed to parse modules JSON:", parseError);
-        throw new Error("Failed to generate course structure. Please try again.");
+      const modules = parseModulesJson(content);
+      if (!modules) {
+        throw new Error("RETRY_GENERATION");
       }
 
       console.log(`Parsed ${modules.length} modules, saving to database...`);
