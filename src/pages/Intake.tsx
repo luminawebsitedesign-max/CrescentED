@@ -11,11 +11,18 @@ import { Loader2, ArrowRight, ArrowLeft, Sparkles, Save } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import CrescentLogo from '@/components/ui/crescent-logo';
 
-const STEPS = [
+const STEPS_NEW = [
   { id: 'idea', title: 'Your Big Idea', subtitle: 'What do you want to build?' },
   { id: 'goals', title: 'Your Goals', subtitle: 'What do you want to achieve?' },
   { id: 'background', title: 'About You', subtitle: 'Help us understand your journey' },
   { id: 'style', title: 'Learning Style', subtitle: 'How do you learn best?' },
+];
+
+const STEPS_EDIT = [
+  { id: 'idea', title: 'Edit Your Idea', subtitle: 'Update your business idea and interests' },
+  { id: 'goals', title: 'Edit Your Goals', subtitle: 'Refine what you want to achieve' },
+  { id: 'background', title: 'Edit Your Background', subtitle: 'Update your experience info' },
+  { id: 'style', title: 'Edit Learning Style', subtitle: 'Change how you prefer to learn' },
 ];
 
 const Intake = () => {
