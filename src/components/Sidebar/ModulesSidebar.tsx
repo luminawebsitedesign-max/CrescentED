@@ -79,7 +79,7 @@ const ModulesSidebar = () => {
     setCurrentModuleId,
     intake 
   } = useStore();
-  const [userDataOpen, setUserDataOpen] = useState(false);
+  
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
