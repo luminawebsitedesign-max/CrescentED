@@ -385,14 +385,17 @@ const Intake = () => {
           )}
 
           <div className="flex justify-between mt-8">
-            <Button
-              variant="outline"
-              onClick={isEditMode && step === 0 ? () => navigate('/dashboard') : handleBack}
-              className="border-border"
-            >
-              <ArrowLeft className="mr-2 w-4 h-4" />
-              {isEditMode && step === 0 ? 'Cancel' : 'Back'}
-            </Button>
+            {(step > 0 || isEditMode) && (
+              <Button
+                variant="outline"
+                onClick={isEditMode && step === 0 ? () => navigate('/dashboard') : step === 0 ? () => navigate('/') : handleBack}
+                className="border-border"
+              >
+                <ArrowLeft className="mr-2 w-4 h-4" />
+                {isEditMode && step === 0 ? 'Cancel' : 'Back'}
+              </Button>
+            )}
+            {step === 0 && !isEditMode && <div />}
             
             {step < STEPS.length - 1 ? (
               <Button onClick={handleNext} className="bg-primary hover:bg-primary/90">
