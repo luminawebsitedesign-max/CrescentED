@@ -189,7 +189,7 @@ const ModuleView = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto animate-fade-in">
+      <div className="max-w-4xl mx-auto animate-fade-in pb-8">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-6">
           <Link to="/modules" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">

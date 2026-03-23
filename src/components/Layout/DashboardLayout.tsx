@@ -62,7 +62,7 @@ const DashboardLayout = ({ children, loading = false }: DashboardLayoutProps) =>
           sidebarCollapsed ? 'ml-16' : 'ml-[260px]'
         )}
       >
-        <div className="p-4 lg:p-6 h-screen overflow-hidden">
+        <div className="p-4 lg:p-6 h-screen overflow-y-auto scrollbar-cosmic">
           {children}
         </div>
       </main>

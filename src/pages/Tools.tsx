@@ -175,7 +175,7 @@ Make tasks realistic, achievable, and high-impact.`,
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto animate-fade-in">
+      <div className="max-w-6xl mx-auto animate-fade-in pb-8">
         <div className="mb-8">
           <h1 className="text-h1 mb-2">Business Tools</h1>
           <p className="text-muted-foreground">

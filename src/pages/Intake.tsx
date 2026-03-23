@@ -216,12 +216,7 @@ const Intake = () => {
       <div className="relative z-10 w-full max-w-2xl">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-8 h-8 relative">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cosmic-magenta via-cosmic-violet to-cosmic-sapphire opacity-60 blur-sm" />
-              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center">
-                <div className="w-5 h-5 rounded-full border-2 border-white/80" style={{ clipPath: 'inset(0 0 0 40%)' }} />
-              </div>
-            </div>
+            <CrescentLogo size="sm" />
             <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
           {isEditMode && (

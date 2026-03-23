@@ -507,7 +507,6 @@ const Settings = () => {
             </Button>
           </div>
         </div>
-      </ScrollArea>
     </DashboardLayout>
   );
 };
