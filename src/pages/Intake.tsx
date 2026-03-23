@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowRight, ArrowLeft, Sparkles, Save } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import CrescentLogo from '@/components/ui/crescent-logo';
 
 const STEPS = [
   { id: 'idea', title: 'Your Big Idea', subtitle: 'What do you want to build?' },
