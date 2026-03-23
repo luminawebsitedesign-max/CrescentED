@@ -309,50 +309,37 @@ const ModulesSidebar = () => {
               </Button>
             </Link>
 
+            {/* Settings */}
+            <Link to="/settings">
+              <Button
+                variant={location.pathname === '/settings' ? 'secondary' : 'ghost'}
+                className={cn(
+                  'w-full justify-start gap-2 h-9 text-sm',
+                  location.pathname === '/settings' && 'bg-primary/10 text-primary border border-primary/20'
+                )}
+              >
+                <Settings className="w-4 h-4 flex-shrink-0" />
+                <span>Settings</span>
+              </Button>
+            </Link>
+
             {/* Divider */}
             <div className="my-3 h-px bg-border" />
 
-            {/* User Data Collapsible */}
-            <Collapsible open={userDataOpen} onOpenChange={setUserDataOpen}>
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-between gap-2 h-9 text-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 flex-shrink-0" />
-                    <span>My Data</span>
-                  </div>
-                  <span className="flex-shrink-0">
-                    {userDataOpen ? (
-                      <ChevronUp className="w-3 h-3" />
-                    ) : (
-                      <ChevronDown className="w-3 h-3" />
-                    )}
-                  </span>
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="px-2 py-1 space-y-1">
-                <Link to="/intake?edit=true">
-                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs h-8">
-                    <FileText className="w-3 h-3 flex-shrink-0" />
-                    <span>Edit Onboarding</span>
-                  </Button>
-                </Link>
-                <Link to="/settings">
-                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs h-8">
-                    <Settings className="w-3 h-3 flex-shrink-0" />
-                    <span>Settings</span>
-                  </Button>
-                </Link>
-                {intake && (
-                  <div className="mt-1 p-2 rounded-lg bg-secondary/50 text-xs">
-                    <p className="font-medium mb-0.5">Your Idea:</p>
-                    <p className="text-muted-foreground line-clamp-2">{intake.idea}</p>
-                  </div>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
+            {/* Edit Onboarding link */}
+            <Link to="/intake?edit=true">
+              <Button variant="ghost" className="w-full justify-start gap-2 h-9 text-sm text-muted-foreground">
+                <FileText className="w-4 h-4 flex-shrink-0" />
+                <span>Edit Onboarding</span>
+              </Button>
+            </Link>
+
+            {intake && (
+              <div className="mx-2 mt-1 p-2 rounded-lg bg-secondary/50 text-xs">
+                <p className="font-medium mb-0.5">Your Idea:</p>
+                <p className="text-muted-foreground line-clamp-2">{intake.idea}</p>
+              </div>
+            )}
 
             {/* Divider */}
             <div className="my-3 h-px bg-border" />
