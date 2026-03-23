@@ -212,9 +212,10 @@ const Landing = () => {
             <CrescentLogo size="sm" />
             <span className="font-sora font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            © 2025 CrescentEd. Empowering young entrepreneurs worldwide.
-          </p>
+          <div className="text-sm text-muted-foreground text-center md:text-right">
+            <p>© 2026 CrescentEd. Empowering young entrepreneurs worldwide.</p>
+            <p className="mt-1">Powered by <a href="https://luminaweb.co" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lumina</a></p>
+          </div>
         </div>
       </footer>
     </div>
