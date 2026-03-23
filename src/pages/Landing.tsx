@@ -81,7 +81,7 @@ const Landing = () => {
             </div>
             <h3 className="font-sora text-xl font-semibold mb-3">Personalized Curriculum</h3>
             <p className="text-muted-foreground">
-              AI analyzes your goals, experience, and learning style to create a custom course just for you
+              Tell us about your goals and business idea — our AI builds a custom course tailored to you
             </p>
           </CosmicCard>
           
