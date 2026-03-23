@@ -92,6 +92,50 @@ REQUIREMENTS:
 - Output ONLY valid JSON array, no other text or markdown`;
 
 
+function parseModulesJson(content: string): any[] | null {
+  try {
+    let jsonString = content;
+    if (jsonString.includes('```json')) {
+      jsonString = jsonString.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    } else if (jsonString.includes('```')) {
+      jsonString = jsonString.replace(/```\n?/g, '');
+    }
+
+    const jsonMatch = jsonString.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      console.error("No JSON array found in response");
+      return null;
+    }
+
+    // Sanitize common JSON issues: control chars inside strings
+    let cleaned = jsonMatch[0];
+    cleaned = cleaned.replace(/[\x00-\x1F\x7F]/g, (ch) => {
+      if (ch === '\n' || ch === '\r' || ch === '\t') return ch;
+      return '';
+    });
+    // Fix unescaped backslashes that aren't valid escape sequences
+    cleaned = cleaned.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+
+    const modules = JSON.parse(cleaned);
+    if (!Array.isArray(modules) || modules.length === 0) {
+      console.error("Invalid modules array");
+      return null;
+    }
+
+    if (modules.length > 5) {
+      console.log(`AI returned ${modules.length} modules, truncating to 5`);
+      return modules.slice(0, 5);
+    }
+    if (modules.length < 5) {
+      console.warn(`AI returned only ${modules.length} modules instead of 5`);
+    }
+    return modules;
+  } catch (parseError) {
+    console.error("Failed to parse modules JSON:", parseError);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -120,77 +164,65 @@ User Profile:
 Generate exactly 5 personalized modules for their business idea: "${intake.idea}".
 Output ONLY the JSON array.`;
 
-      console.log('Calling AI gateway for course generation...');
+      const MAX_ATTEMPTS = 2;
+      let modules = null;
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: COURSE_GENERATION_PROMPT },
-            { role: "user", content: userPrompt },
-          ],
-        }),
-      });
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        console.log(`Calling AI gateway for course generation (attempt ${attempt})...`);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('AI Gateway Error:', response.status, errorText);
-        
-        if (response.status === 429) {
-          return new Response(
-            JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              { role: "system", content: COURSE_GENERATION_PROMPT },
+              { role: "user", content: userPrompt },
+            ],
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('AI Gateway Error:', response.status, errorText);
+          
+          if (response.status === 429) {
+            return new Response(
+              JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }),
+              { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          if (response.status === 402) {
+            return new Response(
+              JSON.stringify({ error: "AI credits exhausted. Please try again later." }),
+              { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          
+          if (attempt < MAX_ATTEMPTS) {
+            console.log('Gateway error, retrying...');
+            continue;
+          }
+          throw new Error(`AI gateway error: ${response.status}`);
         }
-        if (response.status === 402) {
-          return new Response(
-            JSON.stringify({ error: "AI credits exhausted. Please try again later." }),
-            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+        console.log('AI response received, parsing modules...');
         
-        throw new Error(`AI gateway error: ${response.status}`);
+        modules = parseModulesJson(content);
+        if (modules) break;
+
+        if (attempt < MAX_ATTEMPTS) {
+          console.log('JSON parse failed, retrying automatically...');
+        }
       }
 
-      const data = await response.json();
-      const content = data.choices[0].message.content;
-      console.log('AI response received, parsing modules...');
-      
-      let modules;
-      try {
-        let jsonString = content;
-        if (jsonString.includes('```json')) {
-          jsonString = jsonString.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-        } else if (jsonString.includes('```')) {
-          jsonString = jsonString.replace(/```\n?/g, '');
-        }
-        
-        const jsonMatch = jsonString.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          modules = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error("No JSON array found in response");
-        }
-        
-        if (!Array.isArray(modules) || modules.length === 0) {
-          throw new Error("Invalid modules array");
-        }
-        
-        // Enforce exactly 5 modules
-        if (modules.length > 5) {
-          console.log(`AI returned ${modules.length} modules, truncating to 5`);
-          modules = modules.slice(0, 5);
-        } else if (modules.length < 5) {
-          console.warn(`AI returned only ${modules.length} modules instead of 5`);
-        }
-      } catch (parseError) {
-        console.error("Failed to parse modules JSON:", parseError);
-        throw new Error("Failed to generate course structure. Please try again.");
+      if (!modules) {
+        throw new Error("Failed to generate course after retries. Please try again.");
       }
 
       console.log(`Parsed ${modules.length} modules, saving to database...`);

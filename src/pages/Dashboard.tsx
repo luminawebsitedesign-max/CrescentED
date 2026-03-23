@@ -237,8 +237,8 @@ const Dashboard = () => {
           </GradientButton>
           {!generating && (
             <p className="text-xs text-muted-foreground mt-4">
-              Need to update your profile first?{' '}
-              <Link to="/intake?edit=true" className="text-primary hover:underline">Edit profile</Link>
+              Need to change your business idea or goals?{' '}
+              <Link to="/intake?edit=true" className="text-primary hover:underline">Edit onboarding answers</Link>
             </p>
           )}
         </CosmicCard>
