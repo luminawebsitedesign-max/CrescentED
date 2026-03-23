@@ -154,35 +154,38 @@ const Intake = () => {
 
         if (intakeError) throw intakeError;
 
-        toast({
-          title: 'Profile saved!',
-          description: 'Generating your personalized learning path...',
-        });
-
         // Generate course immediately
-        const response = await supabase.functions.invoke('crescented-ai', {
-          body: {
-            type: 'generate_course',
-            intake: formData,
-            userId: userId,
-          },
-        });
-
-        if (response.error) {
-          console.error('Course generation error:', response.error);
-          toast({
-            title: 'Course generation failed',
-            description: 'We couldn\'t generate your course right now. You can retry from the Dashboard.',
-            variant: 'destructive',
+        try {
+          const response = await supabase.functions.invoke('crescented-ai', {
+            body: {
+              type: 'generate_course',
+              intake: formData,
+              userId: userId,
+            },
           });
-        } else {
+
+          if (response.error) {
+            throw new Error(response.error.message || 'Generation failed');
+          }
+
+          if (response.data?.error) {
+            throw new Error(response.data.error);
+          }
+
           toast({
             title: 'Course generated!',
-            description: `Created ${response.data?.modulesCount || 7} modules for you.`,
+            description: `Created ${response.data?.modulesCount || 5} modules for you.`,
           });
+          navigate('/dashboard');
+        } catch (genError: any) {
+          console.error('Course generation error:', genError);
+          toast({
+            title: 'Course generation failed',
+            description: 'Your profile is saved. You can generate your course from the Dashboard.',
+            variant: 'destructive',
+          });
+          navigate('/dashboard');
         }
-
-        navigate('/dashboard');
       }
     } catch (error: any) {
       console.error('Submission error:', error);
