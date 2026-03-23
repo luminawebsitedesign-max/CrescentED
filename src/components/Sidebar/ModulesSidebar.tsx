@@ -11,14 +11,11 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
-  ChevronUp,
   Wrench,
   FileText,
   User,
   CheckCircle,
   LayoutDashboard,
-  Briefcase,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { type Module, type ModuleProgress } from '@/types/crescented';
