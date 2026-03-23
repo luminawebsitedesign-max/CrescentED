@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const TUTOR_SYSTEM_PROMPT = `You are a friendly, conversational AI tutor for CrescentEd, an entrepreneurship learning platform for young entrepreneurs.
@@ -13,34 +13,23 @@ PERSONALITY:
 - Speak naturally and conversationally, like you're chatting with a friend
 - Never judgmental, never condescending
 - Get excited about their progress and ideas
-- Be a coach and cheerleader, not just an information source
 
 COMMUNICATION STYLE:
 - NO asterisks or markdown formatting ever
 - NO emojis unless the user uses them first
 - Write in short paragraphs (2-3 sentences max)
 - Use numbered lists for steps, but keep them brief
-- Conversational tone - use contractions ("you're", "let's", "here's")
-- Vary your sentence structure to sound natural
+- Conversational tone - use contractions
 
 RESPONSE STRUCTURE:
-1. Start with a brief, friendly acknowledgment of their question (one sentence)
-2. Give clear, actionable guidance in 2-4 short paragraphs
-3. ALWAYS end every response with:
+1. Brief, friendly acknowledgment (one sentence)
+2. Clear, actionable guidance in 2-4 short paragraphs
+3. ALWAYS end with:
 
 Action Steps:
 1. [First specific thing they can do right now]
 2. [Second specific action]
 3. [Third action if needed]
-
-PHRASES TO USE:
-- "Great question! Here's the deal..."
-- "Let's break this down step by step."
-- "I love that you're thinking about this!"
-- "Here's what I'd recommend..."
-- "Your next move should be..."
-- "You've got this! Start with..."
-- "The simplest way to do this is..."
 
 WHAT YOU HELP WITH:
 - Explaining business concepts in plain English
@@ -48,64 +37,59 @@ WHAT YOU HELP WITH:
 - Helping with their specific business idea
 - Creating templates, worksheets, and action plans
 - Providing encouragement and motivation
-- Giving specific, actionable advice
 
 NEVER DO:
 - Say "As an AI..." or mention being artificial
 - Use asterisks, markdown headers, or code blocks
-- Give legal, medical, or financial advice (suggest they consult professionals)
+- Give legal, medical, or financial advice
 - Use formal, academic, or corporate language
 - Write long walls of text
 - Be vague - always be specific and actionable
 - End without action steps`;
 
-const COURSE_GENERATION_PROMPT = `You are an AI Course Architect for CrescentEd, creating comprehensive entrepreneurship curricula for young entrepreneurs.
+const COURSE_GENERATION_PROMPT = `You are an AI Course Architect for CrescentEd. Generate exactly 5 focused entrepreneurship modules.
 
-Generate a LARGE, DETAILED curriculum with 20-40 modules across these 7 domains:
-1. business_foundations - Ideas, validation, business models, market research, niche selection
-2. running_a_business - Operations, finance, accounting basics, legal basics, contracts, invoicing, bookkeeping
-3. customer_success - Marketing, sales, customer relationships, outreach, funnels, retention
-4. personal_development - Mindset, skills, resilience, productivity, time management, habits
-5. daily_life_optimization - Routines, tools setup (Canva, Stripe, Notion), automation, workflows
-6. philosophy_worldview - Purpose, values, ethics, vision, long-term thinking
-7. other_topics - Branding, website setup, social media, pricing strategy, scaling, launch strategy
+Pick the 5 most relevant domains from these 7 based on the user's business idea:
+1. business_foundations - Ideas, validation, business models
+2. running_a_business - Operations, finance, legal basics
+3. customer_success - Marketing, sales, customer relationships
+4. personal_development - Mindset, productivity, time management
+5. daily_life_optimization - Tools setup, automation, workflows
+6. philosophy_worldview - Purpose, values, long-term thinking
+7. other_topics - Branding, website, social media, pricing
 
-For EACH module, output a JSON object with this exact structure:
+For EACH module, output a JSON object:
 {
-  "title": "Specific, actionable module title",
+  "title": "Specific module title",
   "domain": "one of the 7 domains above",
-  "description": "2-3 sentence description of what they'll learn",
+  "description": "2 sentence description",
   "summary": "One sentence summary",
   "content": {
     "sections": [
       {
         "title": "Lesson title",
-        "content": "Detailed educational content (400-600 words). Be specific, practical, use examples relevant to their business idea. Write like a mentor, not a textbook. Include real examples.",
+        "content": "Educational content (200-300 words). Be practical, use examples relevant to their business idea.",
         "plug_and_plays": [
           {
-            "title": "Template/Resource name",
-            "type": "worksheet|template|checklist|script|exercise",
-            "content": "Structured template with blank fields, checkboxes, or fillable sections. Make it actually usable - not just paragraphs of text."
+            "title": "Template name",
+            "type": "worksheet",
+            "content": "A fillable template with blanks and structure."
           }
         ]
       }
     ],
-    "action_steps": ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5"]
+    "action_steps": ["Step 1", "Step 2", "Step 3"]
   }
 }
 
-CRITICAL REQUIREMENTS:
-- Generate 20-40 modules total (at least 3 per domain, aim for 5+ in key domains)
-- Each module has 4-7 detailed sections/lessons
-- Each module has 5-10 specific action steps
-- Each section has 2-4 plug_and_plays with REAL fillable templates
-- Plug_and_plays must be actual templates with blanks to fill, NOT paragraphs
-- Personalize everything to their specific business idea
-- Cover: budgeting, pricing, invoicing, social media setup, branding, website creation, basic accounting, customer journey mapping, automation tools, contracts, marketing campaigns, product development, launch planning, scaling strategies, legal basics, outreach scripts, productivity systems
-- Write like a premium course creator, not generic AI
-- Make content actionable and specific to their level
-
-Output ONLY valid JSON array, no other text or markdown.`;
+REQUIREMENTS:
+- Output EXACTLY 5 modules as a JSON array
+- Each module has 3 sections/lessons
+- Each section has 1 plug_and_play template
+- Each module has 3 action steps
+- Personalize to their business idea
+- Keep content concise and actionable
+- Output ONLY valid JSON array, no other text or markdown`;
 
 
 serve(async (req) => {
@@ -127,22 +111,14 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     if (type === "generate_course") {
-      // Generate personalized course based on intake
       const userPrompt = `
 User Profile:
 - Business Idea: ${intake.idea}
 - Goals: ${intake.goals}
-- Background: ${intake.background || 'Not specified'}
 - Experience Level: ${intake.experience_level}
-- Interests: ${intake.interests || 'Not specified'}
-- Constraints: ${intake.constraints || 'None specified'}
-- Learning Style: ${intake.learning_style}
-- Commitment Level: ${intake.commitment_level}
 
-Generate a complete personalized curriculum with at least 25 modules across all 7 domains.
-Each module should have 4-7 lessons with detailed content and actionable templates.
-Tailor everything to their specific business idea: "${intake.idea}".
-Output ONLY the JSON array, no other text.`;
+Generate exactly 5 personalized modules for their business idea: "${intake.idea}".
+Output ONLY the JSON array.`;
 
       console.log('Calling AI gateway for course generation...');
 
@@ -173,7 +149,7 @@ Output ONLY the JSON array, no other text.`;
         }
         if (response.status === 402) {
           return new Response(
-            JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
+            JSON.stringify({ error: "AI credits exhausted. Please try again later." }),
             { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
@@ -185,25 +161,19 @@ Output ONLY the JSON array, no other text.`;
       const content = data.choices[0].message.content;
       console.log('AI response received, parsing modules...');
       
-      // Parse the JSON response
       let modules;
       try {
-        // Try to extract JSON from the response - handle code blocks
         let jsonString = content;
-        
-        // Remove markdown code blocks if present
         if (jsonString.includes('```json')) {
           jsonString = jsonString.replace(/```json\n?/g, '').replace(/```\n?/g, '');
         } else if (jsonString.includes('```')) {
           jsonString = jsonString.replace(/```\n?/g, '');
         }
         
-        // Try to find JSON array
         const jsonMatch = jsonString.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           modules = JSON.parse(jsonMatch[0]);
         } else {
-          console.error("No JSON array found in response:", content);
           throw new Error("No JSON array found in response");
         }
         
@@ -212,13 +182,11 @@ Output ONLY the JSON array, no other text.`;
         }
       } catch (parseError) {
         console.error("Failed to parse modules JSON:", parseError);
-        console.error("Raw content:", content);
         throw new Error("Failed to generate course structure. Please try again.");
       }
 
       console.log(`Parsed ${modules.length} modules, saving to database...`);
 
-      // Save modules to database
       const insertedModules = [];
       for (const module of modules) {
         const { data: insertedModule, error } = await supabase.from('modules').insert({
@@ -248,10 +216,8 @@ Output ONLY the JSON array, no other text.`;
       });
 
     } else if (type === "tutor") {
-      // AI Tutor response
       let contextInfo = "";
       
-      // Get user's intake data for context
       if (userId) {
         const { data: intakeData } = await supabase
           .from('intake_forms')
@@ -318,7 +284,7 @@ Output ONLY the JSON array, no other text.`;
         }
         if (response.status === 402) {
           return new Response(
-            JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
+            JSON.stringify({ error: "AI credits exhausted. Please try again later." }),
             { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
@@ -329,7 +295,6 @@ Output ONLY the JSON array, no other text.`;
       const data = await response.json();
       const tutorResponse = data.choices[0].message.content;
 
-      // Log the interaction
       if (userId) {
         const { error: logError } = await supabase.from('ai_logs').insert({
           user_id: userId,
@@ -344,7 +309,6 @@ Output ONLY the JSON array, no other text.`;
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     } else if (type === "generate_tool") {
-      // Generate content for tools (business plan, marketing checklist, etc.)
       const { prompt, toolType } = message;
       
       console.log('Generating tool content:', toolType);
@@ -358,7 +322,7 @@ Output ONLY the JSON array, no other text.`;
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: "You are a helpful business advisor. Provide detailed, actionable, and well-formatted content. Use clear headers, bullet points, and numbered lists for readability. Write like a mentor helping a young entrepreneur." },
+            { role: "system", content: "You are a helpful business advisor. Provide detailed, actionable, well-formatted content. Write like a mentor helping a young entrepreneur." },
             { role: "user", content: prompt },
           ],
         }),

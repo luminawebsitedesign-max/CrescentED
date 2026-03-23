@@ -200,7 +200,7 @@ const Dashboard = () => {
     );
   }
 
-  // No modules - show blank state
+  // No modules - show blank state with clear retry
   if (modules.length === 0) {
     return (
       <div className="h-screen flex items-center justify-center bg-background p-4">
@@ -208,9 +208,13 @@ const Dashboard = () => {
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cosmic-magenta to-cosmic-violet flex items-center justify-center mx-auto mb-6">
             <Sparkles className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h2 className="text-2xl font-sora font-bold mb-2">No Course Yet</h2>
+          <h2 className="text-2xl font-sora font-bold mb-2">
+            {generating ? 'Generating Your Course...' : 'Ready to Generate Your Course'}
+          </h2>
           <p className="text-muted-foreground mb-6">
-            Generate a personalized learning path covering all 7 domains of entrepreneurship based on your profile.
+            {generating
+              ? 'This usually takes about 30 seconds. Please don\'t close this page.'
+              : 'We\'ll create 5 personalized modules based on your profile. This takes about 30 seconds.'}
           </p>
           <GradientButton
             size="lg"
@@ -221,7 +225,7 @@ const Dashboard = () => {
             {generating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating your course...
+                Generating...
               </>
             ) : (
               <>
@@ -230,9 +234,12 @@ const Dashboard = () => {
               </>
             )}
           </GradientButton>
-          <p className="text-xs text-muted-foreground mt-4">
-            Or go to <Link to="/settings" className="text-primary hover:underline">Settings</Link> to configure your course.
-          </p>
+          {!generating && (
+            <p className="text-xs text-muted-foreground mt-4">
+              Need to update your profile first?{' '}
+              <Link to="/intake?edit=true" className="text-primary hover:underline">Edit profile</Link>
+            </p>
+          )}
         </CosmicCard>
       </div>
     );
