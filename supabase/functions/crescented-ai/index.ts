@@ -92,6 +92,50 @@ REQUIREMENTS:
 - Output ONLY valid JSON array, no other text or markdown`;
 
 
+function parseModulesJson(content: string): any[] | null {
+  try {
+    let jsonString = content;
+    if (jsonString.includes('```json')) {
+      jsonString = jsonString.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    } else if (jsonString.includes('```')) {
+      jsonString = jsonString.replace(/```\n?/g, '');
+    }
+
+    const jsonMatch = jsonString.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      console.error("No JSON array found in response");
+      return null;
+    }
+
+    // Sanitize common JSON issues: control chars inside strings
+    let cleaned = jsonMatch[0];
+    cleaned = cleaned.replace(/[\x00-\x1F\x7F]/g, (ch) => {
+      if (ch === '\n' || ch === '\r' || ch === '\t') return ch;
+      return '';
+    });
+    // Fix unescaped backslashes that aren't valid escape sequences
+    cleaned = cleaned.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+
+    const modules = JSON.parse(cleaned);
+    if (!Array.isArray(modules) || modules.length === 0) {
+      console.error("Invalid modules array");
+      return null;
+    }
+
+    if (modules.length > 5) {
+      console.log(`AI returned ${modules.length} modules, truncating to 5`);
+      return modules.slice(0, 5);
+    }
+    if (modules.length < 5) {
+      console.warn(`AI returned only ${modules.length} modules instead of 5`);
+    }
+    return modules;
+  } catch (parseError) {
+    console.error("Failed to parse modules JSON:", parseError);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
