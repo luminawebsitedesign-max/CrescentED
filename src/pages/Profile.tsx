@@ -80,7 +80,7 @@ export default function ProfilePage() {
 
   return (
     <DashboardLayout loading={loading}>
-      <div className="max-w-2xl mx-auto animate-fade-in">
+      <div className="max-w-2xl mx-auto animate-fade-in pb-8">
         <div className="mb-6">
           <h1 className="text-h1 mb-1">Your Profile</h1>
           <p className="text-muted-foreground text-sm">Update your personal info and learning preferences</p>

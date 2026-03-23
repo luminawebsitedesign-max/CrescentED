@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { CosmicCard } from '@/components/ui/cosmic-card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/store/useStore';
 import { 
@@ -243,7 +242,6 @@ const Settings = () => {
 
   return (
     <DashboardLayout loading={loading}>
-      <ScrollArea className="h-full">
         <div className="max-w-2xl mx-auto pb-8">
           <h1 className="font-sora text-2xl font-bold mb-1">Settings</h1>
           <p className="text-muted-foreground text-sm mb-6">
@@ -508,7 +506,6 @@ const Settings = () => {
             </Button>
           </div>
         </div>
-      </ScrollArea>
     </DashboardLayout>
   );
 };

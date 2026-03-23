@@ -65,7 +65,7 @@ const Modules = () => {
 
   return (
     <DashboardLayout loading={loading}>
-      <div className="max-w-6xl mx-auto animate-fade-in">
+      <div className="max-w-6xl mx-auto animate-fade-in pb-8">
         <div className="mb-8">
           <h1 className="text-h1 mb-2">My Course</h1>
           <p className="text-muted-foreground">
