@@ -48,13 +48,13 @@ const Landing = () => {
         </div>
         
         <h1 className="font-sora text-display mb-6 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          Turn Your Ideas Into
-          <span className="text-gradient-cosmic block mt-2">Real Businesses</span>
+          Learn to Build a
+          <span className="text-gradient-cosmic block mt-2">Real Business</span>
         </h1>
         
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          CrescentEd is your AI-powered learning companion that guides young entrepreneurs 
-          from creative spark to successful startup — one personalized lesson at a time.
+          CrescentEd is an AI-powered platform that teaches young entrepreneurs how to 
+          start, run, and grow a business — with personalized lessons, templates, and mentorship.
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
