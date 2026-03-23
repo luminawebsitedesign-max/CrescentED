@@ -226,9 +226,9 @@ const Intake = () => {
             <CrescentLogo size="sm" />
             <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
-          {isEditMode && (
-            <p className="text-sm text-primary mb-2">Editing your profile</p>
-          )}
+          {isEditMode ? (
+            <p className="text-sm text-primary font-medium mb-2">Editing your onboarding answers</p>
+          ) : null}
           <Progress value={progress} className="h-2 bg-secondary" />
           <p className="text-sm text-muted-foreground mt-2">
             Step {step + 1} of {STEPS.length}
