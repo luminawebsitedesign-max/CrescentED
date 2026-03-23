@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import CrescentLogo from '@/components/ui/crescent-logo';
 import {
