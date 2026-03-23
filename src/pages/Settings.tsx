@@ -243,7 +243,6 @@ const Settings = () => {
 
   return (
     <DashboardLayout loading={loading}>
-      <ScrollArea className="h-full">
         <div className="max-w-2xl mx-auto pb-8">
           <h1 className="font-sora text-2xl font-bold mb-1">Settings</h1>
           <p className="text-muted-foreground text-sm mb-6">
