@@ -124,17 +124,6 @@ const ModulesSidebar = () => {
           )}
         </Link>
         <div className="flex items-center gap-1">
-          {!sidebarCollapsed && (
-            <Link to="/settings">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-foreground h-8 w-8"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-            </Link>
-          )}
           <Button
             variant="ghost"
             size="icon"
