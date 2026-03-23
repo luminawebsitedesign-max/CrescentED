@@ -28,7 +28,7 @@ const STEPS_EDIT = [
 const Intake = () => {
   const [searchParams] = useSearchParams();
   const isEditMode = searchParams.get('edit') === 'true';
-  
+  const STEPS = isEditMode ? STEPS_EDIT : STEPS_NEW;
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
