@@ -209,6 +209,24 @@ const ModulesSidebar = () => {
             </TooltipTrigger>
             <TooltipContent side="right">Profile</TooltipContent>
           </Tooltip>
+
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Link to="/settings">
+                <Button
+                  variant={location.pathname === '/settings' ? 'secondary' : 'ghost'}
+                  size="icon"
+                  className={cn(
+                    'h-9 w-9',
+                    location.pathname === '/settings' && 'bg-primary/10 text-primary border border-primary/20'
+                  )}
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">Settings</TooltipContent>
+          </Tooltip>
           
           <div className="my-2 w-8 h-px bg-border" />
           
