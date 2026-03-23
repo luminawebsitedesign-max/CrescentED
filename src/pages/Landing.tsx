@@ -194,7 +194,7 @@ const Landing = () => {
             Ready to Build Something Amazing?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Join hundreds of young entrepreneurs who are turning their dreams into reality with CrescentEd.
+            Start learning the skills that turn ideas into real ventures — at your own pace, completely free.
           </p>
           <Link to="/register">
             <GradientButton size="lg" glow className="text-lg px-10">
