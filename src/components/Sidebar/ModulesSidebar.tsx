@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import CrescentLogo from '@/components/ui/crescent-logo';
 import {
@@ -12,14 +11,11 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
-  ChevronUp,
   Wrench,
   FileText,
   User,
   CheckCircle,
   LayoutDashboard,
-  Briefcase,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { type Module, type ModuleProgress } from '@/types/crescented';
@@ -79,7 +75,7 @@ const ModulesSidebar = () => {
     setCurrentModuleId,
     intake 
   } = useStore();
-  const [userDataOpen, setUserDataOpen] = useState(false);
+  
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -92,7 +88,10 @@ const ModulesSidebar = () => {
     return (progress.sectionsCompleted.length / sections.length) * 100;
   };
 
+  // Only show modules as active when on dashboard or module pages
+  const isOnModulePage = location.pathname === '/dashboard' || location.pathname.startsWith('/module/');
   const isModuleActive = (moduleId: string) => {
+    if (!isOnModulePage) return false;
     return currentModuleId === moduleId || location.pathname === `/module/${moduleId}`;
   };
 
@@ -121,17 +120,6 @@ const ModulesSidebar = () => {
           )}
         </Link>
         <div className="flex items-center gap-1">
-          {!sidebarCollapsed && (
-            <Link to="/settings">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-foreground h-8 w-8"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-            </Link>
-          )}
           <Button
             variant="ghost"
             size="icon"
@@ -216,6 +204,24 @@ const ModulesSidebar = () => {
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">Profile</TooltipContent>
+          </Tooltip>
+
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Link to="/settings">
+                <Button
+                  variant={location.pathname === '/settings' ? 'secondary' : 'ghost'}
+                  size="icon"
+                  className={cn(
+                    'h-9 w-9',
+                    location.pathname === '/settings' && 'bg-primary/10 text-primary border border-primary/20'
+                  )}
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">Settings</TooltipContent>
           </Tooltip>
           
           <div className="my-2 w-8 h-px bg-border" />
@@ -306,50 +312,37 @@ const ModulesSidebar = () => {
               </Button>
             </Link>
 
+            {/* Settings */}
+            <Link to="/settings">
+              <Button
+                variant={location.pathname === '/settings' ? 'secondary' : 'ghost'}
+                className={cn(
+                  'w-full justify-start gap-2 h-9 text-sm',
+                  location.pathname === '/settings' && 'bg-primary/10 text-primary border border-primary/20'
+                )}
+              >
+                <Settings className="w-4 h-4 flex-shrink-0" />
+                <span>Settings</span>
+              </Button>
+            </Link>
+
             {/* Divider */}
             <div className="my-3 h-px bg-border" />
 
-            {/* User Data Collapsible */}
-            <Collapsible open={userDataOpen} onOpenChange={setUserDataOpen}>
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-between gap-2 h-9 text-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 flex-shrink-0" />
-                    <span>My Data</span>
-                  </div>
-                  <span className="flex-shrink-0">
-                    {userDataOpen ? (
-                      <ChevronUp className="w-3 h-3" />
-                    ) : (
-                      <ChevronDown className="w-3 h-3" />
-                    )}
-                  </span>
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="px-2 py-1 space-y-1">
-                <Link to="/intake?edit=true">
-                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs h-8">
-                    <FileText className="w-3 h-3 flex-shrink-0" />
-                    <span>Edit Onboarding</span>
-                  </Button>
-                </Link>
-                <Link to="/settings">
-                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs h-8">
-                    <Settings className="w-3 h-3 flex-shrink-0" />
-                    <span>Settings</span>
-                  </Button>
-                </Link>
-                {intake && (
-                  <div className="mt-1 p-2 rounded-lg bg-secondary/50 text-xs">
-                    <p className="font-medium mb-0.5">Your Idea:</p>
-                    <p className="text-muted-foreground line-clamp-2">{intake.idea}</p>
-                  </div>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
+            {/* Edit Onboarding link */}
+            <Link to="/intake?edit=true">
+              <Button variant="ghost" className="w-full justify-start gap-2 h-9 text-sm text-muted-foreground">
+                <FileText className="w-4 h-4 flex-shrink-0" />
+                <span>Edit Onboarding</span>
+              </Button>
+            </Link>
+
+            {intake && (
+              <div className="mx-2 mt-1 p-2 rounded-lg bg-secondary/50 text-xs">
+                <p className="font-medium mb-0.5">Your Idea:</p>
+                <p className="text-muted-foreground line-clamp-2">{intake.idea}</p>
+              </div>
+            )}
 
             {/* Divider */}
             <div className="my-3 h-px bg-border" />
