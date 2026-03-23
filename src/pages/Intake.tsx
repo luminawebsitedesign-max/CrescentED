@@ -146,8 +146,8 @@ const Intake = () => {
         if (intakeError) throw intakeError;
 
         toast({
-          title: 'Profile updated!',
-          description: 'Your learning preferences have been saved.',
+          title: 'Onboarding updated!',
+          description: 'Your answers have been saved. Your existing course is unchanged.',
         });
 
         navigate('/dashboard');
