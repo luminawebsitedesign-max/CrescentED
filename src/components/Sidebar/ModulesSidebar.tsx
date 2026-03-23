@@ -92,7 +92,10 @@ const ModulesSidebar = () => {
     return (progress.sectionsCompleted.length / sections.length) * 100;
   };
 
+  // Only show modules as active when on dashboard or module pages
+  const isOnModulePage = location.pathname === '/dashboard' || location.pathname.startsWith('/module/');
   const isModuleActive = (moduleId: string) => {
+    if (!isOnModulePage) return false;
     return currentModuleId === moduleId || location.pathname === `/module/${moduleId}`;
   };
 
