@@ -48,13 +48,13 @@ const Landing = () => {
         </div>
         
         <h1 className="font-sora text-display mb-6 leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          Turn Your Ideas Into
-          <span className="text-gradient-cosmic block mt-2">Real Businesses</span>
+          Learn to Build a
+          <span className="text-gradient-cosmic block mt-2">Real Business</span>
         </h1>
         
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          CrescentEd is your AI-powered learning companion that guides young entrepreneurs 
-          from creative spark to successful startup — one personalized lesson at a time.
+          CrescentEd is an AI-powered platform that teaches young entrepreneurs how to 
+          start, run, and grow a business — with personalized lessons, templates, and mentorship.
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
@@ -81,7 +81,7 @@ const Landing = () => {
             </div>
             <h3 className="font-sora text-xl font-semibold mb-3">Personalized Curriculum</h3>
             <p className="text-muted-foreground">
-              AI analyzes your goals, experience, and learning style to create a custom course just for you
+              Tell us about your goals and business idea — our AI builds a custom course tailored to you
             </p>
           </CosmicCard>
           
@@ -91,7 +91,7 @@ const Landing = () => {
             </div>
             <h3 className="font-sora text-xl font-semibold mb-3">AI Tutor On-Demand</h3>
             <p className="text-muted-foreground">
-              Get instant answers from your supportive big-sibling style AI mentor whenever you need help
+              Ask questions anytime and get clear, encouraging guidance from your personal AI mentor
             </p>
           </CosmicCard>
           
@@ -194,7 +194,7 @@ const Landing = () => {
             Ready to Build Something Amazing?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Join hundreds of young entrepreneurs who are turning their dreams into reality with CrescentEd.
+            Start learning the skills that turn ideas into real ventures — at your own pace, completely free.
           </p>
           <Link to="/register">
             <GradientButton size="lg" glow className="text-lg px-10">
@@ -212,9 +212,10 @@ const Landing = () => {
             <CrescentLogo size="sm" />
             <span className="font-sora font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            © 2025 CrescentEd. Empowering young entrepreneurs worldwide.
-          </p>
+          <div className="text-sm text-muted-foreground text-center md:text-right">
+            <p>© 2026 CrescentEd. Empowering young entrepreneurs worldwide.</p>
+            <p className="mt-1">Powered by <a href="https://luminaweb.co" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Lumina</a></p>
+          </div>
         </div>
       </footer>
     </div>
