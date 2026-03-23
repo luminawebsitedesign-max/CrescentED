@@ -164,50 +164,65 @@ User Profile:
 Generate exactly 5 personalized modules for their business idea: "${intake.idea}".
 Output ONLY the JSON array.`;
 
-      console.log('Calling AI gateway for course generation...');
+      const MAX_ATTEMPTS = 2;
+      let modules = null;
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: COURSE_GENERATION_PROMPT },
-            { role: "user", content: userPrompt },
-          ],
-        }),
-      });
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        console.log(`Calling AI gateway for course generation (attempt ${attempt})...`);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('AI Gateway Error:', response.status, errorText);
-        
-        if (response.status === 429) {
-          return new Response(
-            JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              { role: "system", content: COURSE_GENERATION_PROMPT },
+              { role: "user", content: userPrompt },
+            ],
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('AI Gateway Error:', response.status, errorText);
+          
+          if (response.status === 429) {
+            return new Response(
+              JSON.stringify({ error: "Rate limit exceeded. Please wait a moment and try again." }),
+              { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          if (response.status === 402) {
+            return new Response(
+              JSON.stringify({ error: "AI credits exhausted. Please try again later." }),
+              { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          
+          if (attempt < MAX_ATTEMPTS) {
+            console.log('Gateway error, retrying...');
+            continue;
+          }
+          throw new Error(`AI gateway error: ${response.status}`);
         }
-        if (response.status === 402) {
-          return new Response(
-            JSON.stringify({ error: "AI credits exhausted. Please try again later." }),
-            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+        console.log('AI response received, parsing modules...');
         
-        throw new Error(`AI gateway error: ${response.status}`);
+        modules = parseModulesJson(content);
+        if (modules) break;
+
+        if (attempt < MAX_ATTEMPTS) {
+          console.log('JSON parse failed, retrying automatically...');
+        }
       }
 
-      const data = await response.json();
-      const content = data.choices[0].message.content;
-      console.log('AI response received, parsing modules...');
-      
-      const modules = parseModulesJson(content);
       if (!modules) {
-        throw new Error("RETRY_GENERATION");
+        throw new Error("Failed to generate course after retries. Please try again.");
       }
 
       console.log(`Parsed ${modules.length} modules, saving to database...`);
