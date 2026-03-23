@@ -91,7 +91,7 @@ const Landing = () => {
             </div>
             <h3 className="font-sora text-xl font-semibold mb-3">AI Tutor On-Demand</h3>
             <p className="text-muted-foreground">
-              Get instant answers from your supportive big-sibling style AI mentor whenever you need help
+              Ask questions anytime and get clear, encouraging guidance from your personal AI mentor
             </p>
           </CosmicCard>
           
