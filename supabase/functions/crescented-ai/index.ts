@@ -180,6 +180,14 @@ Output ONLY the JSON array.`;
         if (!Array.isArray(modules) || modules.length === 0) {
           throw new Error("Invalid modules array");
         }
+        
+        // Enforce exactly 5 modules
+        if (modules.length > 5) {
+          console.log(`AI returned ${modules.length} modules, truncating to 5`);
+          modules = modules.slice(0, 5);
+        } else if (modules.length < 5) {
+          console.warn(`AI returned only ${modules.length} modules instead of 5`);
+        }
       } catch (parseError) {
         console.error("Failed to parse modules JSON:", parseError);
         throw new Error("Failed to generate course structure. Please try again.");

@@ -103,9 +103,10 @@ const Dashboard = () => {
 
       if (modulesData && modulesData.length > 0) {
         setModules(modulesData as unknown as Module[]);
-        // Set first module as current if none selected
+        // Set first module as current if none selected or if stored ID is stale
         const stored = useStore.getState().currentModuleId;
-        if (!stored) {
+        const storedExists = stored && modulesData.some(m => m.id === stored);
+        if (!storedExists) {
           setCurrentModuleId(modulesData[0].id);
         }
       }
