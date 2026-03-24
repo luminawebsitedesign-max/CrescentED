@@ -377,6 +377,27 @@ const Settings = () => {
               </div>
             </CosmicCard>
 
+            {/* Edit Onboarding */}
+            <CosmicCard className="p-5" hover={false}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <PenLine className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-outfit font-semibold text-sm">Onboarding Answers</h2>
+                  <p className="text-xs text-muted-foreground">Update your business idea, goals, and preferences</p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate('/intake?edit=true')}
+              >
+                <PenLine className="w-4 h-4 mr-2" />
+                Edit Onboarding Answers
+              </Button>
+            </CosmicCard>
+
             {/* Course Management */}
             <CosmicCard className="p-5" hover={false}>
               <div className="flex items-center gap-3 mb-4">
