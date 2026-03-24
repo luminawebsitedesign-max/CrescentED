@@ -48,9 +48,10 @@ const getShortName = (title: string): string => {
     if (lowerTitle.includes(key)) return shortName;
   }
   
-  const words = title.split(' ').slice(0, 3);
+  // For unmatched titles: take first 2 meaningful words, cap at 20 chars
+  const words = title.split(/[\s:–—-]+/).filter(w => w.length > 0).slice(0, 2);
   const shortened = words.join(' ');
-  return shortened.length > 18 ? shortened.substring(0, 18) + '…' : shortened;
+  return shortened.length > 20 ? shortened.substring(0, 19) + '…' : shortened;
 };
 
 const getMoonPhase = (index: number, total: number, isComplete: boolean): string => {
