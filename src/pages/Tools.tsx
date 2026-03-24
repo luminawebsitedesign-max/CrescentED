@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { CosmicCard } from '@/components/ui/cosmic-card';
@@ -40,6 +41,7 @@ const Tools = () => {
   const [loading, setLoading] = useState(false);
   const [businessIdea, setBusinessIdea] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -223,7 +225,7 @@ Make tasks realistic, achievable, and high-impact.`,
 
             <SectionDivider label="Quick Downloads" className="pt-4" />
             
-            <CosmicCard className="p-4 flex items-center gap-3" hover={false}>
+            <CosmicCard className="p-4 flex items-center gap-3 cursor-pointer" onClick={() => navigate('/pdfs')}>
               <div className="w-10 h-10 rounded-lg bg-cosmic-violet/10 flex items-center justify-center">
                 <FolderDown className="w-5 h-5 text-cosmic-violet" />
               </div>

@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/store/useStore';
 import { 
   Loader2, Save, User, Palette, StickyNote, 
-  BookOpen, AlertTriangle, RefreshCw, Trash2 
+  BookOpen, AlertTriangle, RefreshCw, Trash2, PenLine 
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -243,9 +243,9 @@ const Settings = () => {
   return (
     <DashboardLayout loading={loading}>
         <div className="max-w-2xl mx-auto pb-8">
-          <h1 className="font-sora text-2xl font-bold mb-1">Settings</h1>
+          <h1 className="font-sora text-2xl font-bold mb-1">Account</h1>
           <p className="text-muted-foreground text-sm mb-6">
-            Manage your account and learning preferences
+            Manage your profile, preferences, and course settings
           </p>
 
           <div className="space-y-4">
@@ -375,6 +375,27 @@ const Settings = () => {
                   </RadioGroup>
                 </div>
               </div>
+            </CosmicCard>
+
+            {/* Edit Onboarding */}
+            <CosmicCard className="p-5" hover={false}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <PenLine className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-outfit font-semibold text-sm">Onboarding Answers</h2>
+                  <p className="text-xs text-muted-foreground">Update your business idea, goals, and preferences</p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate('/intake?edit=true')}
+              >
+                <PenLine className="w-4 h-4 mr-2" />
+                Edit Onboarding Answers
+              </Button>
             </CosmicCard>
 
             {/* Course Management */}
