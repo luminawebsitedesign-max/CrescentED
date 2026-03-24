@@ -18,59 +18,62 @@ const Auth = ({ mode }: AuthProps) => {
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [rememberedEmail, setRememberedEmail] = useState<string | null>(null);
-  const [useDifferentEmail, setUseDifferentEmail] = useState(false);
+  const [showLoginForm, setShowLoginForm] = useState(false);
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem('crescented-last-email');
-    if (savedEmail) {
-      setRememberedEmail(savedEmail);
-    }
-    
-    // Check if user has an active session for the remembered email
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session && savedEmail && session.user.email === savedEmail) {
+      const savedEmail = localStorage.getItem('crescented-last-email');
+
+      if (session) {
+        // Store the ACTUAL authenticated email, not whatever was saved before
+        const actualEmail = session.user.email || null;
+        if (actualEmail) {
+          localStorage.setItem('crescented-last-email', actualEmail);
+        }
+        setRememberedEmail(actualEmail);
         setHasActiveSession(true);
+      } else if (savedEmail) {
+        setRememberedEmail(savedEmail);
+        setHasActiveSession(false);
       }
+
       setCheckingSession(false);
     };
-    
+
     checkSession();
   }, []);
 
   const handleContinueAsRemembered = async () => {
     if (!rememberedEmail) return;
-    
-    setLoading(true);
-    
-    // Check if there's an active session for this email
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session && session.user.email === rememberedEmail) {
-      // Active session exists - navigate to dashboard
+
+    if (hasActiveSession) {
+      setLoading(true);
       toast({
         title: 'Welcome back!',
         description: 'Continuing your entrepreneurial journey.',
       });
       navigate('/dashboard');
+      setLoading(false);
     } else {
-      // No active session - need password to login
+      // No active session — show password field with email pre-filled
       setEmail(rememberedEmail);
-      setUseDifferentEmail(true); // Show login form with email pre-filled
-      toast({
-        title: 'Session expired',
-        description: 'Please enter your password to continue.',
-      });
+      setShowLoginForm(true);
     }
-    
-    setLoading(false);
   };
 
   const handleUseDifferentEmail = () => {
-    setUseDifferentEmail(true);
+    setShowLoginForm(true);
+    setEmail('');
+  };
+
+  const handleForgetAccount = () => {
+    localStorage.removeItem('crescented-last-email');
+    setRememberedEmail(null);
+    setShowLoginForm(true);
     setEmail('');
   };
 
@@ -87,26 +90,26 @@ const Auth = ({ mode }: AuthProps) => {
             emailRedirectTo: `${window.location.origin}/dashboard`
           }
         });
-        
+
         if (error) throw error;
-        
+
         localStorage.setItem('crescented-last-email', email);
-        
+
         toast({
           title: 'Account created!',
-          description: 'Welcome to CrescentEd. Let\'s get started!',
+          description: "Welcome to CrescentEd. Let's get started!",
         });
         navigate('/intake');
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        
+
         if (error) throw error;
-        
+
         localStorage.setItem('crescented-last-email', email);
-        
+
         toast({
           title: 'Welcome back!',
           description: 'Ready to continue your entrepreneurial journey?',
@@ -132,33 +135,33 @@ const Auth = ({ mode }: AuthProps) => {
     );
   }
 
-  // Show "Continue as" screen if remembered email exists and not choosing different
-  const showRememberedChoice = rememberedEmail && !useDifferentEmail && mode === 'login';
+  // Show account picker only on login, when we have a remembered email, and user hasn't chosen yet
+  const showAccountPicker = rememberedEmail && !showLoginForm && mode === 'login';
 
   return (
     <div className="min-h-screen bg-background noise-texture flex items-center justify-center p-6">
       <div className="fixed inset-0 aurora-overlay pointer-events-none" />
-      
+
       <div className="relative z-10 w-full max-w-md">
         <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8">
           <ArrowLeft className="w-4 h-4" />
           Back to Home
         </Link>
-        
+
         <div className="glass-cosmic rounded-2xl p-8">
           <div className="flex items-center gap-3 mb-6">
             <CrescentLogo size="md" />
             <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
-          
-          {showRememberedChoice ? (
+
+          {showAccountPicker ? (
             <>
               <h1 className="font-sora text-2xl font-bold mb-2">Welcome Back</h1>
               <p className="text-muted-foreground mb-6">
                 Choose how you'd like to continue
               </p>
-              
-              {/* Continue as remembered email */}
+
+              {/* Continue as remembered account */}
               <button
                 onClick={handleContinueAsRemembered}
                 disabled={loading}
@@ -173,15 +176,20 @@ const Auth = ({ mode }: AuthProps) => {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-muted-foreground">Continue as</p>
+                    <p className="text-sm text-muted-foreground">
+                      {hasActiveSession ? 'Continue as' : 'Sign in as'}
+                    </p>
                     <p className="font-medium truncate">{rememberedEmail}</p>
                     {hasActiveSession && (
-                      <p className="text-xs text-green-500">Active session</p>
+                      <p className="text-xs text-green-500 mt-0.5">Session active — no password needed</p>
+                    )}
+                    {!hasActiveSession && (
+                      <p className="text-xs text-muted-foreground mt-0.5">You'll need to enter your password</p>
                     )}
                   </div>
                 </div>
               </button>
-              
+
               {/* Use different email */}
               <button
                 onClick={handleUseDifferentEmail}
@@ -198,8 +206,16 @@ const Auth = ({ mode }: AuthProps) => {
                   </div>
                 </div>
               </button>
-              
-              <p className="mt-6 text-center text-sm text-muted-foreground">
+
+              {/* Forget this account link */}
+              <button
+                onClick={handleForgetAccount}
+                className="w-full mt-3 text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Forget this account on this device
+              </button>
+
+              <p className="mt-5 text-center text-sm text-muted-foreground">
                 Don't have an account?{' '}
                 <Link to="/register" className="text-primary hover:underline">
                   Sign up
@@ -212,11 +228,11 @@ const Auth = ({ mode }: AuthProps) => {
                 {mode === 'login' ? 'Welcome Back' : 'Start Your Journey'}
               </h1>
               <p className="text-muted-foreground mb-6">
-                {mode === 'login' 
-                  ? 'Log in to continue your entrepreneurial path' 
+                {mode === 'login'
+                  ? 'Log in to continue your entrepreneurial path'
                   : 'Create your account and begin learning'}
               </p>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -233,7 +249,7 @@ const Auth = ({ mode }: AuthProps) => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
@@ -250,9 +266,9 @@ const Auth = ({ mode }: AuthProps) => {
                     />
                   </div>
                 </div>
-                
-                <Button 
-                  type="submit" 
+
+                <Button
+                  type="submit"
                   className="w-full bg-primary hover:bg-primary/90 glow-primary"
                   disabled={loading}
                 >
@@ -266,7 +282,7 @@ const Auth = ({ mode }: AuthProps) => {
                   )}
                 </Button>
               </form>
-              
+
               <p className="mt-6 text-center text-sm text-muted-foreground">
                 {mode === 'login' ? (
                   <>
