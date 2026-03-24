@@ -254,19 +254,19 @@ const ModulesSidebar = () => {
                         <button
                           onClick={() => handleModuleClick(module.id)}
                           className={cn(
-                            'w-full text-left px-2 py-2 rounded-lg transition-all group flex items-center gap-2',
+                            'w-full text-left px-2 py-1.5 rounded-lg transition-all group flex items-center gap-2 min-w-0',
                             isActive 
                               ? 'bg-primary/10 border border-primary/30' 
                               : 'hover:bg-secondary/50'
                           )}
                         >
-                          <span className="text-base flex-shrink-0">
+                          <span className="text-sm flex-shrink-0 w-5 text-center">
                             {getMoonPhase(index, modules.length, isComplete)}
                           </span>
                           <span className={cn(
-                            'text-sm font-medium truncate flex-1',
+                            'text-sm font-medium truncate min-w-0 flex-1',
                             isActive && 'text-primary',
-                            isComplete && 'text-green-500'
+                            isComplete && 'text-muted-foreground'
                           )}>
                             {shortName}
                           </span>
