@@ -41,6 +41,7 @@ const Tools = () => {
   const [loading, setLoading] = useState(false);
   const [businessIdea, setBusinessIdea] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
