@@ -243,9 +243,9 @@ const Settings = () => {
   return (
     <DashboardLayout loading={loading}>
         <div className="max-w-2xl mx-auto pb-8">
-          <h1 className="font-sora text-2xl font-bold mb-1">Settings</h1>
+          <h1 className="font-sora text-2xl font-bold mb-1">Account</h1>
           <p className="text-muted-foreground text-sm mb-6">
-            Manage your account and learning preferences
+            Manage your profile, preferences, and course settings
           </p>
 
           <div className="space-y-4">
