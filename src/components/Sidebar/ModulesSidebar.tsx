@@ -210,11 +210,20 @@ const ModulesSidebar = () => {
 
             {/* Your Idea - compact inline */}
             {intake?.idea && (
-              <div className="px-2 py-1">
-                <p className="text-xs text-muted-foreground truncate" title={intake.idea}>
-                  💡 {intake.idea.length > 40 ? intake.idea.slice(0, 40) + '…' : intake.idea}
-                </p>
-              </div>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <div className="px-2 py-1 cursor-default">
+                    <p className="text-xs text-muted-foreground truncate">
+                      💡 {intake.idea}
+                    </p>
+                  </div>
+                </TooltipTrigger>
+                {intake.idea.length > 35 && (
+                  <TooltipContent side="right" className="max-w-[240px]">
+                    <p className="text-xs">{intake.idea}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
             )}
 
             {/* Modules Section Header */}
