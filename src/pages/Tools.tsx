@@ -223,7 +223,7 @@ Make tasks realistic, achievable, and high-impact.`,
 
             <SectionDivider label="Quick Downloads" className="pt-4" />
             
-            <CosmicCard className="p-4 flex items-center gap-3 cursor-pointer" onClick={() => window.location.href = '/pdfs'}>
+            <CosmicCard className="p-4 flex items-center gap-3 cursor-pointer" onClick={() => navigate('/pdfs')}>
               <div className="w-10 h-10 rounded-lg bg-cosmic-violet/10 flex items-center justify-center">
                 <FolderDown className="w-5 h-5 text-cosmic-violet" />
               </div>
