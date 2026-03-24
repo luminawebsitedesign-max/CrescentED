@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import CrescentLogo from '@/components/ui/crescent-logo';
 import {
@@ -13,17 +12,14 @@ import {
   ChevronRight,
   Wrench,
   FileText,
-  User,
   CheckCircle,
   LayoutDashboard,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { type Module, type ModuleProgress } from '@/types/crescented';
 
-// Moon phase icons for module progression
 const MOON_PHASES = ['🌑', '🌒', '🌓', '🌔', '🌕'];
 
-// Short creative display names for modules
 const getShortName = (title: string): string => {
   const shortNames: Record<string, string> = {
     'budgeting': 'Budget Basics',
@@ -52,7 +48,6 @@ const getShortName = (title: string): string => {
     if (lowerTitle.includes(key)) return shortName;
   }
   
-  // Fallback: use first 2-3 words max 18 chars
   const words = title.split(' ').slice(0, 3);
   const shortened = words.join(' ');
   return shortened.length > 18 ? shortened.substring(0, 18) + '…' : shortened;
@@ -63,6 +58,13 @@ const getMoonPhase = (index: number, total: number, isComplete: boolean): string
   const phase = Math.floor((index / Math.max(total - 1, 1)) * 4);
   return MOON_PHASES[Math.min(phase, 4)];
 };
+
+const NAV_ITEMS = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/tools', label: 'Tools', icon: Wrench },
+  { to: '/pdfs', label: 'My PDFs', icon: FileText },
+  { to: '/settings', label: 'Account', icon: Settings },
+];
 
 const ModulesSidebar = () => {
   const location = useLocation();
@@ -75,7 +77,6 @@ const ModulesSidebar = () => {
     setCurrentModuleId,
     intake 
   } = useStore();
-  
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -88,11 +89,15 @@ const ModulesSidebar = () => {
     return (progress.sectionsCompleted.length / sections.length) * 100;
   };
 
-  // Only show modules as active when on dashboard or module pages
   const isOnModulePage = location.pathname === '/dashboard' || location.pathname.startsWith('/module/');
   const isModuleActive = (moduleId: string) => {
     if (!isOnModulePage) return false;
     return currentModuleId === moduleId || location.pathname === `/module/${moduleId}`;
+  };
+
+  const isNavActive = (to: string) => {
+    if (to === '/settings') return location.pathname === '/settings' || location.pathname === '/profile';
+    return location.pathname === to;
   };
 
   const isModuleComplete = (module: Module) => calculateModuleProgress(module) === 100;
@@ -109,7 +114,7 @@ const ModulesSidebar = () => {
         sidebarCollapsed ? 'w-16' : 'w-[260px]'
       )}
     >
-      {/* Header - Logo & Settings */}
+      {/* Header */}
       <div className="p-3 border-b border-border flex items-center justify-between flex-shrink-0">
         <Link to="/dashboard" className="flex items-center gap-2">
           <CrescentLogo size="sm" />
@@ -119,114 +124,41 @@ const ModulesSidebar = () => {
             </span>
           )}
         </Link>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
-          >
-            {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
+        >
+          {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        </Button>
       </div>
 
       {sidebarCollapsed ? (
         /* Collapsed View */
         <div className="flex-1 flex flex-col items-center py-3 gap-1 overflow-hidden">
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Link to="/dashboard">
-                <Button
-                  variant={location.pathname === '/dashboard' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className={cn(
-                    'h-9 w-9',
-                    location.pathname === '/dashboard' && 'bg-primary/10 text-primary border border-primary/20'
-                  )}
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Dashboard</TooltipContent>
-          </Tooltip>
-          
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Link to="/tools">
-                <Button
-                  variant={location.pathname === '/tools' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className={cn(
-                    'h-9 w-9',
-                    location.pathname === '/tools' && 'bg-primary/10 text-primary border border-primary/20'
-                  )}
-                >
-                  <Wrench className="w-4 h-4" />
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Tools</TooltipContent>
-          </Tooltip>
-          
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Link to="/pdfs">
-                <Button
-                  variant={location.pathname === '/pdfs' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className={cn(
-                    'h-9 w-9',
-                    location.pathname === '/pdfs' && 'bg-primary/10 text-primary border border-primary/20'
-                  )}
-                >
-                  <FileText className="w-4 h-4" />
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">My PDFs</TooltipContent>
-          </Tooltip>
-          
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Link to="/profile">
-                <Button
-                  variant={location.pathname === '/profile' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className={cn(
-                    'h-9 w-9',
-                    location.pathname === '/profile' && 'bg-primary/10 text-primary border border-primary/20'
-                  )}
-                >
-                  <User className="w-4 h-4" />
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Profile</TooltipContent>
-          </Tooltip>
-
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Link to="/settings">
-                <Button
-                  variant={location.pathname === '/settings' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className={cn(
-                    'h-9 w-9',
-                    location.pathname === '/settings' && 'bg-primary/10 text-primary border border-primary/20'
-                  )}
-                >
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
-          </Tooltip>
+          {NAV_ITEMS.map((item) => (
+            <Tooltip key={item.to} delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Link to={item.to}>
+                  <Button
+                    variant={isNavActive(item.to) ? 'secondary' : 'ghost'}
+                    size="icon"
+                    className={cn(
+                      'h-9 w-9',
+                      isNavActive(item.to) && 'bg-primary/10 text-primary border border-primary/20'
+                    )}
+                  >
+                    <item.icon className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">{item.label}</TooltipContent>
+            </Tooltip>
+          ))}
           
           <div className="my-2 w-8 h-px bg-border" />
           
-          {/* Collapsed module list */}
           <ScrollArea className="flex-1 w-full">
             <div className="flex flex-col items-center gap-1 px-2">
               {modules.map((module, index) => (
@@ -256,96 +188,33 @@ const ModulesSidebar = () => {
         /* Expanded View */
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-0.5">
-            {/* Dashboard */}
-            <Link to="/dashboard">
-              <Button
-                variant={location.pathname === '/dashboard' ? 'secondary' : 'ghost'}
-                className={cn(
-                  'w-full justify-start gap-2 h-9 text-sm',
-                  location.pathname === '/dashboard' && 'bg-primary/10 text-primary border border-primary/20'
-                )}
-              >
-                <LayoutDashboard className="w-4 h-4 flex-shrink-0" />
-                <span>Dashboard</span>
-              </Button>
-            </Link>
-
-            {/* Tools */}
-            <Link to="/tools">
-              <Button
-                variant={location.pathname === '/tools' ? 'secondary' : 'ghost'}
-                className={cn(
-                  'w-full justify-start gap-2 h-9 text-sm',
-                  location.pathname === '/tools' && 'bg-primary/10 text-primary border border-primary/20'
-                )}
-              >
-                <Wrench className="w-4 h-4 flex-shrink-0" />
-                <span>Tools</span>
-              </Button>
-            </Link>
-
-            {/* My PDFs */}
-            <Link to="/pdfs">
-              <Button
-                variant={location.pathname === '/pdfs' ? 'secondary' : 'ghost'}
-                className={cn(
-                  'w-full justify-start gap-2 h-9 text-sm',
-                  location.pathname === '/pdfs' && 'bg-primary/10 text-primary border border-primary/20'
-                )}
-              >
-                <FileText className="w-4 h-4 flex-shrink-0" />
-                <span>My PDFs</span>
-              </Button>
-            </Link>
-
-            {/* Profile */}
-            <Link to="/profile">
-              <Button
-                variant={location.pathname === '/profile' ? 'secondary' : 'ghost'}
-                className={cn(
-                  'w-full justify-start gap-2 h-9 text-sm',
-                  location.pathname === '/profile' && 'bg-primary/10 text-primary border border-primary/20'
-                )}
-              >
-                <User className="w-4 h-4 flex-shrink-0" />
-                <span>Profile</span>
-              </Button>
-            </Link>
-
-            {/* Settings */}
-            <Link to="/settings">
-              <Button
-                variant={location.pathname === '/settings' ? 'secondary' : 'ghost'}
-                className={cn(
-                  'w-full justify-start gap-2 h-9 text-sm',
-                  location.pathname === '/settings' && 'bg-primary/10 text-primary border border-primary/20'
-                )}
-              >
-                <Settings className="w-4 h-4 flex-shrink-0" />
-                <span>Settings</span>
-              </Button>
-            </Link>
+            {/* Nav Items */}
+            {NAV_ITEMS.map((item) => (
+              <Link key={item.to} to={item.to}>
+                <Button
+                  variant={isNavActive(item.to) ? 'secondary' : 'ghost'}
+                  className={cn(
+                    'w-full justify-start gap-2 h-9 text-sm',
+                    isNavActive(item.to) && 'bg-primary/10 text-primary border border-primary/20'
+                  )}
+                >
+                  <item.icon className="w-4 h-4 flex-shrink-0" />
+                  <span>{item.label}</span>
+                </Button>
+              </Link>
+            ))}
 
             {/* Divider */}
             <div className="my-3 h-px bg-border" />
 
-            {/* Edit Onboarding link */}
-            <Link to="/intake?edit=true">
-              <Button variant="ghost" className="w-full justify-start gap-2 h-9 text-sm text-muted-foreground">
-                <FileText className="w-4 h-4 flex-shrink-0" />
-                <span>Edit Onboarding</span>
-              </Button>
-            </Link>
-
-            {intake && (
-              <div className="mx-2 mt-1 p-2 rounded-lg bg-secondary/50 text-xs">
-                <p className="font-medium mb-0.5">Your Idea:</p>
-                <p className="text-muted-foreground line-clamp-2">{intake.idea}</p>
+            {/* Your Idea - compact inline */}
+            {intake?.idea && (
+              <div className="px-2 py-1">
+                <p className="text-xs text-muted-foreground truncate" title={intake.idea}>
+                  💡 {intake.idea.length > 40 ? intake.idea.slice(0, 40) + '…' : intake.idea}
+                </p>
               </div>
             )}
-
-            {/* Divider */}
-            <div className="my-3 h-px bg-border" />
 
             {/* Modules Section Header */}
             <div className="px-2 py-1.5 flex items-center justify-between">

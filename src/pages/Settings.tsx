@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useStore } from '@/store/useStore';
 import { 
   Loader2, Save, User, Palette, StickyNote, 
-  BookOpen, AlertTriangle, RefreshCw, Trash2 
+  BookOpen, AlertTriangle, RefreshCw, Trash2, PenLine 
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import {
