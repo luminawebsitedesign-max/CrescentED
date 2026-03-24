@@ -48,9 +48,10 @@ const getShortName = (title: string): string => {
     if (lowerTitle.includes(key)) return shortName;
   }
   
-  const words = title.split(' ').slice(0, 3);
+  // For unmatched titles: take first 2 meaningful words, cap at 20 chars
+  const words = title.split(/[\s:–—-]+/).filter(w => w.length > 0).slice(0, 2);
   const shortened = words.join(' ');
-  return shortened.length > 18 ? shortened.substring(0, 18) + '…' : shortened;
+  return shortened.length > 20 ? shortened.substring(0, 19) + '…' : shortened;
 };
 
 const getMoonPhase = (index: number, total: number, isComplete: boolean): string => {
@@ -209,11 +210,20 @@ const ModulesSidebar = () => {
 
             {/* Your Idea - compact inline */}
             {intake?.idea && (
-              <div className="px-2 py-1">
-                <p className="text-xs text-muted-foreground truncate" title={intake.idea}>
-                  💡 {intake.idea.length > 40 ? intake.idea.slice(0, 40) + '…' : intake.idea}
-                </p>
-              </div>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <div className="px-2 py-1 cursor-default">
+                    <p className="text-xs text-muted-foreground truncate">
+                      💡 {intake.idea}
+                    </p>
+                  </div>
+                </TooltipTrigger>
+                {intake.idea.length > 35 && (
+                  <TooltipContent side="right" className="max-w-[240px]">
+                    <p className="text-xs">{intake.idea}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
             )}
 
             {/* Modules Section Header */}
@@ -244,19 +254,19 @@ const ModulesSidebar = () => {
                         <button
                           onClick={() => handleModuleClick(module.id)}
                           className={cn(
-                            'w-full text-left px-2 py-2 rounded-lg transition-all group flex items-center gap-2',
+                            'w-full text-left px-2 py-1.5 rounded-lg transition-all group flex items-center gap-2 min-w-0',
                             isActive 
                               ? 'bg-primary/10 border border-primary/30' 
                               : 'hover:bg-secondary/50'
                           )}
                         >
-                          <span className="text-base flex-shrink-0">
+                          <span className="text-sm flex-shrink-0 w-5 text-center">
                             {getMoonPhase(index, modules.length, isComplete)}
                           </span>
                           <span className={cn(
-                            'text-sm font-medium truncate flex-1',
+                            'text-sm font-medium truncate min-w-0 flex-1',
                             isActive && 'text-primary',
-                            isComplete && 'text-green-500'
+                            isComplete && 'text-muted-foreground'
                           )}>
                             {shortName}
                           </span>
