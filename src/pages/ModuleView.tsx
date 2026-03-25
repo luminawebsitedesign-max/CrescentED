@@ -192,9 +192,9 @@ const ModuleView = () => {
       <div className="max-w-4xl mx-auto animate-fade-in pb-8">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-6">
-          <Link to="/modules" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            Back to Modules
+            Back to Dashboard
           </Link>
           <Button
             variant="outline"
