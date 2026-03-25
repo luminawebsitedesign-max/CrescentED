@@ -205,35 +205,34 @@ const ModulesSidebar = () => {
               </Link>
             ))}
 
-            {/* Divider */}
-            <div className="my-3 h-px bg-border" />
-
-            {/* Your Idea - compact inline */}
-            {intake?.idea && (
-              <Tooltip delayDuration={300}>
-                <TooltipTrigger asChild>
-                  <div className="px-2 py-1 cursor-default">
-                    <p className="text-xs text-muted-foreground truncate">
-                      💡 {intake.idea}
-                    </p>
-                  </div>
-                </TooltipTrigger>
-                {intake.idea.length > 35 && (
-                  <TooltipContent side="right" className="max-w-[240px]">
-                    <p className="text-xs">{intake.idea}</p>
+            {/* Divider + Idea */}
+            <div className="mt-3 mb-2">
+              <div className="h-px bg-border" />
+              {intake?.idea && (
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <div className="px-2 pt-2 pb-0.5 cursor-default flex items-center gap-1.5">
+                      <span className="text-xs">💡</span>
+                      <span className="text-[11px] text-muted-foreground/70 font-medium">Your Idea</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-[260px]">
+                    <p className="text-xs leading-relaxed">{intake.idea}</p>
                   </TooltipContent>
-                )}
-              </Tooltip>
-            )}
+                </Tooltip>
+              )}
+            </div>
 
             {/* Modules Section Header */}
-            <div className="px-2 py-1.5 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+            <div className="px-2 pb-1 flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase text-muted-foreground/70 tracking-wider">
                 Modules
               </span>
-              <span className="text-xs text-muted-foreground">
-                {modules.filter(m => isModuleComplete(m)).length}/{modules.length}
-              </span>
+              {modules.length > 0 && (
+                <span className="text-[11px] font-medium text-muted-foreground/60 tabular-nums">
+                  {modules.filter(m => isModuleComplete(m)).length} of {modules.length}
+                </span>
+              )}
             </div>
 
             {/* Module List */}
