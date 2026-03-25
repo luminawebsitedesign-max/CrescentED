@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
+import TutorSidebar from '@/components/Tutor/TutorSidebar';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { SectionDivider } from '@/components/ui/section-divider';
