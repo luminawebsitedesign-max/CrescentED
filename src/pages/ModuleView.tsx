@@ -31,9 +31,11 @@ const ModuleView = () => {
   const [module, setModule] = useState<Module | null>(null);
   const [loading, setLoading] = useState(true);
   const [allModules, setAllModules] = useState<Module[]>([]);
+  const [tutorOpen, setTutorOpen] = useState(false);
+  const [tutorContext, setTutorContext] = useState<{ module_id?: string; section_title?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { setTutorOpen, setCurrentModuleId } = useStore();
+  const { setCurrentModuleId } = useStore();
 
   useEffect(() => {
     const fetchModule = async () => {
