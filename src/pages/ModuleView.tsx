@@ -381,30 +381,36 @@ const ModuleView = () => {
         )}
 
         {/* Module Navigation */}
-        <div className="flex items-center justify-between pt-6 border-t border-border">
+        <div className="flex items-center justify-between gap-3 pt-6 border-t border-border">
           {prevModule ? (
-            <Link to={`/module/${prevModule.id}`}>
-              <Button variant="outline" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Previous:</span> {prevModule.title?.slice(0, 20)}...
+            <Link to={`/module/${prevModule.id}`} className="min-w-0 flex-1">
+              <Button variant="outline" className="gap-2 w-full justify-start">
+                <ArrowLeft className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate min-w-0">
+                  <span className="hidden sm:inline">Prev: </span>
+                  {prevModule.title}
+                </span>
               </Button>
             </Link>
           ) : (
-            <div />
+            <div className="flex-1" />
           )}
           
           {nextModule ? (
-            <Link to={`/module/${nextModule.id}`}>
-              <GradientButton className="gap-2">
-                <span className="hidden sm:inline">Next:</span> {nextModule.title?.slice(0, 20)}...
-                <ArrowRight className="w-4 h-4" />
+            <Link to={`/module/${nextModule.id}`} className="min-w-0 flex-1">
+              <GradientButton className="gap-2 w-full justify-end">
+                <span className="truncate min-w-0">
+                  <span className="hidden sm:inline">Next: </span>
+                  {nextModule.title}
+                </span>
+                <ArrowRight className="w-4 h-4 flex-shrink-0" />
               </GradientButton>
             </Link>
           ) : (
-            <Link to="/modules">
-              <GradientButton className="gap-2">
-                Complete! View All Modules
-                <CheckCircle className="w-4 h-4" />
+            <Link to="/dashboard" className="flex-1">
+              <GradientButton className="gap-2 w-full justify-center">
+                All Complete!
+                <CheckCircle className="w-4 h-4 flex-shrink-0" />
               </GradientButton>
             </Link>
           )}
