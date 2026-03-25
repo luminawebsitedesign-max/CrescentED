@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
+import TutorSidebar from '@/components/Tutor/TutorSidebar';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { SectionDivider } from '@/components/ui/section-divider';
@@ -30,9 +31,11 @@ const ModuleView = () => {
   const [module, setModule] = useState<Module | null>(null);
   const [loading, setLoading] = useState(true);
   const [allModules, setAllModules] = useState<Module[]>([]);
+  const [tutorOpen, setTutorOpen] = useState(false);
+  const [tutorContext, setTutorContext] = useState<{ module_id?: string; section_title?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { setTutorOpen, setCurrentModuleId } = useStore();
+  const { setCurrentModuleId } = useStore();
 
   useEffect(() => {
     const fetchModule = async () => {
@@ -199,7 +202,10 @@ const ModuleView = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setTutorOpen(true)}
+            onClick={() => {
+              setTutorContext({ module_id: id });
+              setTutorOpen(true);
+            }}
             className="border-border"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
@@ -288,7 +294,10 @@ const ModuleView = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setTutorOpen(true)}
+                          onClick={() => {
+                            setTutorContext({ module_id: id, section_title: section.title });
+                            setTutorOpen(true);
+                          }}
                           className="border-accent text-accent hover:bg-accent/10"
                         >
                           <Sparkles className="w-4 h-4 mr-2" />
@@ -401,6 +410,12 @@ const ModuleView = () => {
           )}
         </div>
       </div>
+
+      <TutorSidebar
+        open={tutorOpen}
+        onClose={() => setTutorOpen(false)}
+        context={tutorContext}
+      />
     </DashboardLayout>
   );
 };
