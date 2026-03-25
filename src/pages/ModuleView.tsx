@@ -202,7 +202,10 @@ const ModuleView = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setTutorOpen(true)}
+            onClick={() => {
+              setTutorContext({ module_id: id });
+              setTutorOpen(true);
+            }}
             className="border-border"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
