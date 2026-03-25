@@ -410,6 +410,12 @@ const ModuleView = () => {
           )}
         </div>
       </div>
+
+      <TutorSidebar
+        open={tutorOpen}
+        onClose={() => setTutorOpen(false)}
+        context={tutorContext}
+      />
     </DashboardLayout>
   );
 };
