@@ -294,7 +294,10 @@ const ModuleView = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setTutorOpen(true)}
+                          onClick={() => {
+                            setTutorContext({ module_id: id, section_title: section.title });
+                            setTutorOpen(true);
+                          }}
                           className="border-accent text-accent hover:bg-accent/10"
                         >
                           <Sparkles className="w-4 h-4 mr-2" />
