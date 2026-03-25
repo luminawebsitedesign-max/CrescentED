@@ -51,11 +51,6 @@ const Dashboard = () => {
 
       if (modulesData && modulesData.length > 0) {
         setModules(modulesData as unknown as Module[]);
-        const stored = useStore.getState().currentModuleId;
-        const storedExists = stored && modulesData.some(m => m.id === stored);
-        if (!storedExists) {
-          setCurrentModuleId(modulesData[0].id);
-        }
       }
 
       setLoading(false);
