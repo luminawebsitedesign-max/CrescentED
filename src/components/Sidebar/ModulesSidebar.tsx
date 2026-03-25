@@ -105,7 +105,7 @@ const ModulesSidebar = () => {
 
   const handleModuleClick = (moduleId: string) => {
     setCurrentModuleId(moduleId);
-    navigate('/dashboard');
+    navigate(`/module/${moduleId}`);
   };
 
   return (
