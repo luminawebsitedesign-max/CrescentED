@@ -20,38 +20,12 @@ import { type Module, type ModuleProgress } from '@/types/crescented';
 
 const MOON_PHASES = ['🌑', '🌒', '🌓', '🌔', '🌕'];
 
-const getShortName = (title: string): string => {
-  const shortNames: Record<string, string> = {
-    'budgeting': 'Budget Basics',
-    'pricing': 'Price It Right',
-    'invoicing': 'Invoice Flow',
-    'social media': 'Social Setup',
-    'branding': 'Brand DNA',
-    'website': 'Web Launch',
-    'accounting': 'Money Moves',
-    'customer': 'Customer Love',
-    'automation': 'Auto-Magic',
-    'contracts': 'Legal Shield',
-    'marketing': 'Market Attack',
-    'product': 'Product Craft',
-    'launch': 'Launch Day',
-    'scaling': 'Scale Up',
-    'business foundations': 'Foundations',
-    'running a business': 'Operations',
-    'customer success': 'Client Wins',
-    'personal development': 'Growth Mode',
-    'philosophy': 'Big Picture',
-  };
-  
-  const lowerTitle = title.toLowerCase();
-  for (const [key, shortName] of Object.entries(shortNames)) {
-    if (lowerTitle.includes(key)) return shortName;
-  }
-  
-  // For unmatched titles: take first 2 meaningful words, cap at 20 chars
-  const words = title.split(/[\s:–—-]+/).filter(w => w.length > 0).slice(0, 2);
-  const shortened = words.join(' ');
-  return shortened.length > 20 ? shortened.substring(0, 19) + '…' : shortened;
+const getDisplayName = (title: string): string => {
+  // Strip common prefixes like "Module 1: " or "1. " for cleaner display
+  return title
+    .replace(/^module\s*\d+\s*[:\-–—]\s*/i, '')
+    .replace(/^\d+\s*[.):\-–—]\s*/, '')
+    .trim();
 };
 
 const getMoonPhase = (index: number, total: number, isComplete: boolean): string => {
@@ -245,7 +219,7 @@ const ModulesSidebar = () => {
                 {modules.map((module, index) => {
                   const isActive = isModuleActive(module.id);
                   const isComplete = isModuleComplete(module);
-                  const shortName = getShortName(module.title);
+                  const displayName = getDisplayName(module.title);
 
                   return (
                     <Tooltip key={module.id} delayDuration={0}>
@@ -267,7 +241,7 @@ const ModulesSidebar = () => {
                             isActive && 'text-primary',
                             isComplete && 'text-muted-foreground'
                           )}>
-                            {shortName}
+                            {displayName}
                           </span>
                           {isComplete && (
                             <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
