@@ -219,7 +219,7 @@ const ModulesSidebar = () => {
                 {modules.map((module, index) => {
                   const isActive = isModuleActive(module.id);
                   const isComplete = isModuleComplete(module);
-                  const shortName = getShortName(module.title);
+                  const displayName = getDisplayName(module.title);
 
                   return (
                     <Tooltip key={module.id} delayDuration={0}>
