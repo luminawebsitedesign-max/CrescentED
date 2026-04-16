@@ -241,7 +241,7 @@ const ModulesSidebar = () => {
                             isActive && 'text-primary',
                             isComplete && 'text-muted-foreground'
                           )}>
-                            {shortName}
+                            {displayName}
                           </span>
                           {isComplete && (
                             <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
