@@ -222,33 +222,42 @@ const ModulesSidebar = () => {
                   const displayName = getDisplayName(module.title);
 
                   return (
-                    <Tooltip key={module.id} delayDuration={0}>
+                    <Tooltip key={module.id} delayDuration={300}>
                       <TooltipTrigger asChild>
                         <button
                           onClick={() => handleModuleClick(module.id)}
                           className={cn(
-                            'w-full text-left px-2 py-1.5 rounded-lg transition-all group flex items-center gap-2 min-w-0',
-                            isActive 
-                              ? 'bg-primary/10 border border-primary/30' 
+                            'w-full text-left px-2 py-2 rounded-lg transition-all group flex items-start gap-2',
+                            isActive
+                              ? 'bg-primary/10 border border-primary/30'
                               : 'hover:bg-secondary/50'
                           )}
                         >
-                          <span className="text-sm flex-shrink-0 w-5 text-center">
+                          <span className="text-sm flex-shrink-0 w-5 text-center leading-5 mt-px">
                             {getMoonPhase(index, modules.length, isComplete)}
                           </span>
-                          <span className={cn(
-                            'text-sm font-medium truncate min-w-0 flex-1',
-                            isActive && 'text-primary',
-                            isComplete && 'text-muted-foreground'
-                          )}>
+                          <span
+                            className={cn(
+                              'text-[13px] font-medium leading-snug flex-1 min-w-0 break-words',
+                              isActive && 'text-primary',
+                              isComplete && 'text-muted-foreground'
+                            )}
+                            style={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              wordBreak: 'break-word',
+                            }}
+                          >
                             {displayName}
                           </span>
                           {isComplete && (
-                            <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                            <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" />
                           )}
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-[200px]">
+                      <TooltipContent side="right" className="max-w-[240px]">
                         <p className="font-medium">{module.title}</p>
                         {module.description && (
                           <p className="text-xs text-muted-foreground mt-1">{module.description}</p>
