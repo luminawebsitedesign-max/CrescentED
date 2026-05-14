@@ -44,6 +44,7 @@ const Landing = () => {
         </div>
       </nav>
 
+      <main>
       {/* Hero Section */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-16 pb-24 text-center">
         <div className="animate-fade-in mb-8">
@@ -210,6 +211,7 @@ const Landing = () => {
           </Link>
         </CosmicCard>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-border py-8">
