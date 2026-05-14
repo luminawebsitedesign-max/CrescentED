@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://cyber-plan-assist.lovable.app/sitemap.xml
