@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 
 const NotFound = () => {
   return (
-    <div className="min-h-screen bg-background noise-texture flex items-center justify-center p-6">
+    <main className="min-h-screen bg-background noise-texture flex items-center justify-center p-6">
       <div className="fixed inset-0 aurora-overlay pointer-events-none" />
       <div className="relative z-10 text-center max-w-md">
         <CrescentLogo size="xl" className="mx-auto mb-6" glow />
@@ -20,7 +20,7 @@ const NotFound = () => {
           </Button>
         </Link>
       </div>
-    </div>
+    </main>
   );
 };
 

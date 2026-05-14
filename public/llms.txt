@@ -1,0 +1,16 @@
+# CrescentEd
+
+> AI-powered learning platform that teaches young entrepreneurs how to start, run, and grow a real business through personalized lessons, templates, and an AI mentor.
+
+CrescentEd builds a custom curriculum based on each learner's goals and business idea, organized across 7 domains of entrepreneurship. Learners get an AI tutor, ready-to-use worksheet/template generators, and PDF exports.
+
+## Pages
+
+- [Home](/): Overview of CrescentEd, the 7-domain framework, and how the AI builds a personalized course.
+- [Sign Up](/register): Create a free CrescentEd account.
+- [Log In](/login): Access your dashboard, modules, and AI tutor.
+
+## Optional
+
+- [Dashboard](/dashboard): Authenticated learner dashboard with progress and modules.
+- [Tools](/tools): AI-powered worksheet and template generators.

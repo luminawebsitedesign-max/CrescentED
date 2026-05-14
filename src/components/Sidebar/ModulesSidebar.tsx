@@ -103,6 +103,7 @@ const ModulesSidebar = () => {
           variant="ghost"
           size="icon"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className="text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
         >
           {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -115,10 +116,11 @@ const ModulesSidebar = () => {
           {NAV_ITEMS.map((item) => (
             <Tooltip key={item.to} delayDuration={0}>
               <TooltipTrigger asChild>
-                <Link to={item.to}>
+                <Link to={item.to} aria-label={item.label}>
                   <Button
                     variant={isNavActive(item.to) ? 'secondary' : 'ghost'}
                     size="icon"
+                    aria-label={item.label}
                     className={cn(
                       'h-9 w-9',
                       isNavActive(item.to) && 'bg-primary/10 text-primary border border-primary/20'
@@ -143,6 +145,7 @@ const ModulesSidebar = () => {
                       variant={isModuleActive(module.id) ? 'secondary' : 'ghost'}
                       size="icon"
                       onClick={() => handleModuleClick(module.id)}
+                      aria-label={module.title}
                       className={cn(
                         'h-9 w-9 relative',
                         isModuleActive(module.id) && 'bg-primary/10 text-primary border border-primary/20'
@@ -277,6 +280,7 @@ const ModulesSidebar = () => {
         <Button
           variant="ghost"
           onClick={handleLogout}
+          aria-label="Log out"
           className={cn(
             'w-full justify-start gap-2 text-muted-foreground hover:text-destructive h-9 text-sm',
             sidebarCollapsed && 'justify-center px-2'

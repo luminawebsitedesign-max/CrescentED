@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import SEO from '@/components/SEO';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -140,6 +141,11 @@ const Auth = ({ mode }: AuthProps) => {
 
   return (
     <div className="min-h-screen bg-background noise-texture flex items-center justify-center p-6">
+      <SEO
+        title={mode === 'register' ? 'Create your CrescentEd account' : 'Log in to CrescentEd'}
+        description={mode === 'register' ? 'Sign up free and start a personalized AI-built entrepreneurship course tailored to your goals.' : 'Log in to access your CrescentEd dashboard, modules, and AI tutor.'}
+        path={mode === 'register' ? '/register' : '/login'}
+      />
       <div className="fixed inset-0 aurora-overlay pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-md">

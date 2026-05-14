@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import SEO from '@/components/SEO';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from '@/store/useStore';
 import { CosmicCard } from '@/components/ui/cosmic-card';
@@ -178,6 +179,11 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
+      <SEO
+        title="Dashboard — CrescentEd"
+        description="Your CrescentEd learning hub: progress, current module, and AI tutor at a glance."
+        path="/dashboard"
+      />
       <div className="max-w-4xl mx-auto animate-fade-in space-y-6">
         {/* Welcome Header */}
         <div>

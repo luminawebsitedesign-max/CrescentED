@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import SEO from '@/components/SEO';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
@@ -177,6 +178,11 @@ Make tasks realistic, achievable, and high-impact.`,
 
   return (
     <DashboardLayout>
+      <SEO
+        title="Business Tools — CrescentEd"
+        description="AI-powered worksheet and template generators to accelerate your startup journey."
+        path="/tools"
+      />
       <div className="max-w-6xl mx-auto animate-fade-in pb-8">
         <div className="mb-8">
           <h1 className="text-h1 mb-2">Business Tools</h1>
