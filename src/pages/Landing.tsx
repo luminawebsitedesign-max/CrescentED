@@ -3,11 +3,17 @@ import { Button } from '@/components/ui/button';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import CrescentLogo from '@/components/ui/crescent-logo';
+import SEO from '@/components/SEO';
 import { Sparkles, BookOpen, MessageCircle, FileText, ArrowRight, Star, Rocket, Users, Zap } from 'lucide-react';
 
 const Landing = () => {
   return (
     <div className="min-h-screen bg-background noise-texture dark">
+      <SEO
+        title="CrescentEd — AI Learning for Young Entrepreneurs"
+        description="Build a real business with a personalized AI curriculum, on-demand tutor, and ready-to-use templates. Free to start."
+        path="/"
+      />
       {/* Aurora Background Effect */}
       <div className="fixed inset-0 aurora-overlay pointer-events-none" />
       
