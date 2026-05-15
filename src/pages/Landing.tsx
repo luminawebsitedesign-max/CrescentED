@@ -131,8 +131,8 @@ const Landing = () => {
           />
           <FeatureCard
             icon={<BookOpen className="w-6 h-6" />}
-            title="7-Domain Framework"
-            description="Master business foundations, customer success, personal growth & more"
+            title="Guided Module System"
+            description="Work through personalized modules covering business foundations, customer success, personal growth & more"
           />
           <FeatureCard
             icon={<MessageCircle className="w-6 h-6" />}
