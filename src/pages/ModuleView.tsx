@@ -214,15 +214,15 @@ const ModuleView = () => {
         </div>
 
         {/* Module Header */}
-        <CosmicCard className="p-6 mb-6" variant="gradient" hover={false}>
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cosmic-magenta/20 to-cosmic-violet/20 flex items-center justify-center text-3xl">
+        <CosmicCard className="p-4 sm:p-6 mb-6" variant="gradient" hover={false}>
+          <div className="flex items-start gap-3 sm:gap-4 mb-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br from-cosmic-magenta/20 to-cosmic-violet/20 flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0">
               {DOMAIN_ICONS[domainKey] || '📚'}
             </div>
-            <div className="flex-1">
-              <p className="text-sm text-primary mb-1">{DOMAIN_LABELS[domainKey] || module.domain}</p>
-              <h1 className="text-h1 mb-2">{module.title}</h1>
-              <p className="text-muted-foreground">{module.description || module.summary}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm text-primary mb-1">{DOMAIN_LABELS[domainKey] || module.domain}</p>
+              <h1 className="font-sora text-xl sm:text-3xl font-bold mb-2 break-words leading-tight">{module.title}</h1>
+              <p className="text-sm sm:text-base text-muted-foreground break-words">{module.description || module.summary}</p>
             </div>
           </div>
           
@@ -241,7 +241,7 @@ const ModuleView = () => {
           </div>
           
           {/* Quick Actions */}
-          <div className="flex gap-2 mt-4">
+          <div className="flex flex-wrap gap-2 mt-4">
             <Button variant="outline" size="sm" onClick={downloadModuleSummary}>
               <Download className="w-4 h-4 mr-2" />
               Download Summary
