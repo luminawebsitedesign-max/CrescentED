@@ -131,8 +131,8 @@ const Landing = () => {
           />
           <FeatureCard
             icon={<BookOpen className="w-6 h-6" />}
-            title="7-Domain Framework"
-            description="Master business foundations, customer success, personal growth & more"
+            title="Guided Module System"
+            description="Work through personalized modules covering business foundations, customer success, personal growth & more"
           />
           <FeatureCard
             icon={<MessageCircle className="w-6 h-6" />}
@@ -147,40 +147,13 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Domains Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pb-24">
-        <h2 className="font-sora text-h1 text-center mb-4">
-          The 7 Domains of <span className="text-gradient-cosmic">Entrepreneurship</span>
-        </h2>
-        <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-          A holistic approach to building not just a business, but a sustainable entrepreneurial life
-        </p>
-        
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { icon: '🏗️', name: 'Business Foundations', desc: 'Ideas, planning, validation' },
-            { icon: '⚙️', name: 'Running a Business', desc: 'Operations, finance, legal' },
-            { icon: '🎯', name: 'Customer Success', desc: 'Marketing, sales, retention' },
-            { icon: '🌱', name: 'Personal Development', desc: 'Mindset, skills, growth' },
-            { icon: '⏰', name: 'Daily Life Optimization', desc: 'Productivity, balance, habits' },
-            { icon: '💭', name: 'Philosophy & Worldview', desc: 'Purpose, values, ethics' },
-            { icon: '✨', name: 'Other Topics', desc: 'Specialized knowledge' },
-          ].map((domain) => (
-            <CosmicCard key={domain.name} className="p-5">
-              <span className="text-2xl mb-3 block">{domain.icon}</span>
-              <h3 className="font-outfit font-medium text-foreground mb-1">{domain.name}</h3>
-              <p className="text-sm text-muted-foreground">{domain.desc}</p>
-            </CosmicCard>
-          ))}
-        </div>
-      </section>
 
       {/* Social Proof */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 pb-24">
         <div className="grid md:grid-cols-3 gap-8 text-center">
           <div>
-            <p className="text-4xl font-bold text-gradient-cosmic mb-2">7</p>
-            <p className="text-muted-foreground">Learning Domains</p>
+            <p className="text-4xl font-bold text-gradient-cosmic mb-2">5</p>
+            <p className="text-muted-foreground">Guided Modules</p>
           </div>
           <div>
             <p className="text-4xl font-bold text-gradient-cosmic mb-2">AI‑Powered</p>
@@ -196,34 +169,31 @@ const Landing = () => {
       {/* Beta + Roadmap Section */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 pb-24">
         <CosmicCard className="p-8 md:p-10" hover={false}>
-          <div className="grid md:grid-cols-[1fr_1.2fr] gap-8 md:gap-10 items-start">
-            {/* Left: Beta note */}
-            <div>
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-cosmic text-xs font-medium text-cosmic-magenta border border-cosmic-magenta/30 mb-4">
-                <FlaskConical className="w-3.5 h-3.5" />
-                Currently in Beta
-              </span>
-              <h2 className="font-sora text-2xl md:text-3xl font-semibold mb-3">
-                Built in the open, improved with you
-              </h2>
-              <p className="text-muted-foreground leading-relaxed">
-                CrescentEd is in active beta. Core functionality — personalized courses, the AI tutor, templates, and PDFs — is live and working today. We're shipping improvements every week based on real feedback from early users.
-              </p>
-            </div>
+          <div className="mb-8">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-cosmic text-xs font-medium text-cosmic-magenta border border-cosmic-magenta/30 mb-4">
+              <FlaskConical className="w-3.5 h-3.5" />
+              Beta Version
+            </span>
+            <h2 className="font-sora text-2xl md:text-3xl font-semibold mb-3">
+              What's live now, and what's coming next
+            </h2>
+            <p className="text-muted-foreground leading-relaxed max-w-3xl">
+              CrescentEd is currently a working beta. The current version already includes personalized onboarding, AI-generated modules, an AI entrepreneurship mentor, practical tools, and PDFs. Future updates will focus on making the platform more personalized, more useful, and more collaborative.
+            </p>
+          </div>
 
-            {/* Right: Roadmap */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-10 mb-8">
             <div>
               <h3 className="font-outfit text-sm uppercase tracking-wider text-muted-foreground/70 mb-4">
-                Coming Next
+                What's in the Beta
               </h3>
               <ul className="space-y-3">
                 {[
-                  'Stronger AI personalization tuned to your goals',
-                  'File uploads to give the AI more of your context',
-                  'Better tools and higher-quality generated outputs',
-                  'More guided, step-by-step support inside lessons',
-                  'Light gamification and progress features',
-                  'Community and collaboration features (later)',
+                  'Personalized onboarding and course generation',
+                  '5 guided entrepreneurship modules',
+                  'AI mentor support inside lessons',
+                  'Practical business tools and downloadable PDFs',
+                  'Dashboard, account flow, and progress-based learning structure',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <CheckCircle2 className="w-4 h-4 text-cosmic-magenta flex-shrink-0 mt-0.5" />
@@ -232,7 +202,33 @@ const Landing = () => {
                 ))}
               </ul>
             </div>
+
+            <div>
+              <h3 className="font-outfit text-sm uppercase tracking-wider text-muted-foreground/70 mb-4">
+                What's planned for V1 and later updates
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  'More complete onboarding with better business-context questions',
+                  'Stronger AI personalization using onboarding answers, master notes, and user context',
+                  'File uploads so users can give the AI more relevant business information',
+                  'Better tools and higher-quality outputs',
+                  'More step-by-step support across the product',
+                  'Lightweight in-app feedback collection',
+                  'Later: collaboration, community, gamification, better source transparency, stronger automation, and more advanced product polish',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-cosmic-magenta/50 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
+
+          <p className="text-sm text-muted-foreground">
+            If you have feedback while using CrescentEd, email <a href="mailto:Luminawebsitedesign@gmail.com" className="text-primary hover:underline">Luminawebsitedesign@gmail.com</a>
+          </p>
         </CosmicCard>
       </section>
 
