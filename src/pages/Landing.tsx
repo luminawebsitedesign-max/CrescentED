@@ -147,33 +147,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Domains Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pb-24">
-        <h2 className="font-sora text-h1 text-center mb-4">
-          The 7 Domains of <span className="text-gradient-cosmic">Entrepreneurship</span>
-        </h2>
-        <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-          A holistic approach to building not just a business, but a sustainable entrepreneurial life
-        </p>
-        
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { icon: '🏗️', name: 'Business Foundations', desc: 'Ideas, planning, validation' },
-            { icon: '⚙️', name: 'Running a Business', desc: 'Operations, finance, legal' },
-            { icon: '🎯', name: 'Customer Success', desc: 'Marketing, sales, retention' },
-            { icon: '🌱', name: 'Personal Development', desc: 'Mindset, skills, growth' },
-            { icon: '⏰', name: 'Daily Life Optimization', desc: 'Productivity, balance, habits' },
-            { icon: '💭', name: 'Philosophy & Worldview', desc: 'Purpose, values, ethics' },
-            { icon: '✨', name: 'Other Topics', desc: 'Specialized knowledge' },
-          ].map((domain) => (
-            <CosmicCard key={domain.name} className="p-5">
-              <span className="text-2xl mb-3 block">{domain.icon}</span>
-              <h3 className="font-outfit font-medium text-foreground mb-1">{domain.name}</h3>
-              <p className="text-sm text-muted-foreground">{domain.desc}</p>
-            </CosmicCard>
-          ))}
-        </div>
-      </section>
 
       {/* Social Proof */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 pb-24">
