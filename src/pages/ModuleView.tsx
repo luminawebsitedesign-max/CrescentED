@@ -262,35 +262,35 @@ const ModuleView = () => {
                   className="border-0 mb-4"
                 >
                   <CosmicCard className="overflow-hidden" hover={false}>
-                    <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                      <div className="flex items-center gap-4 text-left">
+                    <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+                      <div className="flex items-center gap-3 sm:gap-4 text-left flex-1 min-w-0">
                         <Checkbox
                           checked={isComplete}
                           onCheckedChange={() => toggleSectionComplete(section.title)}
                           onClick={(e) => e.stopPropagation()}
-                          className="border-primary data-[state=checked]:bg-primary"
+                          className="border-primary data-[state=checked]:bg-primary flex-shrink-0"
                         />
-                        <div className="flex-1">
-                          <h3 className={`font-outfit font-semibold ${isComplete ? 'text-muted-foreground' : ''}`}>
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`font-outfit font-semibold break-words ${isComplete ? 'text-muted-foreground' : ''}`}>
                             {section.title}
                           </h3>
                           <p className="text-sm text-muted-foreground">
                             {section.plug_and_plays?.length || 0} resources
                           </p>
                         </div>
-                        {isComplete && <CheckCircle className="w-5 h-5 text-green-500" />}
+                        {isComplete && <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />}
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="px-6 pb-6">
+                    <AccordionContent className="px-4 sm:px-6 pb-6">
                       {/* Content */}
-                      <div className="prose prose-sm prose-invert max-w-none mb-6 pl-10">
-                        <div className="text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                      <div className="prose prose-sm prose-invert max-w-none mb-6 sm:pl-10">
+                        <div className="text-foreground/90 whitespace-pre-wrap leading-relaxed break-words">
                           {section.content}
                         </div>
                       </div>
 
                       {/* Ask Tutor Button */}
-                      <div className="pl-10 mb-6">
+                      <div className="sm:pl-10 mb-6">
                         <Button
                           variant="outline"
                           size="sm"
@@ -307,7 +307,7 @@ const ModuleView = () => {
 
                       {/* Plug & Plays */}
                       {section.plug_and_plays && section.plug_and_plays.length > 0 && (
-                        <div className="pl-10 space-y-3">
+                        <div className="sm:pl-10 space-y-3">
                           <h4 className="font-outfit font-semibold text-sm text-muted-foreground uppercase tracking-wide">
                             Resources & Templates
                           </h4>
@@ -319,15 +319,15 @@ const ModuleView = () => {
                                 key={pIndex}
                                 className="bg-secondary/30 rounded-lg p-4 border border-border"
                               >
-                                <div className="flex items-start justify-between gap-4 mb-3">
-                                  <div className="flex items-start gap-3">
+                                <div className="flex items-start justify-between gap-3 mb-3">
+                                  <div className="flex items-start gap-3 min-w-0 flex-1">
                                     <Checkbox
                                       checked={plugComplete}
                                       onCheckedChange={() => togglePlugAndPlayComplete(plug.title)}
-                                      className="mt-1 border-primary data-[state=checked]:bg-primary"
+                                      className="mt-1 border-primary data-[state=checked]:bg-primary flex-shrink-0"
                                     />
-                                    <div>
-                                      <h5 className={`font-medium ${plugComplete ? 'text-muted-foreground' : ''}`}>
+                                    <div className="min-w-0 flex-1">
+                                      <h5 className={`font-medium break-words ${plugComplete ? 'text-muted-foreground' : ''}`}>
                                         {plug.title}
                                       </h5>
                                       <span className="text-xs text-primary capitalize">
@@ -339,12 +339,12 @@ const ModuleView = () => {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => downloadPlugAndPlay(plug)}
-                                    className="text-muted-foreground hover:text-primary"
+                                    className="text-muted-foreground hover:text-primary flex-shrink-0"
                                   >
                                     <Download className="w-4 h-4" />
                                   </Button>
                                 </div>
-                                <div className="pl-7 text-sm text-muted-foreground whitespace-pre-wrap">
+                                <div className="pl-7 text-sm text-muted-foreground whitespace-pre-wrap break-words">
                                   {plug.content}
                                 </div>
                               </div>
