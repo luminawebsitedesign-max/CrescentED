@@ -152,8 +152,8 @@ const Landing = () => {
       <section className="relative z-10 max-w-5xl mx-auto px-6 pb-24">
         <div className="grid md:grid-cols-3 gap-8 text-center">
           <div>
-            <p className="text-4xl font-bold text-gradient-cosmic mb-2">7</p>
-            <p className="text-muted-foreground">Learning Domains</p>
+            <p className="text-4xl font-bold text-gradient-cosmic mb-2">5</p>
+            <p className="text-muted-foreground">Guided Modules</p>
           </div>
           <div>
             <p className="text-4xl font-bold text-gradient-cosmic mb-2">AI‑Powered</p>
