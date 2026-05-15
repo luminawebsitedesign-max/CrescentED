@@ -223,8 +223,8 @@ Make tasks realistic, achievable, and high-impact.`,
                   }`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-outfit font-medium text-sm truncate">{tool.title}</h3>
-                  <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
+                  <h3 className="font-outfit font-medium text-sm leading-snug" title={tool.title}>{tool.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-snug mt-0.5 line-clamp-2">{tool.description}</p>
                 </div>
               </CosmicCard>
             ))}

@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from '@/store/useStore';
 import ModulesSidebar from '@/components/Sidebar/ModulesSidebar';
+import CrescentLogo from '@/components/ui/crescent-logo';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Menu } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -13,7 +15,8 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, loading = false }: DashboardLayoutProps) => {
   const navigate = useNavigate();
-  const { user, setUser, sidebarCollapsed } = useStore();
+  const location = useLocation();
+  const { user, setUser, sidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useStore();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -39,6 +42,11 @@ const DashboardLayout = ({ children, loading = false }: DashboardLayoutProps) =>
     return () => subscription.unsubscribe();
   }, [navigate, setUser]);
 
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [location.pathname, setMobileSidebarOpen]);
+
   if (!user || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -51,18 +59,46 @@ const DashboardLayout = ({ children, loading = false }: DashboardLayoutProps) =>
   }
 
   return (
-    <div className="min-h-screen bg-background noise-texture">
+    <div className="h-screen bg-background noise-texture overflow-hidden">
       <div className="fixed inset-0 aurora-overlay pointer-events-none" />
-      
+
       <ModulesSidebar />
-      
+
+      {/* Mobile backdrop */}
+      {mobileSidebarOpen && (
+        <button
+          aria-label="Close menu"
+          onClick={() => setMobileSidebarOpen(false)}
+          className="md:hidden fixed inset-0 z-30 bg-background/70 backdrop-blur-sm"
+        />
+      )}
+
       <main
         className={cn(
-          'relative z-10 transition-all duration-300 min-h-screen',
-          sidebarCollapsed ? 'ml-16' : 'ml-[260px]'
+          'relative z-10 transition-all duration-300 h-screen flex flex-col',
+          'ml-0',
+          sidebarCollapsed ? 'md:ml-16' : 'md:ml-[260px]'
         )}
       >
-        <div className="p-4 lg:p-6 h-screen overflow-y-auto scrollbar-cosmic">
+        {/* Mobile top bar */}
+        <header className="md:hidden flex items-center justify-between px-4 h-14 border-b border-border glass-cosmic flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Open menu"
+            onClick={() => setMobileSidebarOpen(true)}
+            className="h-9 w-9"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <CrescentLogo size="sm" />
+            <span className="font-sora text-sm font-bold text-gradient-cosmic">CrescentEd</span>
+          </div>
+          <div className="w-9" />
+        </header>
+
+        <div className="flex-1 overflow-y-auto scrollbar-cosmic p-4 lg:p-6">
           {children}
         </div>
       </main>

@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Intake from "./pages/Intake";
@@ -12,7 +12,7 @@ import Modules from "./pages/Modules";
 import Tools from "./pages/Tools";
 import PDFs from "./pages/PDFs";
 import Settings from "./pages/Settings";
-import Profile from "./pages/Profile";
+// Profile route is redirected to /settings (unified account hub)
 
 import NotFound from "./pages/NotFound";
 
@@ -37,7 +37,7 @@ const App = () => (
             <Route path="/tools" element={<Tools />} />
             <Route path="/pdfs" element={<PDFs />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<Navigate to="/settings" replace />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
