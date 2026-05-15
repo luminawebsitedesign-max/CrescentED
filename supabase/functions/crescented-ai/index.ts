@@ -168,7 +168,102 @@ serve(async (req) => {
     }
     const userId = userData.user.id;
 
-    const { type, intake, message, context, history } = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const { type, intake, message, context, history } = body ?? {};
+
+    // Validate type against allowlist
+    const ALLOWED_TYPES = ["generate_course", "tutor", "generate_tool"];
+    if (typeof type !== "string" || !ALLOWED_TYPES.includes(type)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid request type" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Size/type limits
+    const MAX_FIELD = 4000;
+    const MAX_IDEA = 2000;
+    const MAX_HISTORY_ITEMS = 10;
+    const MAX_HISTORY_ITEM = 4000;
+
+    const tooLong = (v: unknown, max: number) =>
+      typeof v === "string" && v.length > max;
+
+    if (type === "generate_course") {
+      if (!intake || typeof intake !== "object") {
+        return new Response(
+          JSON.stringify({ error: "intake is required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (
+        tooLong(intake.idea, MAX_IDEA) ||
+        tooLong(intake.goals, MAX_FIELD) ||
+        tooLong(intake.experience_level, 100)
+      ) {
+        return new Response(
+          JSON.stringify({ error: "Input too long" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    if (type === "tutor") {
+      if (typeof message !== "string" || message.length === 0 || message.length > MAX_FIELD) {
+        return new Response(
+          JSON.stringify({ error: "Invalid message" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (history !== undefined) {
+        if (!Array.isArray(history) || history.length > MAX_HISTORY_ITEMS * 5) {
+          return new Response(
+            JSON.stringify({ error: "Invalid history" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        for (const item of history) {
+          if (
+            !item || typeof item !== "object" ||
+            typeof item.role !== "string" ||
+            !["user", "assistant", "system"].includes(item.role) ||
+            typeof item.content !== "string" ||
+            item.content.length > MAX_HISTORY_ITEM
+          ) {
+            return new Response(
+              JSON.stringify({ error: "Invalid history item" }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        }
+      }
+      if (context && typeof context === "object" && tooLong(context.master_notes, MAX_FIELD)) {
+        return new Response(
+          JSON.stringify({ error: "Notes too long" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    if (type === "generate_tool") {
+      if (!message || typeof message !== "object" ||
+          typeof message.prompt !== "string" || message.prompt.length === 0 ||
+          message.prompt.length > MAX_FIELD) {
+        return new Response(
+          JSON.stringify({ error: "Invalid tool prompt" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     console.log('CrescentEd AI Request:', { type, userId });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
