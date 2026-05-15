@@ -8,7 +8,7 @@ import { Sparkles, BookOpen, MessageCircle, FileText, ArrowRight, Star, Rocket, 
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-background noise-texture dark">
+    <div className="min-h-screen bg-background noise-texture dark overflow-x-hidden">
       <SEO
         title="CrescentEd — AI Learning for Young Entrepreneurs"
         description="Build a real business with a personalized AI curriculum, on-demand tutor, and ready-to-use templates. Free to start."
