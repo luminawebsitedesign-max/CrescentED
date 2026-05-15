@@ -32,10 +32,14 @@ interface AppState {
   masterNotes: string;
   setMasterNotes: (notes: string) => void;
   
-  // Sidebar collapsed state
+  // Sidebar collapsed state (desktop)
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
-  
+
+  // Mobile sidebar drawer (off-canvas)
+  mobileSidebarOpen: boolean;
+  setMobileSidebarOpen: (open: boolean) => void;
+
   // Reset all state
   reset: () => void;
 }
@@ -48,6 +52,7 @@ const initialState = {
   currentModuleId: null,
   tutorOpen: false,
   sidebarCollapsed: false,
+  mobileSidebarOpen: false,
   masterNotes: '',
 };
 
@@ -62,6 +67,7 @@ export const useStore = create<AppState>()(
       setCurrentModuleId: (currentModuleId) => set({ currentModuleId }),
       setTutorOpen: (tutorOpen) => set({ tutorOpen }),
       setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
+      setMobileSidebarOpen: (mobileSidebarOpen) => set({ mobileSidebarOpen }),
       setMasterNotes: (masterNotes) => set({ masterNotes }),
       reset: () => set(initialState),
     }),
