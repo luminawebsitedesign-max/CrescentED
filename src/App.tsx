@@ -12,7 +12,7 @@ import Modules from "./pages/Modules";
 import Tools from "./pages/Tools";
 import PDFs from "./pages/PDFs";
 import Settings from "./pages/Settings";
-import Profile from "./pages/Profile";
+// Profile route is redirected to /settings (unified account hub)
 
 import NotFound from "./pages/NotFound";
 
