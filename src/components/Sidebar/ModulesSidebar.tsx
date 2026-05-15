@@ -84,6 +84,9 @@ const ModulesSidebar = () => {
     navigate(`/module/${moduleId}`);
   };
 
+  // On mobile drawer, always render the expanded view (collapsed icon-only mode is desktop-only)
+  const showCollapsed = sidebarCollapsed && !mobileSidebarOpen;
+
   return (
     <aside
       className={cn(
@@ -91,15 +94,15 @@ const ModulesSidebar = () => {
         sidebarCollapsed ? 'md:w-16' : 'md:w-[260px]',
         // Mobile: off-canvas drawer
         'w-[260px] md:translate-x-0',
-        mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
       )}
     >
       {/* Header */}
       <div className="p-3 border-b border-border flex items-center justify-between flex-shrink-0">
-        <Link to="/dashboard" className="flex items-center gap-2" onClick={() => setMobileSidebarOpen(false)}>
+        <Link to="/dashboard" className="flex items-center gap-2 min-w-0" onClick={() => setMobileSidebarOpen(false)}>
           <CrescentLogo size="sm" />
-          {!sidebarCollapsed && (
-            <span className="font-sora text-base font-bold text-gradient-cosmic">
+          {!showCollapsed && (
+            <span className="font-sora text-base font-bold text-gradient-cosmic truncate">
               CrescentEd
             </span>
           )}
@@ -118,11 +121,11 @@ const ModulesSidebar = () => {
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className="text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
         >
-          {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {showCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </Button>
       </div>
 
-      {sidebarCollapsed ? (
+      {showCollapsed ? (
         /* Collapsed View */
         <div className="flex-1 flex flex-col items-center py-3 gap-1 overflow-hidden">
           {NAV_ITEMS.map((item) => (
@@ -295,11 +298,11 @@ const ModulesSidebar = () => {
           aria-label="Log out"
           className={cn(
             'w-full justify-start gap-2 text-muted-foreground hover:text-destructive h-9 text-sm',
-            sidebarCollapsed && 'justify-center px-2'
+            showCollapsed && 'justify-center px-2'
           )}
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
-          {!sidebarCollapsed && <span>Log Out</span>}
+          {!showCollapsed && <span>Log Out</span>}
         </Button>
       </div>
     </aside>

@@ -245,15 +245,15 @@ Make tasks realistic, achievable, and high-impact.`,
           {/* Generator Panel */}
           <div className="lg:col-span-2">
             {selectedTool ? (
-              <CosmicCard className="p-6" hover={false}>
+              <CosmicCard className="p-4 sm:p-6" hover={false}>
                 {/* Tool Header */}
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cosmic-magenta/20 to-cosmic-violet/20 flex items-center justify-center">
-                    <selectedTool.icon className="w-7 h-7 text-primary" />
+                <div className="flex items-start sm:items-center gap-3 sm:gap-4 mb-6">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-cosmic-magenta/20 to-cosmic-violet/20 flex items-center justify-center flex-shrink-0">
+                    <selectedTool.icon className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
                   </div>
-                  <div>
-                    <h2 className="font-outfit font-semibold text-xl">{selectedTool.title}</h2>
-                    <p className="text-sm text-muted-foreground">{selectedTool.description}</p>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="font-outfit font-semibold text-lg sm:text-xl break-words">{selectedTool.title}</h2>
+                    <p className="text-sm text-muted-foreground break-words">{selectedTool.description}</p>
                   </div>
                 </div>
 
@@ -266,7 +266,7 @@ Make tasks realistic, achievable, and high-impact.`,
                     className="min-h-[120px] bg-background/50 border-border resize-none"
                   />
                   {businessIdea && !input && (
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs text-muted-foreground mt-2 break-words">
                       Using your business idea: "{businessIdea.slice(0, 50)}..."
                     </p>
                   )}
@@ -295,9 +295,9 @@ Make tasks realistic, achievable, and high-impact.`,
                 {/* Results */}
                 {result && (
                   <div className="space-y-4 animate-fade-in">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <h3 className="font-outfit font-semibold">Generated Content</h3>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -318,9 +318,9 @@ Make tasks realistic, achievable, and high-impact.`,
                       </div>
                     </div>
                     
-                    <div className="p-5 bg-secondary/30 rounded-xl border border-border max-h-[400px] overflow-y-auto scrollbar-cosmic">
+                    <div className="p-4 sm:p-5 bg-secondary/30 rounded-xl border border-border max-h-[400px] overflow-y-auto scrollbar-cosmic">
                       <div className="prose prose-sm prose-invert max-w-none">
-                        <div className="whitespace-pre-wrap text-sm text-foreground/90 leading-relaxed">
+                        <div className="whitespace-pre-wrap text-sm text-foreground/90 leading-relaxed break-words">
                           {result}
                         </div>
                       </div>

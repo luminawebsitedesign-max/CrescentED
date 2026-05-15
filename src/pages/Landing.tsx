@@ -8,7 +8,7 @@ import { Sparkles, BookOpen, MessageCircle, FileText, ArrowRight, Star, Rocket, 
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-background noise-texture dark">
+    <div className="min-h-screen bg-background noise-texture dark overflow-x-hidden">
       <SEO
         title="CrescentEd — AI Learning for Young Entrepreneurs"
         description="Build a real business with a personalized AI curriculum, on-demand tutor, and ready-to-use templates. Free to start."
@@ -25,19 +25,19 @@ const Landing = () => {
       </div>
       
       {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between p-6 max-w-7xl mx-auto">
-        <div className="flex items-center gap-3">
+      <nav className="relative z-10 flex items-center justify-between gap-3 px-4 sm:px-6 py-4 sm:py-6 max-w-7xl mx-auto">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
           <CrescentLogo size="md" />
-          <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
-        </div>
-        <div className="flex items-center gap-4">
+          <span className="font-sora text-lg sm:text-xl font-bold text-gradient-cosmic truncate">CrescentEd</span>
+        </Link>
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
           <Link to="/login">
-            <Button variant="ghost" className="text-foreground hover:text-primary">
+            <Button variant="ghost" size="sm" className="text-foreground hover:text-primary px-2 sm:px-4">
               Log In
             </Button>
           </Link>
           <Link to="/register">
-            <GradientButton glow>
+            <GradientButton glow className="text-sm px-3 sm:px-5">
               Get Started
             </GradientButton>
           </Link>
