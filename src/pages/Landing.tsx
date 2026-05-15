@@ -169,34 +169,31 @@ const Landing = () => {
       {/* Beta + Roadmap Section */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 pb-24">
         <CosmicCard className="p-8 md:p-10" hover={false}>
-          <div className="grid md:grid-cols-[1fr_1.2fr] gap-8 md:gap-10 items-start">
-            {/* Left: Beta note */}
-            <div>
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-cosmic text-xs font-medium text-cosmic-magenta border border-cosmic-magenta/30 mb-4">
-                <FlaskConical className="w-3.5 h-3.5" />
-                Currently in Beta
-              </span>
-              <h2 className="font-sora text-2xl md:text-3xl font-semibold mb-3">
-                Built in the open, improved with you
-              </h2>
-              <p className="text-muted-foreground leading-relaxed">
-                CrescentEd is in active beta. Core functionality — personalized courses, the AI tutor, templates, and PDFs — is live and working today. We're shipping improvements every week based on real feedback from early users.
-              </p>
-            </div>
+          <div className="mb-8">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-cosmic text-xs font-medium text-cosmic-magenta border border-cosmic-magenta/30 mb-4">
+              <FlaskConical className="w-3.5 h-3.5" />
+              Beta Version
+            </span>
+            <h2 className="font-sora text-2xl md:text-3xl font-semibold mb-3">
+              What's live now, and what's coming next
+            </h2>
+            <p className="text-muted-foreground leading-relaxed max-w-3xl">
+              CrescentEd is currently a working beta. The current version already includes personalized onboarding, AI-generated modules, an AI entrepreneurship mentor, practical tools, and PDFs. Future updates will focus on making the platform more personalized, more useful, and more collaborative.
+            </p>
+          </div>
 
-            {/* Right: Roadmap */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-10 mb-8">
             <div>
               <h3 className="font-outfit text-sm uppercase tracking-wider text-muted-foreground/70 mb-4">
-                Coming Next
+                What's in the Beta
               </h3>
               <ul className="space-y-3">
                 {[
-                  'Stronger AI personalization tuned to your goals',
-                  'File uploads to give the AI more of your context',
-                  'Better tools and higher-quality generated outputs',
-                  'More guided, step-by-step support inside lessons',
-                  'Light gamification and progress features',
-                  'Community and collaboration features (later)',
+                  'Personalized onboarding and course generation',
+                  '5 guided entrepreneurship modules',
+                  'AI mentor support inside lessons',
+                  'Practical business tools and downloadable PDFs',
+                  'Dashboard, account flow, and progress-based learning structure',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <CheckCircle2 className="w-4 h-4 text-cosmic-magenta flex-shrink-0 mt-0.5" />
@@ -205,7 +202,33 @@ const Landing = () => {
                 ))}
               </ul>
             </div>
+
+            <div>
+              <h3 className="font-outfit text-sm uppercase tracking-wider text-muted-foreground/70 mb-4">
+                What's planned for V1 and later updates
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  'More complete onboarding with better business-context questions',
+                  'Stronger AI personalization using onboarding answers, master notes, and user context',
+                  'File uploads so users can give the AI more relevant business information',
+                  'Better tools and higher-quality outputs',
+                  'More step-by-step support across the product',
+                  'Lightweight in-app feedback collection',
+                  'Later: collaboration, community, gamification, better source transparency, stronger automation, and more advanced product polish',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-cosmic-magenta/50 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
+
+          <p className="text-sm text-muted-foreground">
+            If you have feedback while using CrescentEd, email <a href="mailto:Luminawebsitedesign@gmail.com" className="text-primary hover:underline">Luminawebsitedesign@gmail.com</a>
+          </p>
         </CosmicCard>
       </section>
 
