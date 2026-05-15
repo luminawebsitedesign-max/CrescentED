@@ -102,7 +102,14 @@ const TutorSidebar = ({ open, onClose, context }: TutorSidebarProps) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-96 z-50 glass-cosmic border-l border-border flex flex-col">
+    <>
+      {/* Backdrop (visible on >= sm where the panel doesn't take full width) */}
+      <button
+        aria-label="Close tutor"
+        onClick={onClose}
+        className="hidden sm:block fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
+      />
+      <div className="fixed inset-y-0 right-0 w-full sm:w-96 max-w-full z-50 glass-cosmic border-l border-border flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
