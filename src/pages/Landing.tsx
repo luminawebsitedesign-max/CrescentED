@@ -4,7 +4,7 @@ import { GradientButton } from '@/components/ui/gradient-button';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import CrescentLogo from '@/components/ui/crescent-logo';
 import SEO from '@/components/SEO';
-import { Sparkles, BookOpen, MessageCircle, FileText, ArrowRight, Star, Rocket, Users, Zap } from 'lucide-react';
+import { Sparkles, BookOpen, MessageCircle, FileText, ArrowRight, Star, Rocket, Users, Zap, FlaskConical, CheckCircle2 } from 'lucide-react';
 
 const Landing = () => {
   return (
@@ -191,6 +191,49 @@ const Landing = () => {
             <p className="text-muted-foreground">Tailored to You</p>
           </div>
         </div>
+      </section>
+
+      {/* Beta + Roadmap Section */}
+      <section className="relative z-10 max-w-5xl mx-auto px-6 pb-24">
+        <CosmicCard className="p-8 md:p-10" hover={false}>
+          <div className="grid md:grid-cols-[1fr_1.2fr] gap-8 md:gap-10 items-start">
+            {/* Left: Beta note */}
+            <div>
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-cosmic text-xs font-medium text-cosmic-magenta border border-cosmic-magenta/30 mb-4">
+                <FlaskConical className="w-3.5 h-3.5" />
+                Currently in Beta
+              </span>
+              <h2 className="font-sora text-2xl md:text-3xl font-semibold mb-3">
+                Built in the open, improved with you
+              </h2>
+              <p className="text-muted-foreground leading-relaxed">
+                CrescentEd is in active beta. Core functionality — personalized courses, the AI tutor, templates, and PDFs — is live and working today. We're shipping improvements every week based on real feedback from early users.
+              </p>
+            </div>
+
+            {/* Right: Roadmap */}
+            <div>
+              <h3 className="font-outfit text-sm uppercase tracking-wider text-muted-foreground/70 mb-4">
+                Coming Next
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  'Stronger AI personalization tuned to your goals',
+                  'File uploads to give the AI more of your context',
+                  'Better tools and higher-quality generated outputs',
+                  'More guided, step-by-step support inside lessons',
+                  'Light gamification and progress features',
+                  'Community and collaboration features (later)',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-cosmic-magenta flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground/90 leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </CosmicCard>
       </section>
 
       {/* CTA Section */}
