@@ -13,12 +13,19 @@ const NotFound = () => {
         <p className="text-xl text-muted-foreground mb-8">
           This page doesn't exist. Let's get you back on track.
         </p>
-        <Link to="/">
-          <Button size="lg" className="bg-primary hover:bg-primary/90 gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Button>
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link to="/dashboard">
+            <Button size="lg" className="bg-primary hover:bg-primary/90 gap-2 w-full sm:w-auto">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <Link to="/">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto">
+              Go to Home
+            </Button>
+          </Link>
+        </div>
       </div>
     </main>
   );

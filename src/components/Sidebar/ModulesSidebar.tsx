@@ -44,13 +44,15 @@ const NAV_ITEMS = [
 const ModulesSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { 
-    sidebarCollapsed, 
-    setSidebarCollapsed, 
-    modules, 
+  const {
+    sidebarCollapsed,
+    setSidebarCollapsed,
+    mobileSidebarOpen,
+    setMobileSidebarOpen,
+    modules,
     currentModuleId,
     setCurrentModuleId,
-    intake 
+    intake
   } = useStore();
 
   const handleLogout = async () => {
@@ -86,12 +88,15 @@ const ModulesSidebar = () => {
     <aside
       className={cn(
         'fixed left-0 top-0 h-full z-40 glass-cosmic border-r border-border transition-all duration-300 flex flex-col',
-        sidebarCollapsed ? 'w-16' : 'w-[260px]'
+        sidebarCollapsed ? 'md:w-16' : 'md:w-[260px]',
+        // Mobile: off-canvas drawer
+        'w-[260px] md:translate-x-0',
+        mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       )}
     >
       {/* Header */}
       <div className="p-3 border-b border-border flex items-center justify-between flex-shrink-0">
-        <Link to="/dashboard" className="flex items-center gap-2">
+        <Link to="/dashboard" className="flex items-center gap-2" onClick={() => setMobileSidebarOpen(false)}>
           <CrescentLogo size="sm" />
           {!sidebarCollapsed && (
             <span className="font-sora text-base font-bold text-gradient-cosmic">
@@ -102,7 +107,14 @@ const ModulesSidebar = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onClick={() => {
+            // On mobile, close the drawer; on desktop, toggle collapsed
+            if (window.matchMedia('(max-width: 767px)').matches) {
+              setMobileSidebarOpen(false);
+            } else {
+              setSidebarCollapsed(!sidebarCollapsed);
+            }
+          }}
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className="text-muted-foreground hover:text-foreground h-8 w-8 flex-shrink-0"
         >
