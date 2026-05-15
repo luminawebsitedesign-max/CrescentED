@@ -298,11 +298,11 @@ const ModulesSidebar = () => {
           aria-label="Log out"
           className={cn(
             'w-full justify-start gap-2 text-muted-foreground hover:text-destructive h-9 text-sm',
-            sidebarCollapsed && 'justify-center px-2'
+            showCollapsed && 'justify-center px-2'
           )}
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
-          {!sidebarCollapsed && <span>Log Out</span>}
+          {!showCollapsed && <span>Log Out</span>}
         </Button>
       </div>
     </aside>
