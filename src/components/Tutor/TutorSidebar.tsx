@@ -216,6 +216,7 @@ const TutorSidebar = ({ open, onClose, context }: TutorSidebarProps) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
