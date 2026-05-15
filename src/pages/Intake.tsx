@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowRight, ArrowLeft, Sparkles, Save } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import CrescentLogo from '@/components/ui/crescent-logo';
+import SEO from '@/components/SEO';
 
 const STEPS_NEW = [
   { id: 'idea', title: 'Your Big Idea', subtitle: 'What do you want to build?' },
@@ -217,7 +218,12 @@ const Intake = () => {
   const progress = ((step + 1) / STEPS.length) * 100;
 
   return (
-    <div className="min-h-screen bg-background noise-texture flex items-center justify-center p-6">
+    <main className="min-h-screen bg-background noise-texture flex items-center justify-center p-6">
+      <SEO
+        title={isEditMode ? 'Edit Onboarding — CrescentEd' : 'Personalize Your Learning Path — CrescentEd'}
+        description="Tell CrescentEd about your business idea, goals, and learning style so we can build a personalized entrepreneurship course for you."
+        path="/intake"
+      />
       <div className="fixed inset-0 aurora-overlay pointer-events-none" />
       
       <div className="relative z-10 w-full max-w-2xl">
@@ -226,6 +232,9 @@ const Intake = () => {
             <CrescentLogo size="sm" />
             <span className="font-sora text-xl font-bold text-gradient-cosmic">CrescentEd</span>
           </div>
+          <h1 className="font-sora text-2xl sm:text-3xl font-bold mb-3">
+            {isEditMode ? 'Edit Your Onboarding' : 'Personalize Your Learning Path'}
+          </h1>
           {isEditMode ? (
             <p className="text-sm text-primary font-medium mb-2">Editing your onboarding answers</p>
           ) : null}
@@ -436,7 +445,7 @@ const Intake = () => {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

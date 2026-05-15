@@ -25,6 +25,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import SEO from '@/components/SEO';
 
 const ModuleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -192,6 +193,12 @@ const ModuleView = () => {
 
   return (
     <DashboardLayout>
+      <SEO
+        title={`${module.title} — CrescentEd`}
+        description={(module.description || module.summary || `Learn ${module.title} as part of your personalized CrescentEd entrepreneurship course.`).slice(0, 155)}
+        path={`/module/${module.id}`}
+        ogType="article"
+      />
       <div className="max-w-4xl mx-auto animate-fade-in pb-8">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-6">
@@ -268,12 +275,13 @@ const ModuleView = () => {
                           checked={isComplete}
                           onCheckedChange={() => toggleSectionComplete(section.title)}
                           onClick={(e) => e.stopPropagation()}
+                          aria-label={`Mark section "${section.title}" as ${isComplete ? 'incomplete' : 'complete'}`}
                           className="border-primary data-[state=checked]:bg-primary flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className={`font-outfit font-semibold break-words ${isComplete ? 'text-muted-foreground' : ''}`}>
+                          <h2 className={`font-outfit font-semibold text-base break-words ${isComplete ? 'text-muted-foreground' : ''}`}>
                             {section.title}
-                          </h3>
+                          </h2>
                           <p className="text-sm text-muted-foreground">
                             {section.plug_and_plays?.length || 0} resources
                           </p>
@@ -324,6 +332,7 @@ const ModuleView = () => {
                                     <Checkbox
                                       checked={plugComplete}
                                       onCheckedChange={() => togglePlugAndPlayComplete(plug.title)}
+                                      aria-label={`Mark resource "${plug.title}" as ${plugComplete ? 'incomplete' : 'complete'}`}
                                       className="mt-1 border-primary data-[state=checked]:bg-primary flex-shrink-0"
                                     />
                                     <div className="min-w-0 flex-1">
@@ -339,6 +348,7 @@ const ModuleView = () => {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => downloadPlugAndPlay(plug)}
+                                    aria-label={`Download ${plug.title}`}
                                     className="text-muted-foreground hover:text-primary flex-shrink-0"
                                   >
                                     <Download className="w-4 h-4" />

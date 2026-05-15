@@ -14,6 +14,7 @@ import {
   BookOpen, AlertTriangle, RefreshCw, Trash2, PenLine 
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import SEO from '@/components/SEO';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -242,6 +243,11 @@ const Settings = () => {
 
   return (
     <DashboardLayout loading={loading}>
+        <SEO
+          title="Account Settings — CrescentEd"
+          description="Manage your CrescentEd profile, learning preferences, master notes, and course management options."
+          path="/settings"
+        />
         <div className="max-w-2xl mx-auto pb-8">
           <h1 className="font-sora text-2xl font-bold mb-1">Account</h1>
           <p className="text-muted-foreground text-sm mb-6">
@@ -260,7 +266,9 @@ const Settings = () => {
                   <p className="text-xs text-muted-foreground">Things the AI should always know about you</p>
                 </div>
               </div>
+              <Label htmlFor="master-notes" className="sr-only">Master notes for the AI</Label>
               <Textarea
+                id="master-notes"
                 value={masterNotes}
                 onChange={(e) => setMasterNotes(e.target.value)}
                 placeholder="e.g., I'm building a SaaS for local gyms. I prefer step-by-step guidance. I have 10 hours per week..."
