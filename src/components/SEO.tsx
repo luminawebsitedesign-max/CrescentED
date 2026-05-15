@@ -5,11 +5,12 @@ interface SEOProps {
   description: string;
   path: string;
   ogType?: 'website' | 'article';
+  ogImage?: string;
 }
 
 const SITE_URL = 'https://cyber-plan-assist.lovable.app';
 
-const SEO = ({ title, description, path, ogType = 'website' }: SEOProps) => {
+const SEO = ({ title, description, path, ogType = 'website', ogImage }: SEOProps) => {
   const url = `${SITE_URL}${path}`;
   return (
     <Helmet>
@@ -20,8 +21,10 @@ const SEO = ({ title, description, path, ogType = 'website' }: SEOProps) => {
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
       <meta property="og:type" content={ogType} />
+      {ogImage && <meta property="og:image" content={ogImage} />}
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
+      {ogImage && <meta name="twitter:image" content={ogImage} />}
     </Helmet>
   );
 };

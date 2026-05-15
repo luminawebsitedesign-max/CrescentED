@@ -121,7 +121,7 @@ const TutorSidebar = ({ open, onClose, context }: TutorSidebarProps) => {
             <p className="text-xs text-muted-foreground">Your learning companion</p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose}>
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close tutor">
           <X className="w-4 h-4" />
         </Button>
       </div>
@@ -198,18 +198,22 @@ const TutorSidebar = ({ open, onClose, context }: TutorSidebarProps) => {
           </Button>
         )}
         <div className="flex gap-2">
+          <label htmlFor="tutor-message" className="sr-only">Message the AI tutor</label>
           <Input
+            id="tutor-message"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
             placeholder="Ask me anything..."
             className="bg-secondary/50 border-border"
             disabled={loading}
+            aria-label="Message the AI tutor"
           />
           <Button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
             className="bg-primary hover:bg-primary/90"
+            aria-label="Send message"
           >
             <Send className="w-4 h-4" />
           </Button>

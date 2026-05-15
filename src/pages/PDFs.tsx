@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { FileText, Download, FolderOpen, ExternalLink, Loader2 } from 'lucide-react';
 import { type PDFExport } from '@/types/crescented';
 import { format } from 'date-fns';
+import SEO from '@/components/SEO';
 
 const PDFs = () => {
   const [pdfs, setPdfs] = useState<PDFExport[]>([]);
@@ -70,6 +71,11 @@ const PDFs = () => {
 
   return (
     <DashboardLayout loading={loading}>
+      <SEO
+        title="My PDFs — CrescentEd"
+        description="Access every worksheet, template, and checklist you've generated in CrescentEd, ready to preview or download."
+        path="/pdfs"
+      />
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-sora font-bold mb-2">My PDFs</h1>
         <p className="text-muted-foreground mb-8">All your generated worksheets, templates, and exports</p>
@@ -105,6 +111,7 @@ const PDFs = () => {
                     size="sm" 
                     onClick={() => openPDF(pdf)} 
                     title="Open in new tab"
+                    aria-label={`Open ${pdf.metadata.title} in new tab`}
                     disabled={openingPdf === pdf.id}
                   >
                     {openingPdf === pdf.id ? (
@@ -113,7 +120,13 @@ const PDFs = () => {
                       <ExternalLink className="w-4 h-4" />
                     )}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => downloadPDF(pdf)} title="Download">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => downloadPDF(pdf)}
+                    title="Download"
+                    aria-label={`Download ${pdf.metadata.title}`}
+                  >
                     <Download className="w-4 h-4" />
                   </Button>
                 </div>

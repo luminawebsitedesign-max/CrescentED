@@ -8,6 +8,7 @@ import { GradientButton } from '@/components/ui/gradient-button';
 import { SectionDivider } from '@/components/ui/section-divider';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { generatePDF, generateChecklistPDF } from '@/lib/pdf';
@@ -259,7 +260,11 @@ Make tasks realistic, achievable, and high-impact.`,
 
                 {/* Input Area */}
                 <div className="mb-6">
+                  <Label htmlFor="tool-input" className="sr-only">
+                    Input for {selectedTool.title}
+                  </Label>
                   <Textarea
+                    id="tool-input"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder={selectedTool.placeholder || 'Describe what you need...'}

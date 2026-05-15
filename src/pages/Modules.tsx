@@ -8,6 +8,7 @@ import { GradientButton } from '@/components/ui/gradient-button';
 import { useStore } from '@/store/useStore';
 import { DOMAIN_LABELS, DOMAIN_ICONS, type Module, type ModuleProgress } from '@/types/crescented';
 import { Play, CheckCircle, BookOpen, TrendingUp, Target, ChevronRight } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 const Modules = () => {
   const [loading, setLoading] = useState(true);
@@ -65,11 +66,16 @@ const Modules = () => {
 
   return (
     <DashboardLayout loading={loading}>
+      <SEO
+        title="My Course — CrescentEd"
+        description="Browse your personalized entrepreneurship modules, track progress, and continue learning at your own pace."
+        path="/modules"
+      />
       <div className="max-w-6xl mx-auto animate-fade-in pb-8">
         <div className="mb-8">
           <h1 className="text-h1 mb-2">My Course</h1>
           <p className="text-muted-foreground">
-            Your personalized learning path across 7 domains of entrepreneurship
+            Your personalized learning path across the core domains of entrepreneurship
           </p>
         </div>
 
