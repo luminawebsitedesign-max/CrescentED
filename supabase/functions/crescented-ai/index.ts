@@ -142,7 +142,33 @@ serve(async (req) => {
   }
 
   try {
-    const { type, intake, userId, message, context, history } = await req.json();
+    // Authenticate the caller via JWT — never trust userId from the request body.
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const authClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !userData?.user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const userId = userData.user.id;
+
+    const { type, intake, message, context, history } = await req.json();
     console.log('CrescentEd AI Request:', { type, userId });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -150,9 +176,10 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Use the user-scoped client for all DB operations so RLS is enforced.
+    // Service-role client retained only for inserts that need to bypass RLS audit logs (none here).
+    const supabase = authClient;
+    void serviceKey;
 
     if (type === "generate_course") {
       const userPrompt = `
