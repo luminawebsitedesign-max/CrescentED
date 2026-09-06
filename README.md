@@ -1,73 +1,115 @@
-# Welcome to your Lovable project
+# Crescent ED
 
-## Project info
+Here's a cleaner, more structured prompt for Lovable:
 
-**URL**: https://lovable.dev/projects/8e1b3575-afc1-48a8-b99c-286107f9b9bb
+NEXUS Task Manager
+AI-Powered Productivity Suite
+Branding Direction:
+Choose one aesthetic:
 
-## How can I edit this code?
+Retro Tech: Nostalgic 80s/90s computer vibes with pixel fonts, CRT scan lines, neon accents, terminal-style elements, and vintage UI sounds
+Cyber Sigillism: Futuristic mystical tech with glowing symbols, sacred geometry patterns, holographic effects, sleek gradients (purple/cyan/black), and ethereal animations
 
-There are several ways of editing your application.
 
-**Use Lovable**
+What to Build:
+A desktop to-do list and habit tracker app with GPT integration. Users can download and use it on their PC. Everything must be fully functional.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8e1b3575-afc1-48a8-b99c-286107f9b9bb) and start prompting.
+Required Features (All Must Work):
+1. To-Do Lists
 
-Changes made via Lovable will be committed automatically to this repo.
+Add, edit, delete, and check off tasks
+Each task has: title, description, due date, priority level
+Organize tasks into custom projects/categories
+Filter view by: today, week, project, priority
+Drag and drop to reorder tasks
 
-**Use your preferred IDE**
+2. Habit Tracker
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Create daily/weekly habits
+Simple checkbox to mark habits complete each day
+Show current streak count for each habit
+Calendar view showing completion history
+Statistics: total completions, longest streak, success rate
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. Long-Term Goals
 
-Follow these steps:
+Create goals with title, description, target date
+Break goals into smaller milestone tasks
+Progress bar showing completion percentage
+Link related to-do items to goals
+
+4. Projects/Sections
+
+Create custom project folders
+Assign tasks to specific projects
+Color-code different projects
+View all tasks within a project
+
+5. GPT Integration (Critical!)
+
+Connect to OpenAI API (user provides their API key in settings)
+AI can read user's current tasks, habits, and goals
+Chat interface where AI suggests new tasks based on goals
+AI can add tasks directly to the list when user agrees
+Daily planning mode: AI reviews schedule and suggests priorities
+
+
+UI/UX Requirements:
+Must Have:
+
+Clean, modern interface matching chosen brand aesthetic
+Smooth animations: task completion checkmarks, page transitions, button hovers
+Dark mode and light mode toggle
+Responsive layout for desktop screens
+Satisfying completion animations (confetti, glow effects, or retro beeps)
+
+Interactions:
+
+Hover effects on all clickable elements
+Smooth slide/fade transitions between views
+Animated progress bars and streak counters
+Drag-and-drop visual feedback
+
+
+Technical Must-Haves:
+
+Desktop App: Build as downloadable application (Electron or similar)
+Data Storage: Save all data locally (localStorage or local database)
+API Integration: OpenAI API connection that actually works
+Export Data: Button to export all tasks/habits as JSON or CSV
+Settings Page: User can input OpenAI API key, choose theme, set preferences
+
+
+Critical Rules:
+
+Every feature listed must be fully functional, not placeholder
+All buttons must do something
+All animations must actually animate
+The AI integration must actually connect and work
+Users must be able to actually download and run this
+
+
+Priority: Build a working MVP first, then add polish and animations. Function over form, but make it beautiful once it works.
+
+This project was built with [Lovable](https://lovable.dev).
+
+**Live app**: https://cyber-plan-assist.lovable.app
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/8e1b3575-afc1-48a8-b99c-286107f9b9bb).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+git clone <this-repository-url>
+cd <repository-name>
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/8e1b3575-afc1-48a8-b99c-286107f9b9bb) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
