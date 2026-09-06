@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, askTutor } from '@/lib/api';
+import SampleNotice from '@/components/SampleNotice';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -92,28 +93,23 @@ const DashboardAIChat = () => {
     setLoading(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await supabase.functions.invoke('crescented-ai', {
-        body: {
-          type: 'tutor',
-          message: messageText,
-          context: {
+      const session = await getSession();
+
+      const response = await askTutor({
+        message: messageText,
+        context: {
             module_id: currentModule?.id,
             module_title: currentModule?.title,
             module_content: currentModule?.content,
             intake: intake,
             master_notes: localStorage.getItem('crescented-master-notes') || '',
-          },
-          userId: session?.user?.id,
-          history: messages.slice(-10),
         },
+        userId: session?.user?.id,
+        history: messages.slice(-10),
       });
 
-      if (response.error) throw response.error;
-
       const cleanedResponse = cleanAIResponse(
-        response.data.response || "I'm here to help! Could you tell me more about what you're working on?"
+        response.response || "I'm here to help! Could you tell me more about what you're working on?"
       );
       
       const assistantMessage: ChatMessage = {
@@ -177,6 +173,7 @@ const DashboardAIChat = () => {
 
   return (
     <div className="h-full flex flex-col bg-background">
+      <SampleNotice className="mx-4 mt-3 lg:mx-8" />
       {/* Chat Messages Area */}
       <ScrollArea className="flex-1" ref={scrollRef}>
         <div className="max-w-3xl mx-auto px-4 lg:px-8 py-6">

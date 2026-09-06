@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, getIntake, createIntake, updateIntake, generateCourse } from '@/lib/api';
+import { DEMO_MODE } from '@/lib/demo';
+import DemoBanner from '@/components/DemoBanner';
+import SampleNotice from '@/components/SampleNotice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -51,20 +54,16 @@ const Intake = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getSession();
       if (!session) {
         navigate('/auth');
         return;
       }
       setUserId(session.user.id);
-      
-      // Check if user already has an intake form
-      const { data: existing } = await supabase
-        .from('intake_forms')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-      
+
+      // Check if the user already has an intake form
+      const existing = await getIntake(session.user.id);
+
       if (existing) {
         if (isEditMode) {
           // Load existing data for editing
@@ -89,7 +88,7 @@ const Intake = () => {
         navigate('/intake');
         return;
       }
-      
+
       setInitialLoading(false);
     };
     checkAuth();
@@ -137,14 +136,7 @@ const Intake = () => {
     try {
       if (isEditMode && existingIntakeId) {
         // Update existing intake form - DO NOT regenerate course
-        const { error: intakeError } = await supabase
-          .from('intake_forms')
-          .update({
-            ...formData,
-          })
-          .eq('id', existingIntakeId);
-
-        if (intakeError) throw intakeError;
+        await updateIntake(existingIntakeId, formData);
 
         toast({
           title: 'Onboarding updated!',
@@ -153,44 +145,24 @@ const Intake = () => {
 
         navigate('/dashboard');
       } else {
-        // New intake - save and generate course
-        const { error: intakeError } = await supabase
-          .from('intake_forms')
-          .insert({
-            user_id: userId,
-            ...formData,
-          });
+        // New intake - save and build the course
+        await createIntake(userId, formData);
 
-        if (intakeError) throw intakeError;
-
-        // Generate course immediately
         try {
-          const response = await supabase.functions.invoke('crescented-ai', {
-            body: {
-              type: 'generate_course',
-              intake: formData,
-              userId: userId,
-            },
-          });
-
-          if (response.error) {
-            throw new Error(response.error.message || 'Generation failed');
-          }
-
-          if (response.data?.error) {
-            throw new Error(response.data.error);
-          }
+          const result = await generateCourse(formData, userId);
 
           toast({
-            title: 'Course generated!',
-            description: `Created ${response.data?.modulesCount || 5} modules for you.`,
+            title: result.sample ? 'Sample course loaded' : 'Course generated!',
+            description: result.sample
+              ? `Loaded ${result.modulesCount} sample modules — demo mode.`
+              : `Created ${result.modulesCount} modules for you.`,
           });
           navigate('/dashboard');
         } catch (genError: any) {
           console.error('Course generation error:', genError);
           toast({
             title: 'Course generation failed',
-            description: 'Your profile is saved. You can generate your course from the Dashboard.',
+            description: 'Your answers are saved. You can build your course from the Dashboard.',
             variant: 'destructive',
           });
           navigate('/dashboard');
@@ -227,6 +199,7 @@ const Intake = () => {
       <div className="fixed inset-0 aurora-overlay pointer-events-none" />
       
       <div className="relative z-10 w-full max-w-2xl">
+        <DemoBanner />
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <CrescentLogo size="sm" />
@@ -437,12 +410,14 @@ const Intake = () => {
                 ) : (
                   <>
                     <Sparkles className="mr-2 w-4 h-4" />
-                    Generate My Course
+                    {DEMO_MODE ? 'Build My Course' : 'Generate My Course'}
                   </>
                 )}
               </Button>
             )}
           </div>
+
+          {step === STEPS.length - 1 && !isEditMode && <SampleNotice className="mt-4" />}
         </div>
       </div>
     </main>

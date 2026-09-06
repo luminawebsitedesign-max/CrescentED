@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, listPdfExports, downloadPdfFile } from '@/lib/api';
+import { DEMO_MODE } from '@/lib/demo';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { Button } from '@/components/ui/button';
@@ -19,15 +20,10 @@ const PDFs = () => {
 
   useEffect(() => {
     const fetchPDFs = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getSession();
       if (!session) { navigate('/auth'); return; }
 
-      const { data } = await supabase
-        .from('pdf_exports')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false });
-
+      const data = await listPdfExports(session.user.id);
       if (data) setPdfs(data as PDFExport[]);
       setLoading(false);
     };
@@ -37,9 +33,8 @@ const PDFs = () => {
   const openPDF = async (pdf: PDFExport) => {
     setOpeningPdf(pdf.id);
     try {
-      const { data, error } = await supabase.storage.from('pdfs').download(pdf.file_path);
-      if (error) throw error;
-      
+      const data = await downloadPdfFile(pdf.file_path);
+
       // Create blob URL and open in new tab
       const url = window.URL.createObjectURL(data);
       window.open(url, '_blank');
@@ -55,8 +50,7 @@ const PDFs = () => {
 
   const downloadPDF = async (pdf: PDFExport) => {
     try {
-      const { data, error } = await supabase.storage.from('pdfs').download(pdf.file_path);
-      if (error) throw error;
+      const data = await downloadPdfFile(pdf.file_path);
       const url = window.URL.createObjectURL(data);
       const a = document.createElement('a');
       a.href = url;
@@ -84,7 +78,11 @@ const PDFs = () => {
           <CosmicCard className="p-10 text-center" hover={false}>
             <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h2 className="font-outfit font-semibold text-lg mb-2">No PDFs yet</h2>
-            <p className="text-muted-foreground mb-4">Download worksheets from your modules or tools</p>
+            <p className="text-muted-foreground mb-4">
+              {DEMO_MODE
+                ? 'In this demo, worksheets download straight to your device and nothing is stored on a server, so no history is kept here.'
+                : 'Download worksheets from your modules or tools'}
+            </p>
             <Link to="/tools"><Button>Go to Tools</Button></Link>
           </CosmicCard>
         ) : (

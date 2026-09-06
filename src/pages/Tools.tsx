@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import SEO from '@/components/SEO';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, getIntake, askTutor } from '@/lib/api';
+import SampleNotice from '@/components/SampleNotice';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { GradientButton } from '@/components/ui/gradient-button';
@@ -48,14 +49,10 @@ const Tools = () => {
 
   useEffect(() => {
     const loadIdea = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getSession();
       if (session) {
-        const { data } = await supabase
-          .from('intake_forms')
-          .select('idea')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
-        if (data?.idea) setBusinessIdea(data.idea);
+        const intake = await getIntake(session.user.id);
+        if (intake?.idea) setBusinessIdea(intake.idea);
       }
     };
     loadIdea();
@@ -133,16 +130,15 @@ Make tasks realistic, achievable, and high-impact.`,
     try {
       const prompt = getPromptForTool(selectedTool.id, input);
       
-      const response = await supabase.functions.invoke('crescented-ai', {
-        body: { type: 'tutor', message: prompt, history: [] },
-      });
+      const { response, sample } = await askTutor({ message: prompt, history: [] });
 
-      if (response.error) throw response.error;
-      setResult(response.data.response);
-      
-      toast({ 
-        title: 'Generated successfully!', 
-        description: 'Your content is ready to download.' 
+      setResult(response);
+
+      toast({
+        title: sample ? 'Sample output ready' : 'Generated successfully!',
+        description: sample
+          ? 'This is bundled sample content — demo mode.'
+          : 'Your content is ready to download.',
       });
     } catch (error: any) {
       toast({ 
@@ -300,6 +296,7 @@ Make tasks realistic, achievable, and high-impact.`,
                 {/* Results */}
                 {result && (
                   <div className="space-y-4 animate-fade-in">
+                    <SampleNotice />
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <h3 className="font-outfit font-semibold">Generated Content</h3>
                       <div className="flex flex-wrap gap-2">

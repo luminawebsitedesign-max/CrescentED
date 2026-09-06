@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, askTutor } from '@/lib/api';
+import SampleNotice from '@/components/SampleNotice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -97,27 +98,22 @@ const AITutorMain = () => {
     setLoading(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await supabase.functions.invoke('crescented-ai', {
-        body: {
-          type: 'tutor',
-          message: messageText,
-          context: {
+      const session = await getSession();
+
+      const response = await askTutor({
+        message: messageText,
+        context: {
             module_id: currentModule?.id,
             module_title: currentModule?.title,
             module_content: currentModule?.content,
             intake: intake,
             master_notes: localStorage.getItem('crescented-master-notes') || '',
-          },
-          userId: session?.user?.id,
-          history: messages.slice(-10),
         },
+        userId: session?.user?.id,
+        history: messages.slice(-10),
       });
 
-      if (response.error) throw response.error;
-
-      const cleanedResponse = cleanAIResponse(response.data.response || "I'm here to help! Could you tell me more about what you're working on?");
+      const cleanedResponse = cleanAIResponse(response.response || "I'm here to help! Could you tell me more about what you're working on?");
       
       const assistantMessage: TutorMessage = {
         id: (Date.now() + 1).toString(),
@@ -144,26 +140,21 @@ const AITutorMain = () => {
     setLoading(true);
     
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await supabase.functions.invoke('crescented-ai', {
-        body: {
-          type: 'tutor',
-          message: `Please provide a more detailed and expanded explanation of: "${originalContent}"`,
-          context: {
+      const session = await getSession();
+
+      const response = await askTutor({
+        message: `Please provide a more detailed and expanded explanation of: "${originalContent}"`,
+        context: {
             module_id: currentModule?.id,
             module_title: currentModule?.title,
             module_content: currentModule?.content,
             intake: intake,
-          },
-          userId: session?.user?.id,
-          history: [],
         },
+        userId: session?.user?.id,
+        history: [],
       });
 
-      if (response.error) throw response.error;
-
-      const cleanedResponse = cleanAIResponse(response.data.response || '');
+      const cleanedResponse = cleanAIResponse(response.response || '');
       
       setMessages(prev => prev.map(m => 
         m.id === messageId 
@@ -242,6 +233,8 @@ const AITutorMain = () => {
           </Button>
         ))}
       </div>
+
+      <SampleNotice className="mx-3 mb-2" />
 
       {/* Chat Messages */}
       <ScrollArea className="flex-1 px-3" ref={scrollRef}>

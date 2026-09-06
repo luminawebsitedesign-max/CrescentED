@@ -188,6 +188,40 @@ serve(async (req) => {
       );
     }
 
+    // Rate limit per authenticated user, per hour (applies to every real AI request).
+    const RATE_LIMITS: Record<string, number> = {
+      generate_course: 5,
+      tutor: 60,
+      generate_tool: 20,
+    };
+    const rateClient = createClient(supabaseUrl, serviceKey);
+    const { data: quota, error: quotaErr } = await rateClient.rpc("consume_ai_quota", {
+      _user_id: userId,
+      _limit: RATE_LIMITS[type],
+    });
+    if (quotaErr) {
+      console.error("Rate limit check failed:", quotaErr);
+    } else {
+      const row = Array.isArray(quota) ? quota[0] : quota;
+      if (row && row.allowed === false) {
+        return new Response(
+          JSON.stringify({
+            error: "You've reached the hourly limit for this feature. Please try again later.",
+          }),
+          {
+            status: 429,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+              "Retry-After": String(row.retry_after ?? 60),
+            },
+          }
+        );
+      }
+    }
+
+
+
     // Size/type limits
     const MAX_FIELD = 4000;
     const MAX_IDEA = 2000;

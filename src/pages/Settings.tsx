@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, getProfile, saveProfile, deleteCourseData, deleteAllUserData, generateCourse } from '@/lib/api';
+import { DEMO_MODE } from '@/lib/demo';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,17 +53,13 @@ const Settings = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getSession();
       if (!session) {
         navigate('/auth');
         return;
       }
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .maybeSingle();
+      const data = await getProfile(session.user.id);
 
       if (data) {
         setProfile({
@@ -80,26 +77,24 @@ const Settings = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
+    const session = await getSession();
+    if (!session) {
+      setSaving(false);
+      return;
+    }
 
-    const { error } = await supabase
-      .from('profiles')
-      .update(profile)
-      .eq('id', session.user.id);
-
-    localStorage.setItem('crescented-master-notes', masterNotes);
-
-    if (error) {
+    try {
+      await saveProfile(session.user.id, profile);
+      localStorage.setItem('crescented-master-notes', masterNotes);
+      toast({
+        title: 'Settings saved',
+        description: 'Your preferences have been updated.',
+      });
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to save settings',
         variant: 'destructive',
-      });
-    } else {
-      toast({
-        title: 'Settings saved',
-        description: 'Your preferences have been updated.',
       });
     }
     setSaving(false);
@@ -122,7 +117,7 @@ const Settings = () => {
     if (confirmText !== 'REGENERATE') return;
     
     setRegenerating(true);
-    const { data: { session } } = await supabase.auth.getSession();
+    const session = await getSession();
     if (!session || !intake) {
       toast({
         title: 'Error',
@@ -134,50 +129,31 @@ const Settings = () => {
     }
 
     try {
-      // Delete modules and PDFs from Supabase
-      await supabase.from('modules').delete().eq('user_id', session.user.id);
-      await supabase.from('pdf_exports').delete().eq('user_id', session.user.id);
-      
+      await deleteCourseData(session.user.id);
+
       // Clear local state immediately
       setModules([]);
       setCurrentModuleId(null);
       setCourse(null);
-      
+
       // Clear all localStorage caches
       clearAllChatHistories();
 
       toast({
-        title: 'Generating new course...',
-        description: 'This may take a minute. Please wait.',
+        title: DEMO_MODE ? 'Reloading sample course...' : 'Generating new course...',
+        description: DEMO_MODE ? 'One moment.' : 'This may take a minute. Please wait.',
       });
 
-      // Generate new course
-      const response = await supabase.functions.invoke('crescented-ai', {
-        body: {
-          type: 'generate_course',
-          intake,
-          userId: session.user.id,
-        },
-      });
+      const result = await generateCourse(intake, session.user.id);
 
-      if (response.error) throw new Error(response.error.message);
-      if (response.data?.error) throw new Error(response.data.error);
-
-      // Refresh modules
-      const { data: modulesData } = await supabase
-        .from('modules')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: true });
-
-      if (modulesData && modulesData.length > 0) {
-        setModules(modulesData as any);
-        setCurrentModuleId(modulesData[0].id);
+      if (result.modules.length > 0) {
+        setModules(result.modules as never);
+        setCurrentModuleId(result.modules[0].id);
       }
 
       toast({
-        title: 'Course regenerated!',
-        description: `Created ${modulesData?.length || 0} new modules.`,
+        title: result.sample ? 'Sample course reloaded' : 'Course regenerated!',
+        description: `${result.modulesCount} modules ready.`,
       });
 
       setConfirmText('');
@@ -198,19 +174,14 @@ const Settings = () => {
     if (deleteConfirmText !== 'DELETE') return;
     
     setDeleting(true);
-    const { data: { session } } = await supabase.auth.getSession();
+    const session = await getSession();
     if (!session) {
       setDeleting(false);
       return;
     }
 
     try {
-      // Delete all user data from Supabase
-      await supabase.from('modules').delete().eq('user_id', session.user.id);
-      await supabase.from('pdf_exports').delete().eq('user_id', session.user.id);
-      await supabase.from('intake_forms').delete().eq('user_id', session.user.id);
-      await supabase.from('ai_logs').delete().eq('user_id', session.user.id);
-      await supabase.from('courses').delete().eq('user_id', session.user.id);
+      await deleteAllUserData(session.user.id);
       
       // Reset all local state
       reset();

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import SEO from '@/components/SEO';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { DEMO_MODE } from '@/lib/demo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +26,12 @@ const Auth = ({ mode }: AuthProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (DEMO_MODE) {
+      // No accounts in the deployed demo — go straight into the product.
+      navigate('/intake', { replace: true });
+      return;
+    }
+
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const savedEmail = localStorage.getItem('crescented-last-email');
@@ -46,7 +53,7 @@ const Auth = ({ mode }: AuthProps) => {
     };
 
     checkSession();
-  }, []);
+  }, [navigate]);
 
   const handleContinueAsRemembered = async () => {
     if (!rememberedEmail) return;
@@ -128,7 +135,7 @@ const Auth = ({ mode }: AuthProps) => {
     }
   };
 
-  if (checkingSession) {
+  if (DEMO_MODE || checkingSession) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />

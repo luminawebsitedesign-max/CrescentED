@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, getModules } from '@/lib/api';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { SectionDivider } from '@/components/ui/section-divider';
@@ -17,18 +17,13 @@ const Modules = () => {
 
   useEffect(() => {
     const fetchModules = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { 
-        navigate('/auth'); 
-        return; 
+      const session = await getSession();
+      if (!session) {
+        navigate('/auth');
+        return;
       }
 
-      const { data } = await supabase
-        .from('modules')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: true });
-
+      const data = await getModules(session.user.id);
       if (data) setModules(data as unknown as Module[]);
       setLoading(false);
     };

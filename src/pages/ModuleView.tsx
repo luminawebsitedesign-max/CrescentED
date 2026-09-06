@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, getModule, getModules, updateModuleProgress } from '@/lib/api';
+import SampleNotice from '@/components/SampleNotice';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import TutorSidebar from '@/components/Tutor/TutorSidebar';
 import { CosmicCard } from '@/components/ui/cosmic-card';
@@ -40,21 +41,15 @@ const ModuleView = () => {
 
   useEffect(() => {
     const fetchModule = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getSession();
       if (!session) {
         navigate('/auth');
         return;
       }
 
-      // Fetch current module
-      const { data, error } = await supabase
-        .from('modules')
-        .select('*')
-        .eq('id', id)
-        .eq('user_id', session.user.id)
-        .single();
+      const data = await getModule(id as string, session.user.id);
 
-      if (error || !data) {
+      if (!data) {
         toast({
           title: 'Module not found',
           description: 'This module does not exist.',
@@ -67,13 +62,7 @@ const ModuleView = () => {
       setModule(data as unknown as Module);
       setCurrentModuleId(data.id);
 
-      // Fetch all modules for navigation
-      const { data: modulesData } = await supabase
-        .from('modules')
-        .select('id, title')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: true });
-
+      const modulesData = await getModules(session.user.id);
       if (modulesData) {
         setAllModules(modulesData as unknown as Module[]);
       }
@@ -96,12 +85,9 @@ const ModuleView = () => {
       newProgress.sectionsCompleted = [...newProgress.sectionsCompleted, sectionTitle];
     }
 
-    const { error } = await supabase
-      .from('modules')
-      .update({ progress: newProgress })
-      .eq('id', module.id);
+    const ok = await updateModuleProgress(module.id, newProgress);
 
-    if (!error) {
+    if (ok) {
       setModule({ ...module, progress: newProgress });
     }
   };
@@ -118,12 +104,9 @@ const ModuleView = () => {
       newProgress.plugAndPlayCompleted = [...newProgress.plugAndPlayCompleted, plugTitle];
     }
 
-    const { error } = await supabase
-      .from('modules')
-      .update({ progress: newProgress })
-      .eq('id', module.id);
+    const ok = await updateModuleProgress(module.id, newProgress);
 
-    if (!error) {
+    if (ok) {
       setModule({ ...module, progress: newProgress });
     }
   };
@@ -219,6 +202,8 @@ const ModuleView = () => {
             Ask Tutor
           </Button>
         </div>
+
+        <SampleNotice className="mb-4" />
 
         {/* Module Header */}
         <CosmicCard className="p-4 sm:p-6 mb-6" variant="gradient" hover={false}>

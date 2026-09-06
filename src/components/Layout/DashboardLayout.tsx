@@ -1,8 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { getSession } from '@/lib/api';
+import { DEMO_MODE } from '@/lib/demo';
 import { useStore } from '@/store/useStore';
 import ModulesSidebar from '@/components/Sidebar/ModulesSidebar';
+import DemoBanner from '@/components/DemoBanner';
 import CrescentLogo from '@/components/ui/crescent-logo';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -20,15 +23,17 @@ const DashboardLayout = ({ children, loading = false }: DashboardLayoutProps) =>
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getSession();
       if (!session) {
         navigate('/auth');
         return;
       }
-      setUser(session.user);
+      setUser(session.user as never);
     };
 
     checkAuth();
+
+    if (DEMO_MODE) return;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
@@ -46,6 +51,7 @@ const DashboardLayout = ({ children, loading = false }: DashboardLayoutProps) =>
   useEffect(() => {
     setMobileSidebarOpen(false);
   }, [location.pathname, setMobileSidebarOpen]);
+
 
   if (!user || loading) {
     return (
@@ -99,8 +105,10 @@ const DashboardLayout = ({ children, loading = false }: DashboardLayoutProps) =>
         </header>
 
         <div className="flex-1 overflow-y-auto scrollbar-cosmic p-4 lg:p-6">
+          <DemoBanner />
           {children}
         </div>
+
       </main>
     </div>
   );

@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
+import { DEMO_MODE } from './demo';
 
 interface PDFOptions {
   title: string;
@@ -162,7 +163,7 @@ export const generatePDF = async ({ title, subtitle, content, type = 'worksheet'
   const filename = `${cleanTitle.toLowerCase().replace(/\s+/g, '-').substring(0, 50)}-${type}.pdf`;
   
   // Save to Supabase storage if requested
-  if (saveToStorage) {
+  if (saveToStorage && !DEMO_MODE) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {

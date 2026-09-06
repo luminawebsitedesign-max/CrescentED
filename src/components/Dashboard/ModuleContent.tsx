@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
-import { supabase } from '@/integrations/supabase/client';
+import { updateModuleProgress } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { GradientButton } from '@/components/ui/gradient-button';
@@ -78,17 +78,12 @@ const ModuleContent = ({ onAskTutor }: ModuleContentProps) => {
       ? progress.sectionsCompleted.filter(s => s !== sectionTitle)
       : [...progress.sectionsCompleted, sectionTitle];
 
-    const { error } = await supabase
-      .from('modules')
-      .update({
-        progress: {
-          ...progress,
-          sectionsCompleted: newCompleted,
-        },
-      })
-      .eq('id', currentModule.id);
+    const ok = await updateModuleProgress(currentModule.id, {
+      ...progress,
+      sectionsCompleted: newCompleted,
+    });
 
-    if (error) {
+    if (!ok) {
       toast({
         title: 'Error',
         description: 'Failed to update progress',

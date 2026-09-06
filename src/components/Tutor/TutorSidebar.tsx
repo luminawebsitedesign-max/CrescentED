@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, askTutor } from '@/lib/api';
+import SampleNotice from '@/components/SampleNotice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -60,25 +61,20 @@ const TutorSidebar = ({ open, onClose, context }: TutorSidebarProps) => {
 
     try {
       // Get current user ID for context
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getSession();
       const userId = session?.user?.id;
 
-      const response = await supabase.functions.invoke('crescented-ai', {
-        body: {
-          type: 'tutor',
-          message: input,
-          context,
-          userId,
-          history: messages.slice(-10), // Last 10 messages for context
-        },
+      const { response } = await askTutor({
+        message: input,
+        context,
+        userId,
+        history: messages.slice(-10), // Last 10 messages for context
       });
-
-      if (response.error) throw response.error;
 
       const assistantMessage: TutorMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.data.response,
+        content: response,
         timestamp: new Date().toISOString(),
       };
 
@@ -134,6 +130,10 @@ const TutorSidebar = ({ open, onClose, context }: TutorSidebarProps) => {
           </p>
         </div>
       )}
+
+      <div className="px-4 pt-3">
+        <SampleNotice />
+      </div>
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
