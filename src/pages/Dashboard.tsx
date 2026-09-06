@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import SEO from '@/components/SEO';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, getIntake, getModules, generateCourse, deleteModules } from '@/lib/api';
+import { DEMO_MODE } from '@/lib/demo';
+import SampleNotice from '@/components/SampleNotice';
 import { useStore } from '@/store/useStore';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { GradientButton } from '@/components/ui/gradient-button';
@@ -24,33 +26,25 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getSession();
       if (!session) {
         navigate('/auth');
         return;
       }
 
-      setUser(session.user);
+      setUser(session.user as never);
 
-      const { data: intakeData } = await supabase
-        .from('intake_forms')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
+      const intakeData = await getIntake(session.user.id);
 
       if (!intakeData) {
         navigate('/intake');
         return;
       }
-      setIntake(intakeData as any);
+      setIntake(intakeData as never);
 
-      const { data: modulesData } = await supabase
-        .from('modules')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: true });
+      const modulesData = await getModules(session.user.id);
 
-      if (modulesData && modulesData.length > 0) {
+      if (modulesData.length > 0) {
         setModules(modulesData as unknown as Module[]);
       }
 
@@ -60,41 +54,35 @@ const Dashboard = () => {
     fetchData();
   }, [navigate, setIntake, setModules, setCurrentModuleId, setUser]);
 
-  const generateCourse = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+  const handleGenerateCourse = async () => {
+    const session = await getSession();
     if (!session || !intake) {
       toast({ title: 'Error', description: 'Please complete your onboarding first', variant: 'destructive' });
       return;
     }
-    
+
     setGenerating(true);
 
     try {
-      await supabase.from('modules').delete().eq('user_id', session.user.id);
+      await deleteModules(session.user.id);
 
-      toast({ title: 'Generating your course...', description: 'This may take a minute. Please wait.' });
-
-      const response = await supabase.functions.invoke('crescented-ai', {
-        body: { type: 'generate_course', intake, userId: session.user.id },
+      toast({
+        title: DEMO_MODE ? 'Loading sample course...' : 'Generating your course...',
+        description: DEMO_MODE ? 'One moment.' : 'This may take a minute. Please wait.',
       });
 
-      if (response.error) throw new Error(response.error.message || 'Failed to generate course');
-      if (response.data?.error) throw new Error(response.data.error);
+      const result = await generateCourse(intake, session.user.id);
 
-      const { data: modulesData } = await supabase
-        .from('modules')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: true });
-
-      if (modulesData && modulesData.length > 0) {
-        setModules(modulesData as unknown as Module[]);
-        setCurrentModuleId(modulesData[0].id);
+      if (result.modules.length > 0) {
+        setModules(result.modules as unknown as Module[]);
+        setCurrentModuleId(result.modules[0].id);
       }
 
       toast({
-        title: 'Course generated!',
-        description: `Created ${response.data?.modulesCount || modulesData?.length || 0} personalized modules.`,
+        title: result.sample ? 'Sample course loaded' : 'Course generated!',
+        description: result.sample
+          ? `Loaded ${result.modulesCount} sample modules — demo mode.`
+          : `Created ${result.modulesCount} personalized modules.`,
       });
     } catch (error: any) {
       console.error('Course generation error:', error);
@@ -134,14 +122,17 @@ const Dashboard = () => {
               <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
             <h2 className="text-2xl font-sora font-bold mb-2">
-              {generating ? 'Generating Your Course...' : 'Ready to Generate Your Course'}
+              {generating
+                ? DEMO_MODE ? 'Loading Sample Course...' : 'Generating Your Course...'
+                : DEMO_MODE ? 'Ready to Load Your Sample Course' : 'Ready to Generate Your Course'}
             </h2>
             <p className="text-muted-foreground mb-6">
               {generating
                 ? "This usually takes about 30 seconds. Please don't close this page."
                 : "We'll create 5 personalized modules based on your onboarding answers. This takes about 30 seconds."}
             </p>
-            <GradientButton size="lg" onClick={generateCourse} disabled={generating} glow>
+            <SampleNotice className="mb-6 text-left" />
+            <GradientButton size="lg" onClick={handleGenerateCourse} disabled={generating} glow>
               {generating ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>
               ) : (
@@ -192,6 +183,8 @@ const Dashboard = () => {
             {intake?.idea ? `Building: ${intake.idea}` : 'Your personalized learning hub'}
           </p>
         </div>
+
+        <SampleNotice />
 
         {/* Progress Overview */}
         <CosmicCard className="p-5" variant="gradient" hover={false}>

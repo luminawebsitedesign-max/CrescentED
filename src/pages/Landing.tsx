@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { DEMO_MODE } from '@/lib/demo';
 import { Button } from '@/components/ui/button';
 import { GradientButton } from '@/components/ui/gradient-button';
 import { CosmicCard } from '@/components/ui/cosmic-card';
@@ -31,14 +32,16 @@ const Landing = () => {
           <span className="font-sora text-lg sm:text-xl font-bold text-gradient-cosmic truncate">CrescentEd</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-          <Link to="/login">
-            <Button variant="ghost" size="sm" className="text-foreground hover:text-primary px-2 sm:px-4">
-              Log In
-            </Button>
-          </Link>
-          <Link to="/register">
+          {!DEMO_MODE && (
+            <Link to="/login">
+              <Button variant="ghost" size="sm" className="text-foreground hover:text-primary px-2 sm:px-4">
+                Log In
+              </Button>
+            </Link>
+          )}
+          <Link to={DEMO_MODE ? '/intake' : '/register'}>
             <GradientButton glow className="text-sm px-3 sm:px-5">
-              Get Started
+              {DEMO_MODE ? 'Try the Demo' : 'Get Started'}
             </GradientButton>
           </Link>
         </div>
@@ -65,17 +68,19 @@ const Landing = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <Link to="/register">
+          <Link to={DEMO_MODE ? '/intake' : '/register'}>
             <GradientButton size="lg" glow className="text-lg px-8 py-6 h-auto">
-              Start Your Journey
+              {DEMO_MODE ? 'Try the Live Demo' : 'Start Your Journey'}
               <ArrowRight className="ml-2 w-5 h-5" />
             </GradientButton>
           </Link>
-          <Link to="/login">
-            <Button size="lg" variant="outline" className="text-lg px-8 py-6 h-auto border-border hover:bg-secondary">
-              I Have an Account
-            </Button>
-          </Link>
+          {!DEMO_MODE && (
+            <Link to="/login">
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6 h-auto border-border hover:bg-secondary">
+                I Have an Account
+              </Button>
+            </Link>
+          )}
         </div>
       </section>
 
@@ -240,11 +245,13 @@ const Landing = () => {
             Ready to Build Something Amazing?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Start learning the skills that turn ideas into real ventures — at your own pace, completely free.
+            {DEMO_MODE
+              ? 'Try the full flow right now — no account needed. Your answers stay in your browser.'
+              : 'Start learning the skills that turn ideas into real ventures — at your own pace, completely free.'}
           </p>
-          <Link to="/register">
+          <Link to={DEMO_MODE ? '/intake' : '/register'}>
             <GradientButton size="lg" glow className="text-lg px-10">
-              Create Your Free Account
+              {DEMO_MODE ? 'Try the Live Demo' : 'Create Your Free Account'}
               <ArrowRight className="ml-2 w-5 h-5" />
             </GradientButton>
           </Link>

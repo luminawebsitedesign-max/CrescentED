@@ -15,7 +15,8 @@ import {
   CheckCircle,
   LayoutDashboard,
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { signOut } from '@/lib/api';
+import { DEMO_MODE } from '@/lib/demo';
 import { type Module, type ModuleProgress } from '@/types/crescented';
 
 const MOON_PHASES = ['🌑', '🌒', '🌓', '🌔', '🌕'];
@@ -56,7 +57,7 @@ const ModulesSidebar = () => {
   } = useStore();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
   };
 
   const calculateModuleProgress = (module: Module): number => {
@@ -290,7 +291,8 @@ const ModulesSidebar = () => {
         </ScrollArea>
       )}
 
-      {/* Logout */}
+      {/* Logout — hidden in demo mode (no accounts) */}
+      {!DEMO_MODE && (
       <div className="p-2 border-t border-border flex-shrink-0">
         <Button
           variant="ghost"
@@ -305,6 +307,7 @@ const ModulesSidebar = () => {
           {!showCollapsed && <span>Log Out</span>}
         </Button>
       </div>
+      )}
     </aside>
   );
 };

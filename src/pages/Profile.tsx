@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { getSession, getProfile, saveProfile } from '@/lib/api';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { CosmicCard } from '@/components/ui/cosmic-card';
 import { Button } from '@/components/ui/button';
@@ -24,14 +24,10 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const loadProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getSession();
       if (!session) return;
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .maybeSingle();
+      const data = await getProfile(session.user.id);
 
       if (data) {
         setProfile({
@@ -47,18 +43,15 @@ export default function ProfilePage() {
   }, []);
 
   const handleSave = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const session = await getSession();
     if (!session) return;
     setSaving(true);
 
-    const { error } = await supabase
-      .from('profiles')
-      .upsert({ id: session.user.id, ...profile });
-
-    if (error) {
-      toast({ title: 'Error', description: 'Failed to save profile', variant: 'destructive' });
-    } else {
+    try {
+      await saveProfile(session.user.id, profile);
       toast({ title: 'Profile updated!', description: 'Your changes have been saved.' });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to save profile', variant: 'destructive' });
     }
     setSaving(false);
   };
